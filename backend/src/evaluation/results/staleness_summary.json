@@ -1,0 +1,7302 @@
+{
+  "summaryRows": [
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0092
+      },
+      "top1Suitable": {
+        "mean": 0.9528,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9561,
+        "stdDev": 0.0092
+      },
+      "top3Hit": {
+        "mean": 0.9999,
+        "ciLower": 0.9997,
+        "ciUpper": 1,
+        "stdDev": 0.0005
+      },
+      "ndcg3": {
+        "mean": 0.9534,
+        "ciLower": 0.9512,
+        "ciUpper": 0.9554,
+        "stdDev": 0.0058
+      },
+      "mrr": {
+        "mean": 0.976,
+        "ciLower": 0.9744,
+        "ciUpper": 0.9776,
+        "stdDev": 0.0045
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0003,
+        "stdDev": 0.0005
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 23.717,
+        "ciLower": 23.5542,
+        "ciUpper": 23.8909,
+        "stdDev": 0.4746
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0162,
+        "ciLower": 0.0143,
+        "ciUpper": 0.0182,
+        "stdDev": 0.0055
+      },
+      "top1Suitable": {
+        "mean": 0.9838,
+        "ciLower": 0.9818,
+        "ciUpper": 0.9858,
+        "stdDev": 0.0055
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9849,
+        "ciLower": 0.9837,
+        "ciUpper": 0.986,
+        "stdDev": 0.0029
+      },
+      "mrr": {
+        "mean": 0.9919,
+        "ciLower": 0.9909,
+        "ciUpper": 0.9929,
+        "stdDev": 0.0028
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 25.5641,
+        "ciLower": 25.3434,
+        "ciUpper": 25.7851,
+        "stdDev": 0.6114
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.5753,
+        "ciLower": 28.251,
+        "ciUpper": 28.9129,
+        "stdDev": 0.923
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0929,
+        "ciLower": 0.0887,
+        "ciUpper": 0.0973,
+        "stdDev": 0.0118
+      },
+      "top1Suitable": {
+        "mean": 0.9071,
+        "ciLower": 0.9027,
+        "ciUpper": 0.9113,
+        "stdDev": 0.0118
+      },
+      "top3Hit": {
+        "mean": 0.9983,
+        "ciLower": 0.9977,
+        "ciUpper": 0.9989,
+        "stdDev": 0.0017
+      },
+      "ndcg3": {
+        "mean": 0.9105,
+        "ciLower": 0.9086,
+        "ciUpper": 0.9125,
+        "stdDev": 0.0056
+      },
+      "mrr": {
+        "mean": 0.951,
+        "ciLower": 0.9489,
+        "ciUpper": 0.9532,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0017,
+        "ciLower": 0.0011,
+        "ciUpper": 0.0023,
+        "stdDev": 0.0017
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 22.5163,
+        "ciLower": 22.3499,
+        "ciUpper": 22.6956,
+        "stdDev": 0.4984
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0336,
+        "ciLower": 0.0307,
+        "ciUpper": 0.0363,
+        "stdDev": 0.0079
+      },
+      "top1Suitable": {
+        "mean": 0.9664,
+        "ciLower": 0.9637,
+        "ciUpper": 0.9693,
+        "stdDev": 0.0079
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9684,
+        "ciLower": 0.9669,
+        "ciUpper": 0.97,
+        "stdDev": 0.0044
+      },
+      "mrr": {
+        "mean": 0.983,
+        "ciLower": 0.9816,
+        "ciUpper": 0.9845,
+        "stdDev": 0.004
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 26.295,
+        "ciLower": 26.0281,
+        "ciUpper": 26.5925,
+        "stdDev": 0.7956
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 33.6054,
+        "ciLower": 33.1041,
+        "ciUpper": 34.1145,
+        "stdDev": 1.3703
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "stdDev": 0.0126
+      },
+      "top1Suitable": {
+        "mean": 0.8699,
+        "ciLower": 0.8654,
+        "ciUpper": 0.8743,
+        "stdDev": 0.0126
+      },
+      "top3Hit": {
+        "mean": 0.9955,
+        "ciLower": 0.9947,
+        "ciUpper": 0.9963,
+        "stdDev": 0.0024
+      },
+      "ndcg3": {
+        "mean": 0.8746,
+        "ciLower": 0.8723,
+        "ciUpper": 0.8767,
+        "stdDev": 0.006
+      },
+      "mrr": {
+        "mean": 0.9297,
+        "ciLower": 0.9274,
+        "ciUpper": 0.932,
+        "stdDev": 0.0065
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0045,
+        "ciLower": 0.0037,
+        "ciUpper": 0.0054,
+        "stdDev": 0.0024
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 21.5128,
+        "ciLower": 21.352,
+        "ciUpper": 21.6839,
+        "stdDev": 0.4519
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0473,
+        "ciLower": 0.0442,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0088
+      },
+      "top1Suitable": {
+        "mean": 0.9527,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9558,
+        "stdDev": 0.0088
+      },
+      "top3Hit": {
+        "mean": 0.9997,
+        "ciLower": 0.9994,
+        "ciUpper": 0.9999,
+        "stdDev": 0.0008
+      },
+      "ndcg3": {
+        "mean": 0.953,
+        "ciLower": 0.9514,
+        "ciUpper": 0.9547,
+        "stdDev": 0.0047
+      },
+      "mrr": {
+        "mean": 0.9757,
+        "ciLower": 0.9741,
+        "ciUpper": 0.9773,
+        "stdDev": 0.0045
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0003,
+        "ciLower": 0.0001,
+        "ciUpper": 0.0006,
+        "stdDev": 0.0008
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 27.0429,
+        "ciLower": 26.7207,
+        "ciUpper": 27.3588,
+        "stdDev": 0.9132
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9999,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 40.7108,
+        "ciLower": 40.1668,
+        "ciUpper": 41.2893,
+        "stdDev": 1.5915
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1638,
+        "ciLower": 0.159,
+        "ciUpper": 0.1685,
+        "stdDev": 0.0134
+      },
+      "top1Suitable": {
+        "mean": 0.8362,
+        "ciLower": 0.8315,
+        "ciUpper": 0.841,
+        "stdDev": 0.0134
+      },
+      "top3Hit": {
+        "mean": 0.9913,
+        "ciLower": 0.9901,
+        "ciUpper": 0.9926,
+        "stdDev": 0.0033
+      },
+      "ndcg3": {
+        "mean": 0.8422,
+        "ciLower": 0.8401,
+        "ciUpper": 0.8445,
+        "stdDev": 0.0061
+      },
+      "mrr": {
+        "mean": 0.9093,
+        "ciLower": 0.9069,
+        "ciUpper": 0.9119,
+        "stdDev": 0.0073
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0087,
+        "ciLower": 0.0075,
+        "ciUpper": 0.0099,
+        "stdDev": 0.0033
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 20.6042,
+        "ciLower": 20.4314,
+        "ciUpper": 20.794,
+        "stdDev": 0.4692
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0657,
+        "ciLower": 0.0622,
+        "ciUpper": 0.0691,
+        "stdDev": 0.0097
+      },
+      "top1Suitable": {
+        "mean": 0.9343,
+        "ciLower": 0.9309,
+        "ciUpper": 0.9378,
+        "stdDev": 0.0097
+      },
+      "top3Hit": {
+        "mean": 0.9993,
+        "ciLower": 0.9988,
+        "ciUpper": 0.9997,
+        "stdDev": 0.0013
+      },
+      "ndcg3": {
+        "mean": 0.937,
+        "ciLower": 0.9354,
+        "ciUpper": 0.9388,
+        "stdDev": 0.0049
+      },
+      "mrr": {
+        "mean": 0.966,
+        "ciLower": 0.9642,
+        "ciUpper": 0.9679,
+        "stdDev": 0.0051
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0007,
+        "ciLower": 0.0003,
+        "ciUpper": 0.0012,
+        "stdDev": 0.0013
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.4626,
+        "ciLower": 28.0898,
+        "ciUpper": 28.834,
+        "stdDev": 1.0412
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9996,
+        "ciLower": 0.9995,
+        "ciUpper": 0.9998,
+        "stdDev": 0.0003
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 49.2757,
+        "ciLower": 48.6679,
+        "ciUpper": 49.8731,
+        "stdDev": 1.6521
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "aged",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1963,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.8075,
+        "ciLower": 0.8037,
+        "ciUpper": 0.8113,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0.9855,
+        "ciLower": 0.9843,
+        "ciUpper": 0.9869,
+        "stdDev": 0.0036
+      },
+      "ndcg3": {
+        "mean": 0.8136,
+        "ciLower": 0.8115,
+        "ciUpper": 0.8156,
+        "stdDev": 0.0055
+      },
+      "mrr": {
+        "mean": 0.8911,
+        "ciLower": 0.8889,
+        "ciUpper": 0.8933,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0145,
+        "ciLower": 0.0131,
+        "ciUpper": 0.0157,
+        "stdDev": 0.0036
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 19.9592,
+        "ciLower": 19.8161,
+        "ciUpper": 20.1134,
+        "stdDev": 0.4093
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "aged",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0808,
+        "ciLower": 0.0767,
+        "ciUpper": 0.0856,
+        "stdDev": 0.0127
+      },
+      "top1Suitable": {
+        "mean": 0.9192,
+        "ciLower": 0.9144,
+        "ciUpper": 0.9233,
+        "stdDev": 0.0127
+      },
+      "top3Hit": {
+        "mean": 0.9989,
+        "ciLower": 0.9983,
+        "ciUpper": 0.9994,
+        "stdDev": 0.0015
+      },
+      "ndcg3": {
+        "mean": 0.9211,
+        "ciLower": 0.9183,
+        "ciUpper": 0.9236,
+        "stdDev": 0.0075
+      },
+      "mrr": {
+        "mean": 0.9576,
+        "ciLower": 0.9552,
+        "ciUpper": 0.9599,
+        "stdDev": 0.0066
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0011,
+        "ciLower": 0.0006,
+        "ciUpper": 0.0017,
+        "stdDev": 0.0015
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.7379,
+        "ciLower": 28.4242,
+        "ciUpper": 29.0716,
+        "stdDev": 0.9529
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "aged",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.998,
+        "ciLower": 0.9976,
+        "ciUpper": 0.9983,
+        "stdDev": 0.0009
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0.0002,
+        "ciLower": 0,
+        "ciUpper": 0.0005,
+        "stdDev": 0.0006
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 60.3741,
+        "ciLower": 59.6177,
+        "ciUpper": 61.1481,
+        "stdDev": 2.273
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "aged",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0092
+      },
+      "top1Suitable": {
+        "mean": 0.9528,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9561,
+        "stdDev": 0.0092
+      },
+      "top3Hit": {
+        "mean": 0.9999,
+        "ciLower": 0.9997,
+        "ciUpper": 1,
+        "stdDev": 0.0005
+      },
+      "ndcg3": {
+        "mean": 0.9534,
+        "ciLower": 0.9512,
+        "ciUpper": 0.9554,
+        "stdDev": 0.0058
+      },
+      "mrr": {
+        "mean": 0.976,
+        "ciLower": 0.9744,
+        "ciUpper": 0.9776,
+        "stdDev": 0.0045
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0003,
+        "stdDev": 0.0005
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 23.717,
+        "ciLower": 23.5542,
+        "ciUpper": 23.8909,
+        "stdDev": 0.4746
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.5753,
+        "ciLower": 28.251,
+        "ciUpper": 28.9129,
+        "stdDev": 0.923
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.5753,
+        "ciLower": 28.251,
+        "ciUpper": 28.9129,
+        "stdDev": 0.923
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0929,
+        "ciLower": 0.0887,
+        "ciUpper": 0.0973,
+        "stdDev": 0.0118
+      },
+      "top1Suitable": {
+        "mean": 0.9071,
+        "ciLower": 0.9027,
+        "ciUpper": 0.9113,
+        "stdDev": 0.0118
+      },
+      "top3Hit": {
+        "mean": 0.9983,
+        "ciLower": 0.9977,
+        "ciUpper": 0.9989,
+        "stdDev": 0.0017
+      },
+      "ndcg3": {
+        "mean": 0.9105,
+        "ciLower": 0.9086,
+        "ciUpper": 0.9125,
+        "stdDev": 0.0056
+      },
+      "mrr": {
+        "mean": 0.951,
+        "ciLower": 0.9489,
+        "ciUpper": 0.9532,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0017,
+        "ciLower": 0.0011,
+        "ciUpper": 0.0023,
+        "stdDev": 0.0017
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 22.5163,
+        "ciLower": 22.3499,
+        "ciUpper": 22.6956,
+        "stdDev": 0.4984
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 33.6054,
+        "ciLower": 33.1041,
+        "ciUpper": 34.1145,
+        "stdDev": 1.3703
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 33.6054,
+        "ciLower": 33.1041,
+        "ciUpper": 34.1145,
+        "stdDev": 1.3703
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "stdDev": 0.0126
+      },
+      "top1Suitable": {
+        "mean": 0.8699,
+        "ciLower": 0.8654,
+        "ciUpper": 0.8743,
+        "stdDev": 0.0126
+      },
+      "top3Hit": {
+        "mean": 0.9955,
+        "ciLower": 0.9947,
+        "ciUpper": 0.9963,
+        "stdDev": 0.0024
+      },
+      "ndcg3": {
+        "mean": 0.8746,
+        "ciLower": 0.8723,
+        "ciUpper": 0.8767,
+        "stdDev": 0.006
+      },
+      "mrr": {
+        "mean": 0.9297,
+        "ciLower": 0.9274,
+        "ciUpper": 0.932,
+        "stdDev": 0.0065
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0045,
+        "ciLower": 0.0037,
+        "ciUpper": 0.0054,
+        "stdDev": 0.0024
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 21.5128,
+        "ciLower": 21.352,
+        "ciUpper": 21.6839,
+        "stdDev": 0.4519
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9999,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 40.7108,
+        "ciLower": 40.1668,
+        "ciUpper": 41.2893,
+        "stdDev": 1.5915
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9999,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 40.7108,
+        "ciLower": 40.1668,
+        "ciUpper": 41.2893,
+        "stdDev": 1.5915
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1638,
+        "ciLower": 0.159,
+        "ciUpper": 0.1685,
+        "stdDev": 0.0134
+      },
+      "top1Suitable": {
+        "mean": 0.8362,
+        "ciLower": 0.8315,
+        "ciUpper": 0.841,
+        "stdDev": 0.0134
+      },
+      "top3Hit": {
+        "mean": 0.9913,
+        "ciLower": 0.9901,
+        "ciUpper": 0.9926,
+        "stdDev": 0.0033
+      },
+      "ndcg3": {
+        "mean": 0.8422,
+        "ciLower": 0.8401,
+        "ciUpper": 0.8445,
+        "stdDev": 0.0061
+      },
+      "mrr": {
+        "mean": 0.9093,
+        "ciLower": 0.9069,
+        "ciUpper": 0.9119,
+        "stdDev": 0.0073
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0087,
+        "ciLower": 0.0075,
+        "ciUpper": 0.0099,
+        "stdDev": 0.0033
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 20.6042,
+        "ciLower": 20.4314,
+        "ciUpper": 20.794,
+        "stdDev": 0.4692
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9996,
+        "ciLower": 0.9995,
+        "ciUpper": 0.9998,
+        "stdDev": 0.0003
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 49.2757,
+        "ciLower": 48.6679,
+        "ciUpper": 49.8731,
+        "stdDev": 1.6521
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9996,
+        "ciLower": 0.9995,
+        "ciUpper": 0.9998,
+        "stdDev": 0.0003
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 49.2757,
+        "ciLower": 48.6679,
+        "ciUpper": 49.8731,
+        "stdDev": 1.6521
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "missing",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1963,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.8075,
+        "ciLower": 0.8037,
+        "ciUpper": 0.8113,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0.9855,
+        "ciLower": 0.9843,
+        "ciUpper": 0.9869,
+        "stdDev": 0.0036
+      },
+      "ndcg3": {
+        "mean": 0.8136,
+        "ciLower": 0.8115,
+        "ciUpper": 0.8156,
+        "stdDev": 0.0055
+      },
+      "mrr": {
+        "mean": 0.8911,
+        "ciLower": 0.8889,
+        "ciUpper": 0.8933,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0145,
+        "ciLower": 0.0131,
+        "ciUpper": 0.0157,
+        "stdDev": 0.0036
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 19.9592,
+        "ciLower": 19.8161,
+        "ciUpper": 20.1134,
+        "stdDev": 0.4093
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "missing",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.998,
+        "ciLower": 0.9976,
+        "ciUpper": 0.9983,
+        "stdDev": 0.0009
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0.0002,
+        "ciLower": 0,
+        "ciUpper": 0.0005,
+        "stdDev": 0.0006
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 60.3741,
+        "ciLower": 59.6177,
+        "ciUpper": 61.1481,
+        "stdDev": 2.273
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "missing",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.998,
+        "ciLower": 0.9976,
+        "ciUpper": 0.9983,
+        "stdDev": 0.0009
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0.0002,
+        "ciLower": 0,
+        "ciUpper": 0.0005,
+        "stdDev": 0.0006
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 60.3741,
+        "ciLower": 59.6177,
+        "ciUpper": 61.1481,
+        "stdDev": 2.273
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "missing",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 24.8212,
+        "ciLower": 24.8212,
+        "ciUpper": 24.8212,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 0,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0092
+      },
+      "top1Suitable": {
+        "mean": 0.9528,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9561,
+        "stdDev": 0.0092
+      },
+      "top3Hit": {
+        "mean": 0.9999,
+        "ciLower": 0.9997,
+        "ciUpper": 1,
+        "stdDev": 0.0005
+      },
+      "ndcg3": {
+        "mean": 0.9534,
+        "ciLower": 0.9512,
+        "ciUpper": 0.9554,
+        "stdDev": 0.0058
+      },
+      "mrr": {
+        "mean": 0.976,
+        "ciLower": 0.9744,
+        "ciUpper": 0.9776,
+        "stdDev": 0.0045
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0003,
+        "stdDev": 0.0005
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 23.717,
+        "ciLower": 23.5542,
+        "ciUpper": 23.8909,
+        "stdDev": 0.4746
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0092
+      },
+      "top1Suitable": {
+        "mean": 0.9528,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9561,
+        "stdDev": 0.0092
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0003,
+        "stdDev": 0.0005
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "stdDev": 0.0092
+      },
+      "top1Suitable": {
+        "mean": 0.9528,
+        "ciLower": 0.9495,
+        "ciUpper": 0.9561,
+        "stdDev": 0.0092
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0003,
+        "stdDev": 0.0005
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0094,
+        "ciLower": 0.0081,
+        "ciUpper": 0.0109,
+        "stdDev": 0.004
+      },
+      "top1Suitable": {
+        "mean": 0.9906,
+        "ciLower": 0.9892,
+        "ciUpper": 0.9919,
+        "stdDev": 0.004
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9918,
+        "ciLower": 0.9911,
+        "ciUpper": 0.9924,
+        "stdDev": 0.0019
+      },
+      "mrr": {
+        "mean": 0.9953,
+        "ciLower": 0.9946,
+        "ciUpper": 0.9959,
+        "stdDev": 0.002
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 26.8948,
+        "ciLower": 26.6786,
+        "ciUpper": 27.1213,
+        "stdDev": 0.6633
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 28.5753,
+        "ciLower": 28.251,
+        "ciUpper": 28.9129,
+        "stdDev": 0.923
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 10,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0929,
+        "ciLower": 0.0887,
+        "ciUpper": 0.0973,
+        "stdDev": 0.0118
+      },
+      "top1Suitable": {
+        "mean": 0.9071,
+        "ciLower": 0.9027,
+        "ciUpper": 0.9113,
+        "stdDev": 0.0118
+      },
+      "top3Hit": {
+        "mean": 0.9983,
+        "ciLower": 0.9977,
+        "ciUpper": 0.9989,
+        "stdDev": 0.0017
+      },
+      "ndcg3": {
+        "mean": 0.9105,
+        "ciLower": 0.9086,
+        "ciUpper": 0.9125,
+        "stdDev": 0.0056
+      },
+      "mrr": {
+        "mean": 0.951,
+        "ciLower": 0.9489,
+        "ciUpper": 0.9532,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0017,
+        "ciLower": 0.0011,
+        "ciUpper": 0.0023,
+        "stdDev": 0.0017
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 22.5163,
+        "ciLower": 22.3499,
+        "ciUpper": 22.6956,
+        "stdDev": 0.4984
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0196,
+        "ciLower": 0.0179,
+        "ciUpper": 0.0213,
+        "stdDev": 0.0049
+      },
+      "top1Suitable": {
+        "mean": 0.9804,
+        "ciLower": 0.9787,
+        "ciUpper": 0.9821,
+        "stdDev": 0.0049
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9822,
+        "ciLower": 0.9812,
+        "ciUpper": 0.9832,
+        "stdDev": 0.0028
+      },
+      "mrr": {
+        "mean": 0.9902,
+        "ciLower": 0.9894,
+        "ciUpper": 0.991,
+        "stdDev": 0.0024
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 29.389,
+        "ciLower": 29.0426,
+        "ciUpper": 29.7604,
+        "stdDev": 0.9879
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 33.6054,
+        "ciLower": 33.1041,
+        "ciUpper": 34.1145,
+        "stdDev": 1.3703
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 20,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "stdDev": 0.0126
+      },
+      "top1Suitable": {
+        "mean": 0.8699,
+        "ciLower": 0.8654,
+        "ciUpper": 0.8743,
+        "stdDev": 0.0126
+      },
+      "top3Hit": {
+        "mean": 0.9955,
+        "ciLower": 0.9947,
+        "ciUpper": 0.9963,
+        "stdDev": 0.0024
+      },
+      "ndcg3": {
+        "mean": 0.8746,
+        "ciLower": 0.8723,
+        "ciUpper": 0.8767,
+        "stdDev": 0.006
+      },
+      "mrr": {
+        "mean": 0.9297,
+        "ciLower": 0.9274,
+        "ciUpper": 0.932,
+        "stdDev": 0.0065
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0045,
+        "ciLower": 0.0037,
+        "ciUpper": 0.0054,
+        "stdDev": 0.0024
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 21.5128,
+        "ciLower": 21.352,
+        "ciUpper": 21.6839,
+        "stdDev": 0.4519
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "stdDev": 0.0126
+      },
+      "top1Suitable": {
+        "mean": 0.8699,
+        "ciLower": 0.8654,
+        "ciUpper": 0.8743,
+        "stdDev": 0.0126
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0045,
+        "ciLower": 0.0037,
+        "ciUpper": 0.0054,
+        "stdDev": 0.0024
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "stdDev": 0.0126
+      },
+      "top1Suitable": {
+        "mean": 0.8699,
+        "ciLower": 0.8654,
+        "ciUpper": 0.8743,
+        "stdDev": 0.0126
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0045,
+        "ciLower": 0.0037,
+        "ciUpper": 0.0054,
+        "stdDev": 0.0024
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": true,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0635,
+        "ciLower": 0.0601,
+        "ciUpper": 0.0665,
+        "stdDev": 0.0094
+      },
+      "top1Suitable": {
+        "mean": 0.9365,
+        "ciLower": 0.9335,
+        "ciUpper": 0.9399,
+        "stdDev": 0.0094
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0297,
+        "ciLower": 0.0271,
+        "ciUpper": 0.0322,
+        "stdDev": 0.0072
+      },
+      "top1Suitable": {
+        "mean": 0.9703,
+        "ciLower": 0.9679,
+        "ciUpper": 0.9729,
+        "stdDev": 0.0072
+      },
+      "top3Hit": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "ndcg3": {
+        "mean": 0.9723,
+        "ciLower": 0.9708,
+        "ciUpper": 0.9736,
+        "stdDev": 0.0039
+      },
+      "mrr": {
+        "mean": 0.985,
+        "ciLower": 0.9837,
+        "ciUpper": 0.9863,
+        "stdDev": 0.0036
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 32.7672,
+        "ciLower": 32.3652,
+        "ciUpper": 33.1573,
+        "stdDev": 1.1351
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9999,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 40.7108,
+        "ciLower": 40.1668,
+        "ciUpper": 41.2893,
+        "stdDev": 1.5915
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": true,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 30,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1638,
+        "ciLower": 0.159,
+        "ciUpper": 0.1685,
+        "stdDev": 0.0134
+      },
+      "top1Suitable": {
+        "mean": 0.8362,
+        "ciLower": 0.8315,
+        "ciUpper": 0.841,
+        "stdDev": 0.0134
+      },
+      "top3Hit": {
+        "mean": 0.9913,
+        "ciLower": 0.9901,
+        "ciUpper": 0.9926,
+        "stdDev": 0.0033
+      },
+      "ndcg3": {
+        "mean": 0.8422,
+        "ciLower": 0.8401,
+        "ciUpper": 0.8445,
+        "stdDev": 0.0061
+      },
+      "mrr": {
+        "mean": 0.9093,
+        "ciLower": 0.9069,
+        "ciUpper": 0.9119,
+        "stdDev": 0.0073
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0087,
+        "ciLower": 0.0075,
+        "ciUpper": 0.0099,
+        "stdDev": 0.0033
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 20.6042,
+        "ciLower": 20.4314,
+        "ciUpper": 20.794,
+        "stdDev": 0.4692
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0385,
+        "ciLower": 0.036,
+        "ciUpper": 0.0412,
+        "stdDev": 0.0073
+      },
+      "top1Suitable": {
+        "mean": 0.9615,
+        "ciLower": 0.9589,
+        "ciUpper": 0.964,
+        "stdDev": 0.0073
+      },
+      "top3Hit": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "ndcg3": {
+        "mean": 0.9611,
+        "ciLower": 0.9598,
+        "ciUpper": 0.9626,
+        "stdDev": 0.0039
+      },
+      "mrr": {
+        "mean": 0.9803,
+        "ciLower": 0.9791,
+        "ciUpper": 0.9816,
+        "stdDev": 0.0036
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 36.6576,
+        "ciLower": 36.0961,
+        "ciUpper": 37.2286,
+        "stdDev": 1.5984
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.9996,
+        "ciLower": 0.9995,
+        "ciUpper": 0.9998,
+        "stdDev": 0.0003
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 49.2757,
+        "ciLower": 48.6679,
+        "ciUpper": 49.8731,
+        "stdDev": 1.6521
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 40,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    },
+    {
+      "model": "Always Tier 1",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.324,
+        "ciLower": 0.324,
+        "ciUpper": 0.324,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.676,
+        "ciLower": 0.676,
+        "ciUpper": 0.676,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.934,
+        "ciLower": 0.934,
+        "ciUpper": 0.934,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.6893,
+        "ciLower": 0.6893,
+        "ciUpper": 0.6893,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.7973,
+        "ciLower": 0.7973,
+        "ciUpper": 0.7973,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.066,
+        "ciLower": 0.066,
+        "ciUpper": 0.066,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 17.9125,
+        "ciLower": 17.9125,
+        "ciUpper": 17.9125,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1963,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.8075,
+        "ciLower": 0.8037,
+        "ciUpper": 0.8113,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0.9855,
+        "ciLower": 0.9843,
+        "ciUpper": 0.9869,
+        "stdDev": 0.0036
+      },
+      "ndcg3": {
+        "mean": 0.8136,
+        "ciLower": 0.8115,
+        "ciUpper": 0.8156,
+        "stdDev": 0.0055
+      },
+      "mrr": {
+        "mean": 0.8911,
+        "ciLower": 0.8889,
+        "ciUpper": 0.8933,
+        "stdDev": 0.0062
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0145,
+        "ciLower": 0.0131,
+        "ciUpper": 0.0157,
+        "stdDev": 0.0036
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 19.9592,
+        "ciLower": 19.8161,
+        "ciUpper": 20.1134,
+        "stdDev": 0.4093
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1963,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.8075,
+        "ciLower": 0.8037,
+        "ciUpper": 0.8113,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0145,
+        "ciLower": 0.0131,
+        "ciUpper": 0.0157,
+        "stdDev": 0.0036
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (assume_available)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1963,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.8075,
+        "ciLower": 0.8037,
+        "ciUpper": 0.8113,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.0145,
+        "ciLower": 0.0131,
+        "ciUpper": 0.0157,
+        "stdDev": 0.0036
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (trust_last_reported)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0543,
+        "ciLower": 0.0504,
+        "ciUpper": 0.0579,
+        "stdDev": 0.0107
+      },
+      "top1Suitable": {
+        "mean": 0.9457,
+        "ciLower": 0.9422,
+        "ciUpper": 0.9496,
+        "stdDev": 0.0107
+      },
+      "top3Hit": {
+        "mean": 0.9996,
+        "ciLower": 0.9993,
+        "ciUpper": 0.9999,
+        "stdDev": 0.0008
+      },
+      "ndcg3": {
+        "mean": 0.9476,
+        "ciLower": 0.9457,
+        "ciUpper": 0.9499,
+        "stdDev": 0.006
+      },
+      "mrr": {
+        "mean": 0.972,
+        "ciLower": 0.9702,
+        "ciUpper": 0.9741,
+        "stdDev": 0.0056
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "missedOpportunity": {
+        "mean": 0.0004,
+        "ciLower": 0.0001,
+        "ciUpper": 0.0007,
+        "stdDev": 0.0008
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 40.0101,
+        "ciLower": 39.3734,
+        "ciUpper": 40.566,
+        "stdDev": 1.7016
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.998,
+        "ciLower": 0.9976,
+        "ciUpper": 0.9983,
+        "stdDev": 0.0009
+      },
+      "mrr": {
+        "mean": 1,
+        "ciLower": 0.9999,
+        "ciUpper": 1,
+        "stdDev": 0.0002
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0.0002,
+        "ciLower": 0,
+        "ciUpper": 0.0005,
+        "stdDev": 0.0006
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 60.3741,
+        "ciLower": 59.6177,
+        "ciUpper": 61.1481,
+        "stdDev": 2.273
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.1,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "CareBridge (unknown_aware)",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.5,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.0001,
+        "ciLower": 0,
+        "ciUpper": 0.0002,
+        "stdDev": 0.0004
+      },
+      "top1Suitable": {
+        "mean": 0.9999,
+        "ciLower": 0.9998,
+        "ciUpper": 1,
+        "stdDev": 0.0004
+      },
+      "top3Hit": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Eligible",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.29,
+        "ciLower": 0.29,
+        "ciUpper": 0.29,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.71,
+        "ciLower": 0.71,
+        "ciUpper": 0.71,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.976,
+        "ciLower": 0.976,
+        "ciUpper": 0.976,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.7112,
+        "ciLower": 0.7112,
+        "ciUpper": 0.7112,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.8337,
+        "ciLower": 0.8337,
+        "ciUpper": 0.8337,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.024,
+        "ciLower": 0.024,
+        "ciUpper": 0.024,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.8387,
+        "ciLower": 14.8387,
+        "ciUpper": 14.8387,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Nearest Verified",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.278,
+        "ciLower": 0.278,
+        "ciUpper": 0.278,
+        "stdDev": 0
+      },
+      "top1Suitable": {
+        "mean": 0.502,
+        "ciLower": 0.502,
+        "ciUpper": 0.502,
+        "stdDev": 0
+      },
+      "top3Hit": {
+        "mean": 0.846,
+        "ciLower": 0.846,
+        "ciUpper": 0.846,
+        "stdDev": 0
+      },
+      "ndcg3": {
+        "mean": 0.47,
+        "ciLower": 0.47,
+        "ciUpper": 0.47,
+        "stdDev": 0
+      },
+      "mrr": {
+        "mean": 0.6583,
+        "ciLower": 0.6583,
+        "ciUpper": 0.6583,
+        "stdDev": 0
+      },
+      "capabilityMatch": {
+        "mean": 0.712,
+        "ciLower": 0.712,
+        "ciUpper": 0.712,
+        "stdDev": 0
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.154,
+        "ciLower": 0.154,
+        "ciUpper": 0.154,
+        "stdDev": 0
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 14.2195,
+        "ciLower": 14.2195,
+        "ciUpper": 14.2195,
+        "stdDev": 0
+      }
+    },
+    {
+      "model": "Random Eligible",
+      "mechanism": "mixed",
+      "staleness": 50,
+      "pDrift": 0.3,
+      "isBiased": false,
+      "numSeeds": 30,
+      "falseAvailable": {
+        "mean": 0.2935,
+        "ciLower": 0.286,
+        "ciUpper": 0.3014,
+        "stdDev": 0.0222
+      },
+      "top1Suitable": {
+        "mean": 0.7016,
+        "ciLower": 0.6929,
+        "ciUpper": 0.7099,
+        "stdDev": 0.0244
+      },
+      "top3Hit": {
+        "mean": 0.967,
+        "ciLower": 0.964,
+        "ciUpper": 0.97,
+        "stdDev": 0.0088
+      },
+      "ndcg3": {
+        "mean": 0.7011,
+        "ciLower": 0.6962,
+        "ciUpper": 0.7056,
+        "stdDev": 0.0144
+      },
+      "mrr": {
+        "mean": 0.824,
+        "ciLower": 0.8184,
+        "ciUpper": 0.8292,
+        "stdDev": 0.0151
+      },
+      "capabilityMatch": {
+        "mean": 0.9931,
+        "ciLower": 0.9896,
+        "ciUpper": 0.9961,
+        "stdDev": 0.0098
+      },
+      "flaggedUnknown": {
+        "mean": 1,
+        "ciLower": 1,
+        "ciUpper": 1,
+        "stdDev": 0
+      },
+      "missedOpportunity": {
+        "mean": 0.033,
+        "ciLower": 0.03,
+        "ciUpper": 0.036,
+        "stdDev": 0.0088
+      },
+      "noResult": {
+        "mean": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "stdDev": 0
+      },
+      "meanDistance": {
+        "mean": 215.5167,
+        "ciLower": 213.2569,
+        "ciUpper": 217.7357,
+        "stdDev": 6.5261
+      }
+    }
+  ],
+  "pairedComparisons": [
+    {
+      "staleness": 0,
+      "falseAvailable": {
+        "meanDifference": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "pValue": 1,
+        "zScore": 0,
+        "cliffsDelta": 0,
+        "isSignificant": false
+      },
+      "top1Suitable": {
+        "meanDifference": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "pValue": 1,
+        "zScore": 0,
+        "cliffsDelta": 0,
+        "isSignificant": false
+      },
+      "missedOpportunity": {
+        "meanDifference": 0,
+        "ciLower": 0,
+        "ciUpper": 0,
+        "pValue": 1,
+        "zScore": 0,
+        "cliffsDelta": 0,
+        "isSignificant": false
+      }
+    },
+    {
+      "staleness": 10,
+      "falseAvailable": {
+        "meanDifference": -0.0472,
+        "ciLower": -0.0505,
+        "ciUpper": -0.0439,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      },
+      "top1Suitable": {
+        "meanDifference": 0.0472,
+        "ciLower": 0.0439,
+        "ciUpper": 0.0505,
+        "pValue": 0,
+        "zScore": 4.782,
+        "cliffsDelta": 1,
+        "isSignificant": true
+      },
+      "missedOpportunity": {
+        "meanDifference": -0.0001,
+        "ciLower": -0.0003,
+        "ciUpper": 0,
+        "pValue": 0.05,
+        "zScore": 0,
+        "cliffsDelta": -0.067,
+        "isSignificant": false
+      }
+    },
+    {
+      "staleness": 20,
+      "falseAvailable": {
+        "meanDifference": -0.0929,
+        "ciLower": -0.0973,
+        "ciUpper": -0.0887,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      },
+      "top1Suitable": {
+        "meanDifference": 0.0929,
+        "ciLower": 0.0887,
+        "ciUpper": 0.0973,
+        "pValue": 0,
+        "zScore": 4.782,
+        "cliffsDelta": 1,
+        "isSignificant": true
+      },
+      "missedOpportunity": {
+        "meanDifference": -0.0017,
+        "ciLower": -0.0023,
+        "ciUpper": -0.0011,
+        "pValue": 0.0003,
+        "zScore": -3.621,
+        "cliffsDelta": -0.567,
+        "isSignificant": true
+      }
+    },
+    {
+      "staleness": 30,
+      "falseAvailable": {
+        "meanDifference": -0.1301,
+        "ciLower": -0.1346,
+        "ciUpper": -0.1257,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      },
+      "top1Suitable": {
+        "meanDifference": 0.1301,
+        "ciLower": 0.1257,
+        "ciUpper": 0.1347,
+        "pValue": 0,
+        "zScore": 4.782,
+        "cliffsDelta": 1,
+        "isSignificant": true
+      },
+      "missedOpportunity": {
+        "meanDifference": -0.0045,
+        "ciLower": -0.0053,
+        "ciUpper": -0.0037,
+        "pValue": 0,
+        "zScore": -4.703,
+        "cliffsDelta": -0.967,
+        "isSignificant": true
+      }
+    },
+    {
+      "staleness": 40,
+      "falseAvailable": {
+        "meanDifference": -0.1638,
+        "ciLower": -0.1685,
+        "ciUpper": -0.159,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      },
+      "top1Suitable": {
+        "meanDifference": 0.1638,
+        "ciLower": 0.159,
+        "ciUpper": 0.1685,
+        "pValue": 0,
+        "zScore": 4.782,
+        "cliffsDelta": 1,
+        "isSignificant": true
+      },
+      "missedOpportunity": {
+        "meanDifference": -0.0087,
+        "ciLower": -0.0099,
+        "ciUpper": -0.0074,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      }
+    },
+    {
+      "staleness": 50,
+      "falseAvailable": {
+        "meanDifference": -0.1925,
+        "ciLower": -0.1961,
+        "ciUpper": -0.1885,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      },
+      "top1Suitable": {
+        "meanDifference": 0.1925,
+        "ciLower": 0.1887,
+        "ciUpper": 0.1962,
+        "pValue": 0,
+        "zScore": 4.782,
+        "cliffsDelta": 1,
+        "isSignificant": true
+      },
+      "missedOpportunity": {
+        "meanDifference": -0.0145,
+        "ciLower": -0.0157,
+        "ciUpper": -0.0131,
+        "pValue": 0,
+        "zScore": -4.782,
+        "cliffsDelta": -1,
+        "isSignificant": true
+      }
+    }
+  ],
+  "testSeeds": [
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130
+  ],
+  "tuningSeeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ]
+}

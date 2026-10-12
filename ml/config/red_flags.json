@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "name": "CareBridge Clinical Emergency Red Flags",
+  "disclaimer": "Rule-based emergency triggers that bypass ML risk scores and elevate referral urgency to 'emergency'. All rules are decision support and marked 'needs clinician review'. Standard emergency protocols supersede any decision support score.",
+  "rules": [
+    {
+      "id": "RF-SPO2-CRITICAL",
+      "name": "Severe Hypoxemia",
+      "criterion": "o2sat < 90%",
+      "field": "o2sat",
+      "operator": "<",
+      "threshold": 90.0,
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "WHO Clinical Management of Severe Acute Respiratory Infection / BTS Guidelines"
+    },
+    {
+      "id": "RF-CHEST-PAIN-VITAL-ABNORMAL",
+      "name": "Chest Pain with Hemodynamic or Respiratory Instability",
+      "criterion": "chest_pain == true AND (sbp < 90 OR sbp > 180 OR heartrate > 120 OR o2sat < 92)",
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "AHA/ACC Suspected Acute Coronary Syndrome Emergency Triage Protocol"
+    },
+    {
+      "id": "RF-STROKE-SIGNS",
+      "name": "Acute Neurological Deficit (FAST / Stroke Signs)",
+      "criterion": "stroke_signs == true OR facial_droop == true OR acute_weakness == true",
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "AHA/ASA Early Management of Patients With Acute Ischemic Stroke"
+    },
+    {
+      "id": "RF-HYPERTENSIVE-EMERGENCY",
+      "name": "Hypertensive Crisis",
+      "criterion": "sbp > 180 mmHg OR dbp > 120 mmHg",
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "2017 ACC/AHA High Blood Pressure Clinical Practice Guideline"
+    },
+    {
+      "id": "RF-PROFOUND-HYPOTENSION",
+      "name": "Shock / Profound Hypotension",
+      "criterion": "sbp < 80 mmHg",
+      "field": "sbp",
+      "operator": "<",
+      "threshold": 80.0,
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "Surviving Sepsis Campaign / Critical Care Shock Guidelines"
+    },
+    {
+      "id": "RF-ALTERED-CONSCIOUSNESS",
+      "name": "Altered Mental Status / Lethargy / Unresponsiveness",
+      "criterion": "altered_consciousness == true OR avpu in ['Voice', 'Pain', 'Unresponsive']",
+      "urgency": "emergency",
+      "status": "needs clinician review",
+      "source": "Advanced Trauma Life Support (ATLS) / GCS Emergency Thresholds"
+    }
+  ]
+}

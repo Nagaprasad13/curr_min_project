@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+
+# ML Datasets (Strictly Local - Never Commit Clinical/MIMIC Data)
+ml/data/
+ml/data/raw/
+*.zip
+*.rar
+*.gz
+*.tar
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.joblib
+*.pkl
+
+# Evaluation run scratch
+backend/src/evaluation/results/*.tmp
+ml/scratch/

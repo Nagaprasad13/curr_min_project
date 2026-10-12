@@ -1,0 +1,172 @@
+{
+  "Diabetes": {
+    "condition": "Diabetes",
+    "icd10": "E11",
+    "sample_size": 768,
+    "positive_count": 268,
+    "positive_rate": 0.3489583333333333,
+    "operating_threshold": 0.24,
+    "recall": 0.9029850746268657,
+    "recall_95_ci": [
+      0.8683709552978583,
+      0.9402977563430489
+    ],
+    "precision": 0.5226781857451404,
+    "f1": 0.6621067031463749,
+    "auroc": 0.8326492537313434,
+    "auroc_95_ci": [
+      0.8055599084166664,
+      0.8617496771433297
+    ],
+    "auprc": 0.7024946656501511,
+    "auprc_95_ci": [
+      0.6450245812072909,
+      0.7678911233538865
+    ],
+    "brier_score": 0.15803413694574575,
+    "brier_95_ci": [
+      0.14520701660735738,
+      0.16990849985566
+    ],
+    "expected_calibration_error": 0.042499209899945795,
+    "missed_cases_count": 26,
+    "missed_cases_rate": 9.701492537313433,
+    "baseline_lr_auroc": 0.845089552238806
+  },
+  "Heart Disease": {
+    "condition": "Heart Disease",
+    "icd10": "I25.1",
+    "sample_size": 303,
+    "positive_count": 139,
+    "positive_rate": 0.45874587458745875,
+    "operating_threshold": 0.27999999999999997,
+    "recall": 0.9064748201438849,
+    "recall_95_ci": [
+      0.8566741071428571,
+      0.9525778027746531
+    ],
+    "precision": 0.6737967914438503,
+    "f1": 0.7730061349693251,
+    "auroc": 0.898885769433234,
+    "auroc_95_ci": [
+      0.8629121250962128,
+      0.9306654904217772
+    ],
+    "auprc": 0.8897047554300772,
+    "auprc_95_ci": [
+      0.8444822609910834,
+      0.9291128439565838
+    ],
+    "brier_score": 0.12857317123850703,
+    "brier_95_ci": [
+      0.10949987524104769,
+      0.1488079527689998
+    ],
+    "expected_calibration_error": 0.05277187220967219,
+    "missed_cases_count": 13,
+    "missed_cases_rate": 9.352517985611511,
+    "baseline_lr_auroc": 0.9395069310405334
+  },
+  "Liver Disease": {
+    "condition": "Liver Disease",
+    "icd10": "K76.9",
+    "sample_size": 583,
+    "positive_count": 416,
+    "positive_rate": 0.7135506003430532,
+    "operating_threshold": 0.5599999999999999,
+    "recall": 0.9038461538461539,
+    "recall_95_ci": [
+      0.8740907891264186,
+      0.9289502164502165
+    ],
+    "precision": 0.7475149105367793,
+    "f1": 0.8182807399347116,
+    "auroc": 0.7444725932749885,
+    "auroc_95_ci": [
+      0.7041100979114603,
+      0.7804319702010697
+    ],
+    "auprc": 0.8897981128874702,
+    "auprc_95_ci": [
+      0.8613764084598411,
+      0.913828716008926
+    ],
+    "brier_score": 0.17486864315090522,
+    "brier_95_ci": [
+      0.16282787123793838,
+      0.18911263623742217
+    ],
+    "expected_calibration_error": 0.057010124099551966,
+    "missed_cases_count": 40,
+    "missed_cases_rate": 9.615384615384617,
+    "baseline_lr_auroc": 0.766783740211884
+  },
+  "Chronic Kidney Disease": {
+    "condition": "Chronic Kidney Disease",
+    "icd10": "N18.9",
+    "sample_size": 400,
+    "positive_count": 250,
+    "positive_rate": 0.625,
+    "operating_threshold": 0.85,
+    "recall": 0.956,
+    "recall_95_ci": [
+      0.9292658638258453,
+      0.9788135593220338
+    ],
+    "precision": 1.0,
+    "f1": 0.9775051124744376,
+    "auroc": 0.9999733333333333,
+    "auroc_95_ci": [
+      0.9998417729240764,
+      1.0
+    ],
+    "auprc": 0.9999840637450199,
+    "auprc_95_ci": [
+      0.9999077054457011,
+      1.0
+    ],
+    "brier_score": 0.005840999794583302,
+    "brier_95_ci": [
+      0.0033510789198344733,
+      0.008671721856128186
+    ],
+    "expected_calibration_error": 0.03432532306531859,
+    "missed_cases_count": 11,
+    "missed_cases_rate": 4.3999999999999995,
+    "baseline_lr_auroc": 1.0
+  },
+  "Thyroid Disorder": {
+    "condition": "Thyroid Disorder",
+    "icd10": "E03.9",
+    "sample_size": 3163,
+    "positive_count": 151,
+    "positive_rate": 0.04773948782801138,
+    "operating_threshold": 0.5299999999999999,
+    "recall": 0.9006622516556292,
+    "recall_95_ci": [
+      0.8482057416267943,
+      0.9497607439508847
+    ],
+    "precision": 0.918918918918919,
+    "f1": 0.9096989966555183,
+    "auroc": 0.9899277063929711,
+    "auroc_95_ci": [
+      0.977501716663234,
+      0.9974779835566714
+    ],
+    "auprc": 0.8900114648371431,
+    "auprc_95_ci": [
+      0.8241540227004782,
+      0.951693638162285
+    ],
+    "brier_score": 0.008189964547438039,
+    "brier_95_ci": [
+      0.00589100473569823,
+      0.010960529685976094
+    ],
+    "expected_calibration_error": 0.007848440367894761,
+    "missed_cases_count": 15,
+    "missed_cases_rate": 9.933774834437086,
+    "baseline_lr_auroc": 0.9928157128659754
+  }
+}

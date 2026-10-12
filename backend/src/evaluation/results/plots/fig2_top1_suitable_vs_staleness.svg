@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <rect width="900" height="550" fill="#ffffff"/>
+  
+  <!-- Title and Subtitle -->
+  <text x="80" y="32" font-size="18" font-weight="700" fill="#1a202c">Figure 2: Top-1 Suitable Rate vs. Capacity Staleness (Effectiveness Outcome)</text>
+  <text x="80" y="52" font-size="11" fill="#718096">Notice: Synthetic research prototype simulation data. Decision support only.</text>
+  
+  <!-- Plot Background -->
+  <rect x="80" y="70" width="580" height="400" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="80" y1="470" x2="660" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="474" font-size="11" fill="#4a5568" text-anchor="end">0%</text>
+  <line x1="80" y1="390" x2="660" y2="390" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="394" font-size="11" fill="#4a5568" text-anchor="end">20%</text>
+  <line x1="80" y1="310" x2="660" y2="310" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="314" font-size="11" fill="#4a5568" text-anchor="end">40%</text>
+  <line x1="80" y1="230" x2="660" y2="230" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="234" font-size="11" fill="#4a5568" text-anchor="end">60%</text>
+  <line x1="80" y1="150" x2="660" y2="150" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="154" font-size="11" fill="#4a5568" text-anchor="end">80%</text>
+  <line x1="80" y1="70" x2="660" y2="70" stroke="#edf2f7" stroke-width="1"/>
+  <text x="68" y="74" font-size="11" fill="#4a5568" text-anchor="end">100%</text>
+  <line x1="80" y1="70" x2="80" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="80" y="490" font-size="11" fill="#4a5568" text-anchor="middle">0%</text>
+  <line x1="196" y1="70" x2="196" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="196" y="490" font-size="11" fill="#4a5568" text-anchor="middle">10%</text>
+  <line x1="312" y1="70" x2="312" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="312" y="490" font-size="11" fill="#4a5568" text-anchor="middle">20%</text>
+  <line x1="428" y1="70" x2="428" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="428" y="490" font-size="11" fill="#4a5568" text-anchor="middle">30%</text>
+  <line x1="544" y1="70" x2="544" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="544" y="490" font-size="11" fill="#4a5568" text-anchor="middle">40%</text>
+  <line x1="660" y1="70" x2="660" y2="470" stroke="#edf2f7" stroke-width="1"/>
+  <text x="660" y="490" font-size="11" fill="#4a5568" text-anchor="middle">50%</text>
+  <text x="370" y="520" font-size="13" font-weight="600" fill="#2d3748" text-anchor="middle">Telemetry Staleness Level (%)</text>
+  <text transform="rotate(-90)" x="-270" y="30" font-size="13" font-weight="600" fill="#2d3748" text-anchor="middle">Top-1 Suitable Rate (%)</text>
+  <polygon points="80,70 196,70 312,70 428,70 544,70 660,70 660,70.07999999999998 544,70 428,70 312,70 196,70 80,70" fill="#1f77b4" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,70 196,87.56 312,105.48000000000002 428,120.28000000000003 544,133.60000000000002 660,145.48000000000002 660,148.52000000000004 544,137.39999999999998 428,123.84000000000003 312,108.92000000000002 196,90.19999999999999 80,70" fill="#d62728" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,70 196,73.24000000000001 312,77.16000000000003 428,80.84000000000003 544,84.40000000000003 660,90.16000000000003 660,93.12 544,86.44 428,82.84000000000003 312,78.51999999999998 196,74.32 80,70" fill="#ff7f0e" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,186 196,186 312,186 428,186 544,186 660,186 660,186 544,186 428,186 312,186 196,186 80,186" fill="#9467bd" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,269.2 196,269.2 312,269.2 428,269.2 544,269.2 660,269.2 660,269.2 544,269.2 428,269.2 312,269.2 196,269.2 80,269.2" fill="#7f7f7f" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,199.59999999999997 196,199.59999999999997 312,199.59999999999997 428,199.59999999999997 544,199.59999999999997 660,199.59999999999997 660,199.59999999999997 544,199.59999999999997 428,199.59999999999997 312,199.59999999999997 196,199.59999999999997 80,199.59999999999997" fill="#8c564b" fill-opacity="0.15" stroke="none"/>
+  <polygon points="80,186.04000000000002 196,186.04000000000002 312,186.04000000000002 428,186.04000000000002 544,186.04000000000002 660,186.04000000000002 660,192.84000000000003 544,192.84000000000003 428,192.84000000000003 312,192.84000000000003 196,192.84000000000003 80,192.84000000000003" fill="#2ca02c" fill-opacity="0.15" stroke="none"/>
+  <!-- Series: CareBridge (unknown_aware) -->
+  <polyline points="80,70 196,70 312,70 428,70 544,70 660,70.04000000000002" fill="none" stroke="#1f77b4" stroke-width="3" />
+  <circle cx="80" cy="70" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="70" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="70" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="70" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="70" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="70.04000000000002" r="4.5" fill="#1f77b4" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: CareBridge (assume_available) -->
+  <polyline points="80,70 196,88.88 312,107.15999999999997 428,122.04000000000002 544,135.51999999999998 660,147" fill="none" stroke="#d62728" stroke-width="3" />
+  <circle cx="80" cy="70" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="88.88" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="107.15999999999997" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="122.04000000000002" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="135.51999999999998" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="147" r="4.5" fill="#d62728" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: CareBridge (trust_last_reported) -->
+  <polyline points="80,70 196,73.75999999999999 312,77.83999999999997 428,81.88 544,85.39999999999998 660,91.72000000000003" fill="none" stroke="#ff7f0e" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="80" cy="70" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="73.75999999999999" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="77.83999999999997" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="81.88" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="85.39999999999998" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="91.72000000000003" r="3.5" fill="#ff7f0e" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: Nearest Eligible -->
+  <polyline points="80,186 196,186 312,186 428,186 544,186 660,186" fill="none" stroke="#9467bd" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="80" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="186" r="3.5" fill="#9467bd" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: Nearest Verified -->
+  <polyline points="80,269.2 196,269.2 312,269.2 428,269.2 544,269.2 660,269.2" fill="none" stroke="#7f7f7f" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="80" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="269.2" r="3.5" fill="#7f7f7f" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: Always Tier 1 -->
+  <polyline points="80,199.59999999999997 196,199.59999999999997 312,199.59999999999997 428,199.59999999999997 544,199.59999999999997 660,199.59999999999997" fill="none" stroke="#8c564b" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="80" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="199.59999999999997" r="3.5" fill="#8c564b" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Series: Random Eligible -->
+  <polyline points="80,189.36 196,189.36 312,189.36 428,189.36 544,189.36 660,189.36" fill="none" stroke="#2ca02c" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="80" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="196" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="312" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="428" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="544" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="660" cy="189.36" r="3.5" fill="#2ca02c" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Legend -->
+  <rect x="675" y="70" width="215" height="184" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" rx="4"/>
+  <g transform="translate(685, 80)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#1f77b4" stroke-width="2.5" />
+    <circle cx="10" cy="6" r="3" fill="#1f77b4"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">CareBridge (unknown_aware)</text>
+  </g>
+  <g transform="translate(685, 104)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#d62728" stroke-width="2.5" />
+    <circle cx="10" cy="6" r="3" fill="#d62728"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">CareBridge (assume_available)</text>
+  </g>
+  <g transform="translate(685, 128)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#ff7f0e" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <circle cx="10" cy="6" r="3" fill="#ff7f0e"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">CareBridge (trust_last_reported)</text>
+  </g>
+  <g transform="translate(685, 152)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#9467bd" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <circle cx="10" cy="6" r="3" fill="#9467bd"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">Nearest Eligible</text>
+  </g>
+  <g transform="translate(685, 176)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#7f7f7f" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <circle cx="10" cy="6" r="3" fill="#7f7f7f"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">Nearest Verified</text>
+  </g>
+  <g transform="translate(685, 200)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#8c564b" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <circle cx="10" cy="6" r="3" fill="#8c564b"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">Always Tier 1</text>
+  </g>
+  <g transform="translate(685, 224)">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#2ca02c" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <circle cx="10" cy="6" r="3" fill="#2ca02c"/>
+    <text x="28" y="10" font-size="11" fill="#2d3748">Random Eligible</text>
+  </g>
+</svg>

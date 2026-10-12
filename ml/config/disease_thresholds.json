@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "policy": "recall_first_screening",
+  "target_sensitivity": 0.90,
+  "description": "Operating probability thresholds tuned on out-of-fold validation sets to guarantee >= 90% recall for clinical decision support referral filtering.",
+  "thresholds": {
+    "diabetes": {
+      "condition": "Diabetes",
+      "icd10": "E11",
+      "threshold": 0.240,
+      "primary_specialty": "Endocrinology",
+      "minimum_tier": "Tier 2"
+    },
+    "heart_disease": {
+      "condition": "Heart Disease",
+      "icd10": "I25.1",
+      "threshold": 0.280,
+      "primary_specialty": "Cardiology",
+      "minimum_tier": "Tier 1"
+    },
+    "liver_disease": {
+      "condition": "Liver Disease",
+      "icd10": "K76.9",
+      "threshold": 0.560,
+      "primary_specialty": "Gastroenterology",
+      "minimum_tier": "Tier 2"
+    },
+    "ckd": {
+      "condition": "Chronic Kidney Disease",
+      "icd10": "N18.9",
+      "threshold": 0.850,
+      "primary_specialty": "Nephrology",
+      "minimum_tier": "Tier 1"
+    },
+    "thyroid": {
+      "condition": "Thyroid Disorder",
+      "icd10": "E03.9",
+      "threshold": 0.530,
+      "primary_specialty": "Endocrinology",
+      "minimum_tier": "Tier 2"
+    },
+    "triage_severity": {
+      "task": "High Acuity Triage (ESI 1-2)",
+      "threshold": 0.510,
+      "escalation_urgency": "urgent"
+    }
+  }
+}

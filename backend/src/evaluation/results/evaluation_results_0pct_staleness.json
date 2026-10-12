@@ -1,0 +1,62 @@
+[
+  {
+    "method": "CareBridge (Ours)",
+    "totalScenarios": 500,
+    "top1CapabilityMatchRate": 100,
+    "top1SuitableRate": 100,
+    "top3HitRate": 100,
+    "mrr": 1,
+    "falseAvailableRate": 0,
+    "noResultRate": 0,
+    "meanTop1DistanceKm": 24.8,
+    "medianRuntimeMs": 0.11
+  },
+  {
+    "method": "Nearest Eligible",
+    "totalScenarios": 500,
+    "top1CapabilityMatchRate": 100,
+    "top1SuitableRate": 71,
+    "top3HitRate": 97.6,
+    "mrr": 0.839,
+    "falseAvailableRate": 0,
+    "noResultRate": 0,
+    "meanTop1DistanceKm": 14.8,
+    "medianRuntimeMs": 0.02
+  },
+  {
+    "method": "Nearest Verified",
+    "totalScenarios": 500,
+    "top1CapabilityMatchRate": 71.2,
+    "top1SuitableRate": 50.2,
+    "top3HitRate": 84.6,
+    "mrr": 0.692,
+    "falseAvailableRate": 0,
+    "noResultRate": 0,
+    "meanTop1DistanceKm": 14.2,
+    "medianRuntimeMs": 0.03
+  },
+  {
+    "method": "Always Tier 1",
+    "totalScenarios": 500,
+    "top1CapabilityMatchRate": 100,
+    "top1SuitableRate": 67.6,
+    "top3HitRate": 93.4,
+    "mrr": 0.809,
+    "falseAvailableRate": 0,
+    "noResultRate": 0,
+    "meanTop1DistanceKm": 17.9,
+    "medianRuntimeMs": 0.02
+  },
+  {
+    "method": "Random Eligible",
+    "totalScenarios": 500,
+    "top1CapabilityMatchRate": 99.4,
+    "top1SuitableRate": 68.6,
+    "top3HitRate": 95.4,
+    "mrr": 0.819,
+    "falseAvailableRate": 0,
+    "noResultRate": 0,
+    "meanTop1DistanceKm": 221.8,
+    "medianRuntimeMs": 0.02
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "modelName": "CareBridge Triage Severity Classifier",
+  "version": "1.0.0",
+  "algorithm": "HistGradientBoostingClassifier with Platt Sigmoid Calibration",
+  "dataset": "MIMIC-IV-ED Demo v2.2 (PhysioNet)",
+  "population": "Emergency Department arrivals, Beth Israel Deaconess Medical Center, Boston, MA, USA",
+  "trainingDate": "2026-10-12",
+  "target": "High Acuity (ESI acuity 1 or 2 vs 3, 4, 5)",
+  "operatingThreshold": 0.51,
+  "metrics": {
+    "sensitivity": 0.84,
+    "sensitivity_95_ci": [
+      0.6799642857142858,
+      0.961574074074074
+    ],
+    "specificity": 0.5,
+    "ppv": 0.7241379310344828,
+    "extra_alerts_per_100": 19.51219512195122,
+    "missed_cases_count": 4,
+    "missed_cases_rate": 16.0,
+    "auroc": 0.7024999999999999,
+    "auroc_95_ci": [
+      0.510970695970696,
+      0.8545058883768561
+    ],
+    "auprc": 0.8029709972953717,
+    "auprc_95_ci": [
+      0.6581563272854062,
+      0.9283289145392222
+    ],
+    "brier_score_calibrated": 0.21864540176473082,
+    "brier_score_uncalibrated": 0.2391190445212707,
+    "expected_calibration_error": 0.11522793241605113
+  },
+  "baselines": {
+    "majority_class_auroc": 0.5,
+    "approximate_news2_auroc": 0.6724999999999999,
+    "logistic_regression_auroc": 0.81,
+    "random_forest_auroc": 0.7275
+  },
+  "subgroups": {
+    "Sex_F": {
+      "n": 39,
+      "sensitivity": 0.8260869565217391,
+      "brier": 0.22321804402741366
+    },
+    "Arrival_AMBULANCE": {
+      "n": 24,
+      "sensitivity": 0.8125,
+      "brier": 0.22711113697118934
+    },
+    "Arrival_WALK IN": {
+      "n": 15,
+      "sensitivity": 0.8571428571428571,
+      "brier": 0.21123735746262773
+    }
+  },
+  "robustness_missing_spo2": {
+    "sensitivity": 0.84,
+    "auroc": 0.7075
+  },
+  "intendedUse": "Decision support triage urgency suggestion to support doctor referral prioritization. NOT a clinical diagnosis.",
+  "disclaimer": "Decision support only. Clinician must review. Trained on non-Tamil Nadu public data and not validated for Tamil Nadu patient populations."
+}

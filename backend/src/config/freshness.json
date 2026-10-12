@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "name": "CareBridge Telemetry Freshness Thresholds",
+  "disclaimer": "Maximum acceptable age for capacity and telemetry records. Stale records beyond these thresholds are strictly evaluated as 'unknown'.",
+  "maxAgeMinutes": {
+    "emergency": 120,
+    "urgent": 360,
+    "routine": 1440
+  },
+  "labels": {
+    "fresh": "Data fresh and verified",
+    "stale": "Data stale (exceeds urgency threshold), treated as unknown",
+    "never_reported": "No telemetry ever reported, treated as unknown"
+  }
+}

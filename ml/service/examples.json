@@ -1,0 +1,77 @@
+{
+  "examples": [
+    {
+      "case_name": "Example 1: Acute Coronary Syndrome (Red Flag Emergency)",
+      "clinical_scenario": "A 58-year-old male arrives via ambulance with substernal crushing chest pain, diaphoresis, acute hypotension (SBP 85 mmHg), and mild hypoxia (SpO2 91%).",
+      "request_payload": {
+        "age": 58,
+        "gender": "M",
+        "arrival_transport": "AMBULANCE",
+        "chest_pain": true,
+        "sbp": 85,
+        "dbp": 55,
+        "heartrate": 118,
+        "resprate": 24,
+        "o2sat": 91,
+        "pain": 9.0,
+        "cp": 1,
+        "trestbps": 85,
+        "chol": 240
+      },
+      "expected_response_summary": {
+        "urgency": "emergency",
+        "red_flags_triggered": ["RF-CHEST-PAIN-VITAL-ABNORMAL"],
+        "specialties": ["Cardiology", "Emergency Medicine"],
+        "required_facilities": ["cardiacCathLab", "ecg", "echo"]
+      }
+    },
+    {
+      "case_name": "Example 2: Chronic Kidney Disease with Stage 2 Hypertension (Urgent)",
+      "clinical_scenario": "A 64-year-old female presenting with bilateral pitting pedal edema, fatigue, elevated serum creatinine (3.4 mg/dL), blood urea (78 mg/dL), and BP 155/96 mmHg.",
+      "request_payload": {
+        "age": 64,
+        "gender": "F",
+        "arrival_transport": "WALK IN",
+        "sbp": 155,
+        "dbp": 96,
+        "heartrate": 78,
+        "resprate": 16,
+        "o2sat": 97,
+        "sc": 3.4,
+        "bu": 78,
+        "hemo": 10.1,
+        "bp": 155
+      },
+      "expected_response_summary": {
+        "urgency": "urgent",
+        "condition_risks_flagged": ["Chronic Kidney Disease", "Hypertension"],
+        "specialties": ["Nephrology", "General Medicine"],
+        "required_facilities": ["dialysis", "ecg", "lab"]
+      }
+    },
+    {
+      "case_name": "Example 3: Routine Diabetic Screening with Missing Liver Panel",
+      "clinical_scenario": "A 42-year-old asymptomatic male with family history of diabetes, fasting glucose 195 mg/dL, BMI 29.5 kg/m2, normal vitals, but liver function tests were not ordered.",
+      "request_payload": {
+        "age": 42,
+        "gender": "M",
+        "arrival_transport": "WALK IN",
+        "sbp": 122,
+        "dbp": 78,
+        "heartrate": 72,
+        "resprate": 14,
+        "o2sat": 99,
+        "Glucose": 195,
+        "BMI": 29.5,
+        "BloodPressure": 78
+      },
+      "expected_response_summary": {
+        "urgency": "routine",
+        "condition_risks_flagged": ["Diabetes"],
+        "missing_tests": ["tb", "sgpt", "sgot", "alb", "sc", "bu", "hemo", "TSH", "TT4"],
+        "specialties": ["Endocrinology", "General Medicine"],
+        "required_facilities": ["endocrinologyLab", "lab"]
+      }
+    }
+  ]
+}

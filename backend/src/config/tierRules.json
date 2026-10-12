@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "name": "CareBridge Proposed Hospital Capability Tier Classification Rules",
+  "disclaimer": "These capability tiers (Tier 1 advanced, Tier 2 secondary, Tier 3 basic) are proposed research categories for clinical decision support, NOT official statutory or government classifications.",
+  "rules": {
+    "Tier 1": {
+      "label": "Advanced Tertiary / Quaternary Referral Center",
+      "criteria": {
+        "has24x7Emergency": true,
+        "minIcuBeds": 20,
+        "minVentilators": 10,
+        "requiresCt": true,
+        "requiresMri": true,
+        "requiresLab": true,
+        "minOperationTheatres": 3,
+        "minSpecialties": 8
+      },
+      "descriptions": {
+        "has24x7Emergency": "Dedicated 24x7 Emergency Medical Department",
+        "minIcuBeds": "At least 20 staffed Intensive Care Unit (ICU) beds",
+        "minVentilators": "At least 10 mechanical ventilators available",
+        "requiresCt": "Functional CT scanner on-site",
+        "requiresMri": "Functional MRI scanner on-site",
+        "requiresLab": "Accredited clinical diagnostic laboratory services",
+        "minOperationTheatres": "At least 3 fully operational surgical theatres",
+        "minSpecialties": "At least 8 distinct medical/surgical specialty departments"
+      }
+    },
+    "Tier 2": {
+      "label": "Secondary Referral / District Level Hospital",
+      "criteria": {
+        "minInpatientBeds": 30,
+        "requiresLab": true,
+        "requiresXray": true,
+        "requiresUltrasound": true,
+        "minOperationTheatres": 1,
+        "minSpecialties": 3
+      },
+      "descriptions": {
+        "minInpatientBeds": "At least 30 inpatient beds (General + Emergency + ICU)",
+        "requiresLab": "Clinical laboratory services available",
+        "requiresXray": "Functional diagnostic X-ray system",
+        "requiresUltrasound": "Diagnostic ultrasound imaging system",
+        "minOperationTheatres": "At least 1 operational surgical theatre",
+        "minSpecialties": "At least 3 medical/surgical specialty departments"
+      }
+    },
+    "Tier 3": {
+      "label": "Basic Community / Primary Care Stabilization Center",
+      "criteria": {
+        "registered": true
+      },
+      "descriptions": {
+        "registered": "Registered and operating healthcare establishment"
+      }
+    }
+  }
+}

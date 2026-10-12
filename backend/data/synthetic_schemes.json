@@ -1,0 +1,46 @@
+[
+  {
+    "schemeCode": "CMCHIS",
+    "name": "Chief Minister's Comprehensive Health Insurance Scheme (CMCHIS) - Tamil Nadu",
+    "authority": "Government of Tamil Nadu / United India Insurance",
+    "officialUrl": "https://cmchistn.com",
+    "lastVerifiedDate": "2026-03-01T00:00:00.000Z",
+    "summary": "State health assurance scheme providing up to ₹5,00,000 per family per year for secondary and tertiary inpatient procedures across empaneled network hospitals in Tamil Nadu.",
+    "disclaimer": "Potential match, verify eligibility. Emblemed referral requires pre-authorization through the hospital insurance desk and valid smart ration card verification.",
+    "eligibleBeneficiariesDescription": "Families residing in Tamil Nadu with annual family income below specified threshold or designated vulnerable groups with valid CMCHIS Smart Card.",
+    "coveredSpecialties": [
+      "Cardiology",
+      "Pulmonology",
+      "Neurology",
+      "Nephrology",
+      "Medical Oncology",
+      "General Surgery",
+      "Pediatrics",
+      "Orthopedics",
+      "Obstetrics & Gynecology"
+    ],
+    "annualCoverageInr": 500000,
+    "isSynthetic": false
+  },
+  {
+    "schemeCode": "PM-JAY",
+    "name": "Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana (AB PM-JAY)",
+    "authority": "National Health Authority (NHA) / State Health Agency Tamil Nadu",
+    "officialUrl": "https://pmjay.gov.in",
+    "lastVerifiedDate": "2026-03-01T00:00:00.000Z",
+    "summary": "Centrally sponsored health protection scheme offering coverage up to ₹5,00,000 per eligible family per year for secondary and tertiary care hospitalization.",
+    "disclaimer": "Potential match, verify eligibility. Eligibility is governed by SECC 2011 criteria and requires biometric e-KYC authentication at the hospital Ayushman Mitra kiosk.",
+    "eligibleBeneficiariesDescription": "Deprived rural families and identified occupational categories of urban workers based on Socio-Economic Caste Census (SECC) database.",
+    "coveredSpecialties": [
+      "Cardiology",
+      "Neurology",
+      "Nephrology",
+      "Medical Oncology",
+      "General Surgery",
+      "Pediatrics",
+      "Orthopedics"
+    ],
+    "annualCoverageInr": 500000,
+    "isSynthetic": false
+  }
+]
