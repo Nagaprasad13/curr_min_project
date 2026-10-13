@@ -598,5 +598,332 @@ npm run experiment
 | **10. Results Write-up** | `RESULTS.md` discussing H1–H3, distance trade-off, limitations, permitted claims | Completed | `evaluation/RESULTS.md` |
 | **11. Unit Test Suite** | 14 Phase 4 tests (all 60 suite tests passing across all 4 phases) | Completed | `npm test` (4 test suites, 60/60 passed) |
 
+---
+
+## 13. Phase 6: Consent-Based Record Sharing & Scheme Catalogue
+
+### 13.1 Research Context & Overview
+Phase 6 extends the CareBridge platform to address **cross-hospital clinical record sharing** and **government health assurance scheme potential matching** across simulated healthcare facilities in Tamil Nadu (Hospital A: Kovai Apex Super Specialty Hospital; Hospital B: Salem Government Mohan Kumaramangalam Medical College Hospital).
+
+All patient records, clinical laboratory reports, prescriptions, and hospital interactions are **synthetic**. CareBridge is a research prototype, **NOT** a clinical diagnostic tool or legal consent gateway.
+
+---
+
+### 13.2 Consent State Machine Architecture
+
+Consent transitions strictly follow an append-only state machine:
+
+```mermaid
+stateDiagram-v2
+    [*] --> requested: Doctor requests records (POST /api/consents/request)
+    requested --> granted: Explicit Patient Action (POST /api/consents/:id/grant)<br/>[May narrow record types or shorten duration]
+    requested --> denied: Patient Action (POST /api/consents/:id/deny)
+    requested --> expired: System / Time Expiry (Default 7 days, max 30 days)
+    granted --> revoked: Patient Action (POST /api/consents/:id/revoke)<br/>[Takes effect IMMEDIATELY on very next request]
+    granted --> expired: System / Time Expiry
+    denied --> [*]
+    revoked --> [*]
+    expired --> [*]
+```
+
+- **Explicit Action Only**: Record access is never auto-granted upon referral acceptance. Referral acceptance and record consent are architecturally decoupled.
+- **Server-Side Evaluation on Every Fetch**: Consent permissions are checked dynamically in MongoDB on **every single request**, never trusted from client parameters or cached in client state.
+- **Patient Granularity**: Patients can narrow requested record types (e.g., share lab reports but withhold discharge summaries) and shorten expiry duration.
+- **Sensitive Records Gating**: Sensitive categories (mental health, HIV, reproductive health, substance use) require an **explicit separate consent flag** (`includeSensitiveRecords: true`) and are excluded from default sharing.
+- **Record Age Warning Flags**: Every record displays its source facility, record date, and calculated age. Old records (e.g., $>6$ months old) prominently display warning flags: *"This result is 14 months old; check clinical relevance."*
+- **Provenance Transparency**: Records display: *"Authenticated by source hospital telemetry; verification unconfirmed by third parties."*
+
+---
+
+### 13.3 Threat Model & Security Mitigations
+
+| Threat | Attack Vector / Scenario | Architectural Mitigation | Verification Test |
+| :--- | :--- | :--- | :--- |
+| **Insecure Direct Object Reference (IDOR)** | Malicious doctor or patient guesses UUIDs or iterates record IDs to probe another patient's clinical records | Server-side authorization check runs before record retrieval. Unauthorized records and non-existent records return the **identical generic 404 response** (`Record not found or access denied.`). Record IDs cannot be probed. | `should return the EXACT SAME generic 404 response for forbidden records and non-existent records` |
+| **Replay of Old / Revoked Consent** | Client attempts to reuse cached consent tokens or bypass revocation by replaying requests | Consent is verified server-side on **every fetch**. If `revokedAt` is present or `expiresAt` has passed, access is immediately blocked. | `should immediately cease access when Patient revokes consent` |
+| **Privilege Escalation** | Doctor at Hospital B queries records granted only to Hospital A, or Hospital Admin views clinical files | RBAC restricts doctor access to their own facility (`req.user.hospitalId == consent.requestingHospitalId`). Hospital Admins are restricted to facility metadata and capacity telemetry; clinical record retrieval is blocked (403). | `should block Hospital Admins from accessing clinical records through admin endpoints` |
+| **Over-Broad Sharing & Sensitive Data Leakage** | Patient's highly sensitive records (psychiatric evaluations, HIV tests) shared under routine consent | **Separate affirmative consent flag** (`includeSensitiveRecords: true`) is mandatory. Default queries filter out records with `sensitivityLevel: 'sensitive'`. | `should exclude sensitive records by default when includeSensitiveRecords is false` |
+| **Audit Log Leakage** | Confidential PHI or diagnostic values leak into persistent audit logs | Audit logger records metadata only (actor ID, actor role, action, target resource ID, access outcome, timestamp, IP). Clinical payloads are strictly excluded. | `should verify audit logs contain NO raw clinical payload contents` |
+| **Consent Request Spam / Scraping** | Malicious client floods patient with consent requests or scrapes record metadata | Sliding-window in-memory rate limiting applied to `/api/consents/request` (30 req/min) and record viewing endpoints (60 req/min). | `createRateLimiter` middleware |
+
+---
+
+### 13.4 Emergency Access ("Break-Glass") Design Discussion
+
+- **Default State**: **OFF** (`consentConfig.breakGlassEnabled: false`). When disabled, all requests return `403 Forbidden` (`Break-glass emergency access is disabled by system policy.`).
+- **Activation Requirements**:
+  1. Mandatory detailed clinical emergency justification (minimum 10 characters).
+  2. Time-limited narrow access window (configurable, default 2 hours).
+  3. Prominent audit logging under `BREAK_GLASS_ACCESS`.
+  4. Automatic flagging for retrospective clinical peer review and patient notification.
+- **Design Assessment**: Break-glass is provided as a **design discussion item, NOT a recommended default**. In decentralized health networks, unilateral client-side break-glass overrides present severe privacy liabilities. In statutory architectures (such as ABDM), emergency transfers require verified physical admission attestation and authorized emergency room credentials rather than arbitrary clinician overrides.
+
+---
+
+### 13.5 Government Scheme Catalogue (Source-Verified Thin Demo)
+
+CareBridge provides transparent, rule-based potential matching for government health assurance schemes:
+
+1. **CMCHIS (Chief Minister's Comprehensive Health Insurance Scheme - Tamil Nadu)**
+   - *Authority*: Government of Tamil Nadu / United India Insurance
+   - *Official URL*: `https://cmchistn.com` (Verified on 2026-10-13)
+   - *Confirmed Facts*: Tamil Nadu residency, Smart Family Ration Card, Annual family income $< ₹1,20,000$, Cashless coverage up to ₹5,00,000 per family per year across empaneled hospitals.
+   - *TO VERIFY*: Specialized tertiary procedure corpus extensions requiring special committee approval (marked draft).
+2. **AB PM-JAY (Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana)**
+   - *Authority*: National Health Authority (NHA) / MoHFW, Government of India
+   - *Official URL*: `https://pmjay.gov.in` & `https://beneficiary.nha.gov.in` (Verified on 2026-10-13)
+   - *Confirmed Facts*: SECC 2011 deprivation criteria (rural D1–D7, urban 11 categories), expanded coverage for all Senior Citizens aged 70+ irrespective of income, ₹5,00,000 per family per year, biometric e-KYC.
+   - *TO VERIFY*: State-specific dual-card convergence package matching in Tamil Nadu (marked draft).
+3. **RAN (Rashtriya Arogya Nidhi)**
+   - *Authority*: Ministry of Health and Family Welfare (MoHFW), Government of India
+   - *Official URL*: `https://mohfw.gov.in` (Verified on 2026-10-13)
+   - *Confirmed Facts*: Below Poverty Line (BPL) status, major life-threatening disease, treatment strictly at Government super-speciality hospitals / Regional Cancer Centres (private hospitals ineligible), one-time grant up to ₹15,00,000.
+   - *TO VERIFY*: State revolving fund emergency allocations and hospital-level spending caps (marked draft).
+
+#### Why "Potential Match" Instead of "Eligibility":
+- Automated software **must never state** that a patient is "eligible", "covered", "free", or "approved". Eligibility determination requires physical ration card verification, biometric e-KYC, and formal pre-authorization by the hospital insurance desk and scheme authority.
+- Outputs are strictly categorized as: `"potential match"`, `"unlikely"`, or `"cannot determine"`.
+- Missing required criteria always yield `"cannot determine"` with an explicit list of missing items rather than guessing.
+- Automated safety assertion (`assertNoForbiddenPhrases`) scans all match outputs to guarantee zero forbidden claim words.
+- Mandatory notice displayed on every match screen:
+  > *"This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed."*
+- Reviewer-only verification: Schemes can only be transitioned from `draft` to `verified` by the `platform_reviewer` role. Schemes older than 180 days are automatically flagged as `outdated`.
+
+---
+
+### 13.6 Architecture Decision Records (ADR-008 to ADR-010)
+
+#### ADR-008: Server-Side Consent Check on Every Fetch
+- **Context**: Cached client tokens or client-supplied permission flags can become stale when a patient revokes consent.
+- **Decision**: Perform a database query verifying active, unexpired, unrevoked consent on **every clinical record query**.
+- **Rationale**: Guarantees zero-trust security. Patient revocation takes effect on the very next HTTP request without distributed token revocation complications.
+
+#### ADR-009: Separation of Metadata and Protected Storage
+- **Context**: Storing binary clinical files or large diagnostic payloads inside MongoDB creates performance degradation and complicates cryptographic access boundaries.
+- **Decision**: Store metadata, provenance, sensitivity flags, and references in MongoDB (`records` collection); store actual clinical payloads in protected filesystem storage (`backend/storage/records/`) behind authenticated authorization proxies.
+- **Rationale**: Data minimization, least-privilege access, and architectural readiness for envelope encryption with external KMS / Blob storage.
+
+#### ADR-010: "Potential Match" Semantics for Welfare Schemes
+- **Context**: Automated health-tech tools that state a patient is "eligible" for free treatment cause severe financial distress when hospital pre-authorization is denied.
+- **Decision**: Restrict matching outputs to transparent rule evaluations (`potential match`, `unlikely`, `cannot determine`) with mandatory disclaimers and automated forbidden phrase scanning.
+- **Rationale**: Eliminates false guarantees of cashless care while empowering clinicians and patients with actionable checklist criteria and official government portals.
+
+---
+
+### 13.7 Limitations & Ethical Boundaries
+1. **Simulated Hospitals**: Hospital A and Hospital B are synthetic facilities operating on mock electronic medical record systems.
+2. **Synthetic Data**: All 10 patient identities and 83 clinical records are synthetic.
+3. **No Real Identity Verification**: Production deployment requires statutory digital identity verification (e.g., ABDM ABHA Address and Healthcare Professional ID).
+4. **Simplified Encryption**: Uses protected filesystem storage proxy; production deployment requires envelope encryption with Hardware Security Modules (HSMs).
+5. **No Legal Review of Consent Text**: Consent text versions are research prototypes and have not been vetted by legal counsel under the Indian Digital Personal Data Protection (DPDP) Act.
+6. **Decision Support Only**: CareBridge provides clinical decision support only. A clinician must review all recommendations.
+
+---
+
+### 13.8 Future Work
+- **ABDM/ABHA Consent Manager**: Integration with official Ayushman Bharat Digital Mission (ABDM) Milestone 1/2/3 APIs (HIP/HIU consent artifact exchange).
+- **FHIR Standard Interchange**: Migration of synthetic clinical payloads to HL7 FHIR (Fast Healthcare Interoperability Resources) JSON bundles.
+- **OCR Pipeline**: Secure on-premise optical character recognition for digitizing legacy paper prescriptions.
+- **Live Scheme Empanelment Sync**: Automated API synchronization with Tamil Nadu State Health Agency (TNHSP) empanelled hospital registries.
+
+---
+
+### 13.9 Empirical Evaluation Outputs
+
+#### Consent Enforcement Test Suite (All 25 Tests Passing)
+| Test Scenario | Input / Action | Expected Behavior | Actual Outcome | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| **Request Creation** | Doctor B requests records for Patient 1 | Status `requested`, duration 7d, audit logged | Status `requested`, `CNS-...` created | PASS |
+| **Pre-Grant Access** | Doctor B fetches records while `requested` | 403 Forbidden, `accessGranted: false` | 403 Forbidden, 0 records returned | PASS |
+| **Patient Granting** | Patient 1 grants consent with narrowed scope | Status `granted`, `grantedAt` populated | Status `granted`, narrowed types saved | PASS |
+| **Authorized View** | Doctor B fetches granted records | 200 OK, provenance and age flags attached | 200 OK, 14-month record flagged as old | PASS |
+| **Sensitive Exclusion** | Query records when `includeSensitive: false` | Normal records returned, sensitive excluded | Sensitive record excluded | PASS |
+| **Sensitive Gating** | Patient explicitly grants sensitive flag | Sensitive records returned | Sensitive record returned | PASS |
+| **Immediate Revocation** | Patient revokes consent | Next fetch immediately returns 404 / 403 | Access ceased immediately on next call | PASS |
+| **Cross-Hospital Block** | Doctor A attempts to view Patient 2 (no consent) | 403 Forbidden, access blocked | 403 Forbidden, blocked | PASS |
+| **Admin Shielding** | Hospital Admin attempts to view clinical records | 403 Forbidden | 403 Forbidden | PASS |
+| **IDOR Defense** | Doctor probes forbidden vs non-existent UUID | Identical generic 404 response | Exactly identical 404 response | PASS |
+| **Audit Integrity** | Audit logs inspected across tests | Append-only, zero PHI or test results | No raw clinical data in logs | PASS |
+| **Break-Glass Off** | Doctor initiates break-glass with policy OFF | 403 Forbidden (`disabled by policy`) | 403 Forbidden | PASS |
+| **Referral Integration** | Referral confirmed and accepted | Acceptance does NOT auto-grant records | Status `accepted`, consent `requested` | PASS |
+| **Scheme Potential Match** | Patient resident, income < ₹1.2L | Status `potential match`, mandatory notice | Status `potential match`, notice present | PASS |
+| **Scheme Missing Data** | Incomplete patient criteria submitted | Status `cannot determine` with missing fields | Status `cannot determine` | PASS |
+| **Forbidden Phrase Scan** | Payload tested for `eligible`, `covered`, `free` | Throws violation on prohibited claims | Strict scan passed | PASS |
+| **Reviewer Scheme Auth** | Doctor vs Reviewer attempts verification | Doctor 403, Reviewer 200 verified | Doctor blocked, Reviewer verified | PASS |
+| **Outdated Scheme Flag** | Scheme verification older than 180 days | Automatically flagged `outdated` | Flagged `outdated` | PASS |
+| **Full End-to-End Flow** | Hospital A $\to$ Patient grants $\to$ B views $\to$ Revoke | Records viewed, then ceased on revocation | Complete lifecycle verified | PASS |
+
+#### End-to-End Demo Audit Log Counts
+- Total immutable audit events generated across demo: **$\ge 10$ events** (covers `REQUEST_CONSENT`, `GRANT_CONSENT`, `VIEW_PATIENT_RECORD`, `REVOKE_CONSENT`, `DENIED_RECORD_ACCESS`, and `MATCH_SCHEME`).
+
+---
+
+### 13.10 How to Run Phase 6
+
+#### Step 1: Seed Synthetic Hospitals, Patients, Records & Schemes
+```bash
+cd backend
+npm run seed
+```
+
+#### Step 2: Run Full Unit & Integration Test Suite (100 Passing Tests)
+```bash
+# Run Phase 6 tests only
+npm test -- src/tests/phase6.test.js
+
+# Run complete platform regression suite (Phases 1 through 6)
+npm test
+```
+
+#### Step 3: Start the Backend & Frontend Dev Servers
+```bash
+# Terminal 1: Backend Server (runs on http://localhost:5000)
+cd backend
+npm run dev
+
+# Terminal 2: Frontend Single Page Application (runs on http://localhost:3000)
+cd frontend
+npm run dev
+```
+
+#### Step 4: Example cURL Commands for Complete Flow
+
+```bash
+# 1. Login as Doctor at Hospital B
+DOCTOR_TOKEN=$(curl -s -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"doctor.b@carebridge.synthetic","password":"DoctorPassword123!"}' | jq -r '.token')
+
+# 2. Login as Patient 1
+PATIENT_TOKEN=$(curl -s -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"patient.kavitha@carebridge.synthetic","password":"PatientPassword123!"}' | jq -r '.token')
+
+# 3. Doctor requests records consent from Patient 1
+CONSENT_ID=$(curl -s -X POST http://localhost:5000/api/consents/request \
+  -H "Authorization: Bearer $DOCTOR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"patientId":"<PATIENT_ID>","purpose":"referral","recordTypes":["lab_report","imaging_report"],"durationDays":7}' | jq -r '.consent.consentId')
+
+# 4. Patient explicitly grants consent
+curl -s -X POST "http://localhost:5000/api/consents/$CONSENT_ID/grant" \
+  -H "Authorization: Bearer $PATIENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"narrowedRecordTypes":["lab_report"],"shortenedExpiryDays":5}'
+
+# 5. Doctor views consented records (server-side check enforced on fetch)
+curl -s -X GET "http://localhost:5000/api/patients/<PATIENT_ID>/records" \
+  -H "Authorization: Bearer $DOCTOR_TOKEN"
+
+# 6. Patient revokes consent immediately
+curl -s -X POST "http://localhost:5000/api/consents/$CONSENT_ID/revoke" \
+  -H "Authorization: Bearer $PATIENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"reason":"Consultation complete"}'
+
+# 7. Doctor subsequent fetch is immediately blocked (403 Forbidden)
+curl -s -X GET "http://localhost:5000/api/patients/<PATIENT_ID>/records" \
+  -H "Authorization: Bearer $DOCTOR_TOKEN"
+
+# 8. Run Scheme Potential Matching (Evaluates CMCHIS, PM-JAY, RAN)
+curl -s -X POST http://localhost:5000/api/schemes/match \
+  -H "Authorization: Bearer $PATIENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"inputs":{"stateResident":true,"annualFamilyIncome":95000,"rationCardType":"PHH","age":48}}'
+```
+
+---
+
+## 14. Phase 6 Done Checklist
+
+| Item | Requirement | Status | Verification Reference |
+| :--- | :--- | :---: | :--- |
+| **1. Data Model (Records)** | `records` collection (metadata only, random UUID, provenance, sensitivity flags); files in protected storage | Completed | `src/models/PatientRecord.js`, `src/services/recordStorageService.js` |
+| **2. Data Model (Consents)** | `consents` collection (`requested` $\to$ `granted`/`denied`/`expired`/`revoked`), configurable default & max expiry | Completed | `src/models/Consent.js`, `src/config/consentConfig.json` |
+| **3. Seed Data** | 2 simulated hospitals, 10 synthetic patients, 5–15 records each across record types, all synthetic | Completed | `src/scripts/seedPhase6.js`, `npm run seed` |
+| **4. Consent Endpoints** | `POST /request`, `GET /consents`, `POST /grant`, `POST /deny`, `POST /revoke` | Completed | `src/routes/consentRoutes.js` |
+| **5. Server-side Consent Gate** | Dynamic check on **every** fetch; never trusted from client parameters | Completed | `src/services/consentService.js` (`verifyActiveConsent`) |
+| **6. Record Retrieval & Age Flags** | Provenance, record age in months, old record warning flag ($>6$ months) | Completed | `src/routes/recordRoutes.js`, `consentService.js` |
+| **7. IDOR Protection** | Unauthorized and non-existent queries return identical generic 404 response | Completed | `src/routes/recordRoutes.js` (`GENERIC_NOT_FOUND_RESPONSE`) |
+| **8. Sensitive Records Gating** | Excluded by default; explicit affirmative consent flag required | Completed | `src/models/Consent.js`, `src/services/consentService.js` |
+| **9. Break-Glass Access** | Default OFF; when enabled, requires reason, time-limited, prominently logged | Completed | `src/routes/recordRoutes.js`, `consentConfig.json` |
+| **10. Append-Only Audit Log** | Actor, role, action, target, outcome, IP; zero clinical payloads in logs | Completed | `src/models/AuditLog.js`, `src/services/auditService.js` |
+| **11. Patient Access Report** | Patient can view who accessed what record types, when, under which consent | Completed | `src/routes/consentRoutes.js` (`/access-history`) |
+| **12. Referral Integration** | Referring doctor can request consent for receiving hospital; acceptance decoupled | Completed | `src/routes/referralRoutes.js`, `src/models/Referral.js` |
+| **13. Scheme Catalogue (B1)** | CMCHIS, PM-JAY, RAN with official URLs, verified dates, confirmed facts vs draft | Completed | `src/models/Scheme.js`, `src/scripts/seedPhase6.js` |
+| **14. Scheme Matching (B2)** | Rule-based potential match, "cannot determine" for missing data, forbidden word check | Completed | `src/services/schemeService.js` |
+| **15. Mandatory Notice Text** | Exact notice shown on every match output; forbidden claim words blocked | Completed | `src/services/schemeService.js` (`MANDATORY_NOTICE`) |
+| **16. Scheme Endpoints (B3)** | `GET /schemes`, `POST /match`, reviewer-only `POST /verify`, outdated sweeper | Completed | `src/routes/schemeRoutes.js` |
+| **17. Simple UI (Part C)** | Patient portal, Doctor portal, Reviewer portal; clinical banner on all screens | Completed | `frontend/src/components/`, `npm run build` |
+| **18. Unit & Regression Tests** | 25 Phase 6 tests + 75 Phase 1-5 tests = 100 passing tests (zero regressions) | Completed | `npm test` (6 test suites, 100/100 passed) |
+| **19. Documentation & ADRs** | Mermaid state machine, threat model, break-glass discussion, ADRs, limitations | Completed | `README.md` Sections 13 & 14 |
+
+---
+
+## 15. Phase 7: Dashboards, Hardening, Reproducibility & Research Report Package
+
+Phase 7 consolidates, hardens, documents, and packages all project phases (1 through 6) into a unified, reproducible research prototype.
+
+### 15.1 System Documentation Map
+- **Research Monograph & Report:** [`docs/report/REPORT.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/report/REPORT.md)  
+  *Complete academic report covering context, methodology, 15,000-scenario staleness degradation results, ML triage/screening evaluations, trade-off analysis, ethics, and future work.*
+- **Claims & Figures Traceability:** [`docs/report/RESULTS_TRACEABILITY.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/report/RESULTS_TRACEABILITY.md)  
+  *Traceability matrix linking every metric in the report directly to ground truth JSON/CSV data files and vector figures.*
+- **System Architecture & ADRs:** [`docs/ARCHITECTURE.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/ARCHITECTURE.md)  
+  *High-level architecture, end-to-end Mermaid clinical data flows, and consolidated Architecture Decision Records (ADRs 001–011).*
+- **Authorisation Matrix:** [`docs/AUTH_MATRIX.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/AUTH_MATRIX.md)  
+  *Automated audit matrix testing 13 endpoints across all 5 user roles (`public`, `patient`, `doctor`, `hospital_admin`, `platform_reviewer`).*
+- **Security & Threat Model:** [`docs/SECURITY.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/SECURITY.md)  
+  *Dependency audit analysis, secrets policy, JWT lifecycle, NoSQL injection defenses, and IDOR protection.*
+- **Presentation & Demo Package:**
+  - Slide Deck: [`docs/presentation/SLIDES.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/presentation/SLIDES.md) (12 slides with full speaker notes)
+  - Guided Demo Script: [`docs/presentation/DEMO_SCRIPT.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/presentation/DEMO_SCRIPT.md) (3–5 min step-by-step walkthrough)
+  - Examiner Q&A Prep: [`docs/presentation/QA_PREP.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/presentation/QA_PREP.md) (8 rigorous defense questions & answers)
+
+### 15.2 Reproducibility & Quickstart Guide
+
+#### Automated Verification Commands
+```powershell
+# 1. Verify 100% reproduction of Phase 3, 4, 5 empirical metrics:
+cd backend
+npm run check:reproduce
+
+# 2. Run the complete backend test regression suite (8 suites, 122 tests):
+npm test -- --runInBand --forceExit
+
+# 3. Run the automated guided demo scenario (Path A + Path B):
+npm run demo
+
+# 4. Reset synthetic demo data to pristine state:
+npm run demo:reset
+
+# 5. Build the React frontend production bundle:
+cd ../frontend
+npm run build
+```
+
+---
+
+## 16. Final Project Done Checklist (Phases 1–7 Complete)
+
+| Component | Acceptance Criterion | Status | Evidence Reference |
+| :--- | :--- | :---: | :--- |
+| **1. Role-Based Dashboards** | One coherent React app, role-based tabs, persona switcher, responsive layout, loading/error states | **DONE** | [`frontend/src/App.jsx`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/frontend/src/App.jsx), [`frontend/dist/`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/frontend/dist) |
+| **2. Mandatory Disclaimers** | Ubiquitous *"Decision support only. A clinician must review."* on all screens and responses | **DONE** | [`frontend/src/components/`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/frontend/src/components), [`backend/src/routes/referralRoutes.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/routes/referralRoutes.js) |
+| **3. Prohibited Scheme Claims** | Strictly forbids "eligible", "covered", "free care"; displays "Potential Match only" | **DONE** | [`backend/src/services/schemeService.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/services/schemeService.js) |
+| **4. Security Hardening** | Helmet headers, 100kb payload limit, recursive NoSQL sanitizer, brute-force limiter (5 fails/15m) | **DONE** | [`backend/src/server.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/server.js), [`backend/src/middleware/rateLimiter.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/middleware/rateLimiter.js) |
+| **5. IDOR Defense** | Nonexistent vs unauthorized queries return identical generic 404 responses | **DONE** | [`backend/src/tests/phase7.test.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/tests/phase7.test.js#L142-L171) |
+| **6. Authorisation Matrix** | 13 critical endpoints tested across 5 roles; zero unauthorized bypasses | **DONE** | [`docs/AUTH_MATRIX.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/AUTH_MATRIX.md) |
+| **7. Specialty Map Sign-Off** | Platform reviewer review & sign-off workflow with audit logging | **DONE** | [`backend/src/routes/specialtyMapRoutes.js`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/routes/specialtyMapRoutes.js) |
+| **8. Guided Demo & Reset** | 7-step guided demo script + Path B incomplete intake + instant reset utility | **DONE** | `npm run demo`, `npm run demo:reset` |
+| **9. Reproducibility Gate** | Dockerfiles, docker-compose, Makefile, zero-drift verification script | **DONE** | `npm run check:reproduce` (100% matched) |
+| **10. Research Report** | Monograph report with context, methods, 15k staleness results, ML, ethics, trade-off | **DONE** | [`docs/report/REPORT.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/report/REPORT.md) |
+| **11. Results Traceability** | Claims table and figures index linking every metric to source files | **DONE** | [`docs/report/RESULTS_TRACEABILITY.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/report/RESULTS_TRACEABILITY.md) |
+| **12. Architecture & ADRs** | Mermaid diagrams + consolidated ADRs 001–011 | **DONE** | [`docs/ARCHITECTURE.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/ARCHITECTURE.md) |
+| **13. Presentation Package** | 12-slide deck with notes, 3–5 min demo script, 8 examiner Q&As | **DONE** | [`docs/presentation/`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/presentation) |
+| **14. Full Regression Suite** | 8 test suites, 122 tests passing with zero regressions across Phases 1–7 | **DONE** | `npm test` (All 8 suites passed) |
+
+
+
 
 

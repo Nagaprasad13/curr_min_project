@@ -168,6 +168,15 @@ const ReferralSchema = new mongoose.Schema({
     default: 'draft',
     index: true,
   },
+  recordsConsentStatus: {
+    type: String,
+    enum: ['not_requested', 'requested', 'granted', 'denied', 'expired'],
+    default: 'not_requested',
+  },
+  recordsConsentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Consent',
+  },
   clinicianReview: {
     clinicianId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     clinicianName: { type: String },

@@ -42,6 +42,25 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Optional 2FA (TOTP)
+  isTwoFactorEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  twoFactorSecret: {
+    type: String,
+    default: null,
+  },
+  // Password reset fields
+  passwordResetToken: {
+    type: String,
+    default: null,
+    index: true,
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null,
+  },
 }, {
   timestamps: true,
 });

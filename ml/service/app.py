@@ -19,6 +19,7 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 import json
+import hashlib
 import joblib
 import numpy as np
 import pandas as pd
@@ -58,42 +59,92 @@ condition_models = {}
 triage_card = {}
 screening_summary = {}
 condition_specialty_map = []
+verified_model_hashes = {}
+
+
+def compute_file_sha256(filepath: str) -> str:
+    """Computes SHA-256 cryptographic hash of a binary file on disk."""
+    hasher = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest().lower()
 
 
 @app.on_event("startup")
 def load_all_artifacts():
-    global triage_model, condition_models, triage_card, screening_summary, condition_specialty_map
+    global triage_model, condition_models, triage_card, screening_summary, condition_specialty_map, verified_model_hashes
 
-    # 1. Triage model
+    # Load cryptographic verification manifest
+    manifest_path = os.path.join(MODELS_DIR, 'model_manifest.json')
+    if not os.path.exists(manifest_path):
+        raise RuntimeError(
+            f"FATAL: Model manifest not found at {manifest_path}! "
+            "ML service refuses to start without cryptographic model registry manifest."
+        )
+
+    with open(manifest_path, 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+    manifest_models = manifest.get('models', {})
+
+    # 1. Triage model verification and loading
     t_path = os.path.join(MODELS_DIR, 'triage_model.joblib')
-    if os.path.exists(t_path):
-        triage_model = joblib.load(t_path)
+    if not os.path.exists(t_path):
+        raise RuntimeError(f"FATAL: Triage model artifact missing at {t_path}")
+
+    actual_triage_hash = compute_file_sha256(t_path)
+    expected_triage_hash = manifest_models.get('triage', {}).get('sha256')
+    if not expected_triage_hash or actual_triage_hash != expected_triage_hash:
+        raise RuntimeError(
+            f"FATAL: Cryptographic integrity violation for triage model! "
+            f"Expected SHA-256: {expected_triage_hash}, Actual: {actual_triage_hash}. "
+            "Server refuses to serve tampered or corrupted artifacts."
+        )
+
+    triage_model = joblib.load(t_path)
+    verified_model_hashes['triage'] = actual_triage_hash
+
     card_path = os.path.join(MODELS_DIR, 'triage_model_card.json')
     if os.path.exists(card_path):
-        with open(card_path, 'r') as f:
+        with open(card_path, 'r', encoding='utf-8') as f:
             triage_card = json.load(f)
 
-    # 2. Condition screening models
-    for cond_name, file_name in [
-        ('diabetes', 'diabetes_model.joblib'),
-        ('heart_disease', 'heart_model.joblib'),
-        ('liver_disease', 'liver_model.joblib'),
-        ('ckd', 'ckd_model.joblib'),
-        ('thyroid', 'thyroid_model.joblib')
-    ]:
+    # 2. Condition screening models verification and loading
+    screening_configs = [
+        ('diabetes', 'diabetes_model.joblib', 'diabetes'),
+        ('heart_disease', 'heart_model.joblib', 'heart'),
+        ('liver_disease', 'liver_model.joblib', 'liver'),
+        ('ckd', 'ckd_model.joblib', 'ckd'),
+        ('thyroid', 'thyroid_model.joblib', 'thyroid'),
+    ]
+
+    for cond_name, file_name, manifest_key in screening_configs:
         m_path = os.path.join(MODELS_DIR, file_name)
-        if os.path.exists(m_path):
-            condition_models[cond_name] = joblib.load(m_path)
+        if not os.path.exists(m_path):
+            raise RuntimeError(f"FATAL: Screening model artifact missing for {cond_name} at {m_path}")
+
+        actual_hash = compute_file_sha256(m_path)
+        expected_hash = manifest_models.get(manifest_key, {}).get('sha256')
+        if not expected_hash or actual_hash != expected_hash:
+            raise RuntimeError(
+                f"FATAL: Cryptographic integrity violation for {cond_name} model ({file_name})! "
+                f"Expected SHA-256: {expected_hash}, Actual: {actual_hash}. "
+                "Server refuses to serve tampered or corrupted artifacts."
+            )
+
+        condition_models[cond_name] = joblib.load(m_path)
+        verified_model_hashes[cond_name] = actual_hash
 
     summary_path = os.path.join(MODELS_DIR, 'screening_summary.json')
     if os.path.exists(summary_path):
-        with open(summary_path, 'r') as f:
+        with open(summary_path, 'r', encoding='utf-8') as f:
             screening_summary = json.load(f)
 
     map_path = os.path.join(DATA_DIR, 'condition_specialty_map.json')
     if os.path.exists(map_path):
-        with open(map_path, 'r') as f:
+        with open(map_path, 'r', encoding='utf-8') as f:
             condition_specialty_map = json.load(f)
+
 
 
 # =============================================================================
@@ -433,5 +484,7 @@ def health_check():
         "status": "healthy",
         "service": "CareBridge ML Decision Support",
         "triage_model_loaded": triage_model is not None,
-        "condition_models_count": len(condition_models)
+        "condition_models_count": len(condition_models),
+        "integrity_verified": True,
+        "verified_hashes": verified_model_hashes,
     }

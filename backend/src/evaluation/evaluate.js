@@ -221,17 +221,20 @@ function runEvaluationBenchmark() {
   ];
 
   // Output ASCII report table
-  console.log('\n--- RESEARCH EVALUATION RESULTS TABLE (0% Staleness) ---');
-  console.log('| Model / Method     | Cap Match (%) | Top-1 Suit (%) | Top-3 Hit (%) |   MRR   | False Avail (%) | Mean Dist (km) | Latency (ms) |');
-  console.log('| :----------------- | ------------: | -------------: | ------------: | ------: | --------------: | -------------: | -----------: |');
+  console.log('\n--- RESEARCH EVALUATION RESULTS TABLE (0% Staleness, Synthetic Practitioner-Derived Counts) ---');
+  console.log('| Model / Method     | Cap Match (%) | Top-1 Suit (%) | Top-3 Hit (%) |   MRR   | False Avail (%) | Dist (straight-line km) | Latency (ms) |');
+  console.log('| :----------------- | ------------: | -------------: | ------------: | ------: | --------------: | ----------------------: | -----------: |');
   results.forEach(r => {
     const pad = (str, len, right = false) => {
       const s = String(str);
       return right ? s.padStart(len) : s.padEnd(len);
     };
-    console.log(`| ${pad(r.method, 18)} | ${pad(r.top1CapabilityMatchRate + '%', 13, true)} | ${pad(r.top1SuitableRate + '%', 14, true)} | ${pad(r.top3HitRate + '%', 13, true)} | ${pad(r.mrr.toFixed(3), 7, true)} | ${pad(r.falseAvailableRate + '%', 15, true)} | ${pad(r.meanTop1DistanceKm + ' km', 14, true)} | ${pad(r.medianRuntimeMs + ' ms', 12, true)} |`);
+    console.log(`| ${pad(r.method, 18)} | ${pad(r.top1CapabilityMatchRate + '%', 13, true)} | ${pad(r.top1SuitableRate + '%', 14, true)} | ${pad(r.top3HitRate + '%', 13, true)} | ${pad(r.mrr.toFixed(3), 7, true)} | ${pad(r.falseAvailableRate + '%', 15, true)} | ${pad(r.meanTop1DistanceKm + ' km', 23, true)} | ${pad(r.medianRuntimeMs + ' ms', 12, true)} |`);
   });
-  console.log('--------------------------------------------------------\n');
+  console.log('------------------------------------------------------------------------------------------------\n');
+  console.log('Evaluation Note: Under synthetic practitioner-derived counts, 100% capability match and MRR 1.000');
+  console.log('at 0% staleness is expected by construction because fresh observed snapshots perfectly mirror true network');
+  console.log('ground truth. Algorithmic divergence and degradation manifest under non-zero staleness levels (Phases 4 & 7).\n');
 
   // Save results to CSV and JSON
   const resultsDir = path.join(__dirname, 'results');

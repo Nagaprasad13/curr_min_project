@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-10-13T17:57:26.109Z",
+  "models": {
+    "triage": {
+      "modelId": "ML-TRIAGE-2026-V1",
+      "filename": "triage_model.joblib",
+      "version": "1.0.0",
+      "sha256": "e879f019c80ad077d58de411521d638b358c5d7ae065d8389b23b9675d0c2740",
+      "operatingThreshold": 0.51
+    },
+    "ckd": {
+      "modelId": "ML-CKD-2026-V1",
+      "filename": "ckd_model.joblib",
+      "version": "1.0.0",
+      "sha256": "2fb9ff7335444078147a5d90f3deef7b14fd422b5838e18539c521fa64642617",
+      "operatingThreshold": 0.5
+    },
+    "diabetes": {
+      "modelId": "ML-DIABETES-2026-V1",
+      "filename": "diabetes_model.joblib",
+      "version": "1.0.0",
+      "sha256": "77245e4594ecd7eb722539e180e101717fdc6069054e849d5363792603f07099",
+      "operatingThreshold": 0.24
+    },
+    "heart": {
+      "modelId": "ML-HEART-2026-V1",
+      "filename": "heart_model.joblib",
+      "version": "1.0.0",
+      "sha256": "a3e0f6fd57a212221b1f42030b0adf0298412c9f26d541fe1427b66970242772",
+      "operatingThreshold": 0.27999999999999997
+    },
+    "liver": {
+      "modelId": "ML-LIVER-2026-V1",
+      "filename": "liver_model.joblib",
+      "version": "1.0.0",
+      "sha256": "61aba1cc3d9f8a6515bf22148cf1cba2cd12a283df5d3bf5a34c4ca8b6a8b491",
+      "operatingThreshold": 0.5599999999999999
+    },
+    "thyroid": {
+      "modelId": "ML-THYROID-2026-V1",
+      "filename": "thyroid_model.joblib",
+      "version": "1.0.0",
+      "sha256": "eb70b5e97d147c8669a86d1c27299055d80ec1557ed42aeeb303f1986c34abff",
+      "operatingThreshold": 0.1
+    }
+  }
+}

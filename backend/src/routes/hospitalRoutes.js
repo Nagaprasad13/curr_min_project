@@ -274,6 +274,11 @@ router.get('/', optionalAuthenticate, async (req, res) => {
  */
 router.get('/:id', optionalAuthenticate, async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Not Found', message: 'Hospital not found.' });
+    }
+
     const hospital = await Hospital.findById(req.params.id);
     if (!hospital) {
       return res.status(404).json({ error: 'Not Found', message: 'Hospital not found.' });
@@ -293,8 +298,13 @@ router.get('/:id', optionalAuthenticate, async (req, res) => {
       });
     }
 
+    const consistencyChecks = (isOwner || isReviewer)
+      ? performVerificationConsistencyChecks(hospital.toObject())
+      : null;
+
     return res.json({
       hospital,
+      consistencyChecks,
       disclaimer: 'Decision support only. A clinician must review.',
     });
   } catch (err) {

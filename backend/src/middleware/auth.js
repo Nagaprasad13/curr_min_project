@@ -1,37 +1,62 @@
-const { verifyToken } = require('../config/jwt');
+const { verifyAccessToken } = require('../config/jwt');
 const User = require('../models/User');
 const Hospital = require('../models/Hospital');
 
 /**
- * Authenticate incoming request via JWT Bearer token.
+ * Authenticate incoming request via httpOnly cookie or JWT Bearer header.
+ * Prioritizes secure httpOnly cookies in browser contexts; falls back to Bearer token
+ * for backward compatibility and automated tests.
  */
 async function authenticate(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    let token = null;
+
+    // 1. Check httpOnly cookie
+    if (req.cookies && req.cookies.accessToken) {
+      token = req.cookies.accessToken;
+    }
+    // 2. Check Authorization Bearer header
+    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication token missing or invalid format. Please supply a valid Bearer token.',
+        message: 'Authentication session missing or invalid. Please log in or supply a valid token.',
       });
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
+    const decoded = verifyAccessToken(token);
 
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.id).select('-password -twoFactorSecret');
     if (!user) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'The user account associated with this token no longer exists.',
+        message: 'The user account associated with this session no longer exists.',
       });
     }
 
     req.user = user;
+    req.tokenScope = decoded.scope || 'full';
+
+    // If token has limited scope for 2FA enrollment, restrict to 2FA enrollment endpoints only
+    if (decoded.scope === '2fa_enrollment') {
+      const currentPath = (req.baseUrl || '') + (req.path || '');
+      const allowedPaths = ['/api/auth/2fa/generate', '/api/auth/2fa/enable'];
+      if (!allowedPaths.some(p => currentPath === p || req.originalUrl?.split('?')[0] === p)) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Limited-scope session. You must complete two-factor authentication enrollment before accessing other endpoints.',
+        });
+      }
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({
       error: 'Unauthorized',
-      message: 'Token verification failed or token expired.',
+      message: 'Session verification failed or token expired. Please refresh your session or log in again.',
       details: err.message,
     });
   }
@@ -71,15 +96,12 @@ async function requireHospitalOwnership(req, res, next) {
       return res.status(404).json({ error: 'Not Found', message: `Hospital with ID ${hospitalId} not found.` });
     }
 
-    // Attach hospital to request for downstream controller handlers
     req.targetHospital = hospital;
 
-    // Platform reviewers have platform-wide audit & verification authority
     if (req.user.role === 'platform_reviewer') {
       return next();
     }
 
-    // If hospital_admin, verify strict ownership
     if (req.user.role === 'hospital_admin') {
       const isOwnerByHospitalRef = req.user.hospitalId && req.user.hospitalId.toString() === hospital._id.toString();
       const isOwnerByAdminUser = hospital.adminUserId && hospital.adminUserId.toString() === req.user._id.toString();
@@ -93,7 +115,6 @@ async function requireHospitalOwnership(req, res, next) {
       return next();
     }
 
-    // For other roles, deny modification
     return res.status(403).json({
       error: 'Forbidden',
       message: 'Unauthorized role for hospital modification.',

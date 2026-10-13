@@ -1,0 +1,60 @@
+name: CareBridge CI Quality Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install backend dependencies
+      working-directory: backend
+      run: npm ci
+
+    - name: Run RBAC Authorisation Matrix Test
+      working-directory: backend
+      run: npx jest src/tests/authMatrix.test.js --runInBand
+
+    - name: Run Full Regression Test Suite (Phases 1-7)
+      working-directory: backend
+      run: npm test
+
+    - name: Run Reproducibility Check Gate
+      working-directory: backend
+      run: npm run check:reproduce
+
+  frontend-build-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: npm ci
+
+    - name: Build frontend production bundle with Vite
+      working-directory: frontend
+      run: npm run build

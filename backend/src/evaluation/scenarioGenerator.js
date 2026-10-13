@@ -154,6 +154,11 @@ function generateEvaluationScenarios(hospitals, seed = 42) {
       if (h.verificationStatus !== 'verified') return;
       if (!(h.specialties || []).includes(template.specialty)) return;
 
+      // Derived specialist count check: hospital must have >= 1 active verified specialist in specialty
+      const specialistInfo = (h.specialists || []).find(s => s.specialty === template.specialty);
+      const specialistCount = specialistInfo ? Number(specialistInfo.count) : 0;
+      if (specialistCount <= 0) return;
+
       // Equipment check
       const equipment = h.equipment || {};
       for (const eqKey of template.equipment) {

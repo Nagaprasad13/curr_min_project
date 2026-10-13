@@ -117,12 +117,12 @@ function rankReferralHospitals(params = {}, hospitalsArg = null, capacitySnapsho
     }
 
     const specialistInfo = (hosp.specialists || []).find(s => s.specialty === requiredSpecialty);
-    const specialistCount = specialistInfo ? Number(specialistInfo.count) : 1; // Default to 1 if lists specialty but specialist object omitted
+    const specialistCount = specialistInfo ? Number(specialistInfo.count) : 0;
     if (specialistCount <= 0) {
       excludedHospitals.push({
         hospitalId: hospId,
         hospitalName: hospName,
-        reason: `Specialist count for ${requiredSpecialty} is zero.`,
+        reason: `No active verified specialist practitioner available for ${requiredSpecialty}.`,
         filterCode: 'NO_SPECIALIST_COUNT',
       });
       continue;

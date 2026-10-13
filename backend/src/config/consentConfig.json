@@ -1,0 +1,19 @@
+{
+  "defaultExpiryDays": 7,
+  "maxExpiryDays": 30,
+  "consentTextVersion": "v1.0-research-consent",
+  "sensitiveRecordTypes": [
+    "mental_health",
+    "psychiatry",
+    "hiv_aids",
+    "reproductive_health",
+    "substance_use",
+    "genetic_screening"
+  ],
+  "breakGlassEnabled": false,
+  "breakGlassTimeLimitHours": 2,
+  "schemeVerificationMaxAgeDays": 180,
+  "recordAgeWarningMonths": 6,
+  "rateLimitWindowMs": 60000,
+  "rateLimitMaxRequests": 60
+}

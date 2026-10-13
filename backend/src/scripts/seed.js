@@ -47,11 +47,12 @@ async function runSeed() {
     const insertedCapacities = await HospitalCapacity.insertMany(capacityDocs);
     console.log(`✓ Inserted ${insertedCapacities.length} capacity telemetry snapshots.`);
 
-    console.log('[3/6] Seeding Scheme Catalogue (CMCHIS & PM-JAY)...');
-    const rawSchemes = generateSchemeCatalogue();
+    console.log('[3/6] Seeding Scheme Catalogue (CMCHIS, PM-JAY & RAN with official verified sources)...');
+    const { getOfficialSchemeSeedData } = require('./seedPhase6');
+    const rawSchemes = getOfficialSchemeSeedData();
     await Scheme.deleteMany({});
     const insertedSchemes = await Scheme.insertMany(rawSchemes);
-    console.log(`✓ Inserted ${insertedSchemes.length} health assurance schemes.`);
+    console.log(`✓ Inserted ${insertedSchemes.length} health assurance schemes with source URLs and verified dates.`);
 
     console.log('[4/6] Creating 5 role-based demo user accounts (2 admins, 1 reviewer, 1 doctor, 1 patient)...');
     const rawUsers = generateSyntheticUsers(rawHospitals);
@@ -111,12 +112,26 @@ async function runSeed() {
       requirements: scn.requirements,
       rankedRecommendations: [],
       status: 'submitted',
+      recordsConsentStatus: 'not_requested',
       clinicalDisclaimerAcknowledged: true,
       decisionSupportDisclaimer: 'Decision support only. A clinician must review.',
       isSynthetic: true,
     }));
     await Referral.insertMany(sampleReferralDocs);
     console.log(`✓ Inserted 10 sample active referrals in MongoDB.`);
+
+    console.log('[7/7] Seeding Phase 6 & 7: Consent records, verified schemes & condition-specialty mapping...');
+    const { seedPhase6 } = require('./seedPhase6');
+    await seedPhase6(insertedHospitals);
+
+    const { seedConditionSpecialtyMap } = require('./seedConditionMap');
+    const seededMappings = await seedConditionSpecialtyMap();
+    console.log(`✓ Seeded ${seededMappings.length} condition-specialty mappings for reviewer sign-off.`);
+
+    console.log('[8/8] Seeding Phase 8.2: Doctors, staff rosters & deriving hospital specialists...');
+    const { seedPractitioners } = require('./seedPractitioners');
+    const seededPractitioners = await seedPractitioners(insertedHospitals);
+    console.log(`✓ Seeded ${seededPractitioners.length} medical practitioners and derived all hospital specialists.`);
 
     // Summary statistics table
     console.log('\n=================== SEED GENERATION SUMMARY ===================');

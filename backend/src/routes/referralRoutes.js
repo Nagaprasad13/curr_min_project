@@ -277,14 +277,24 @@ router.post(
  * - Reviewer: platform_reviewer
  * - Patient: can see their own referral status only (not clinical ranking scores or other patient records)
  */
+const GENERIC_REFERRAL_404 = {
+  error: 'Not Found',
+  message: 'Referral document not found or access denied.',
+};
+
 router.get('/:id', authenticate, async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json(GENERIC_REFERRAL_404);
+    }
+
     const referral = await Referral.findById(req.params.id)
       .populate('referringHospitalId', 'name code district')
       .populate('selectedHospitalId', 'name code district');
 
     if (!referral) {
-      return res.status(404).json({ error: 'Not Found', message: 'Referral document not found.' });
+      return res.status(404).json(GENERIC_REFERRAL_404);
     }
 
     const currentUser = req.user;
@@ -292,10 +302,17 @@ router.get('/:id', authenticate, async (req, res) => {
     // Patient view: allowed if referral matches patientId, but strip clinical scores
     if (currentUser.role === 'patient') {
       if (!referral.patientId || referral.patientId.toString() !== currentUser._id.toString()) {
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Access denied: You may only view your own referrals.',
-        });
+        return res.status(404).json(GENERIC_REFERRAL_404);
+      }
+
+      // Sync consent status if linked
+      if (referral.recordsConsentId) {
+        const Consent = require('../models/Consent');
+        const linkedConsent = await Consent.findById(referral.recordsConsentId);
+        if (linkedConsent && referral.recordsConsentStatus !== linkedConsent.status) {
+          referral.recordsConsentStatus = linkedConsent.status;
+          await referral.save();
+        }
       }
 
       // Return sanitized patient view (status only)
@@ -303,6 +320,8 @@ router.get('/:id', authenticate, async (req, res) => {
         referralId: referral.referralId,
         patientName: referral.patientName,
         status: referral.status,
+        recordsConsentStatus: referral.recordsConsentStatus || 'not_requested',
+        recordsConsentId: referral.recordsConsentId,
         selectedHospital: referral.selectedHospitalId ? {
           name: referral.selectedHospitalId.name,
           district: referral.selectedHospitalId.district,
@@ -314,13 +333,20 @@ router.get('/:id', authenticate, async (req, res) => {
     // Doctor access check: Must be the referring doctor
     if (currentUser.role === 'doctor') {
       if (referral.referringDoctorId && referral.referringDoctorId.toString() !== currentUser._id.toString()) {
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Access denied: You are not authorized to view referrals initiated by another clinician.',
-        });
+        return res.status(404).json(GENERIC_REFERRAL_404);
       }
     } else if (currentUser.role !== 'platform_reviewer') {
-      return res.status(403).json({ error: 'Forbidden', message: 'Unauthorized role for referral inspection.' });
+      return res.status(404).json(GENERIC_REFERRAL_404);
+    }
+
+    // Sync consent status if linked
+    if (referral.recordsConsentId) {
+      const Consent = require('../models/Consent');
+      const linkedConsent = await Consent.findById(referral.recordsConsentId);
+      if (linkedConsent && referral.recordsConsentStatus !== linkedConsent.status) {
+        referral.recordsConsentStatus = linkedConsent.status;
+        await referral.save();
+      }
     }
 
     return res.json({ referral });
@@ -354,7 +380,14 @@ router.patch(
         });
       }
 
-      const { selectedHospitalId, notes, overrideReason, newStatus = 'reviewed' } = req.body;
+      const {
+        selectedHospitalId,
+        notes,
+        overrideReason,
+        newStatus = 'reviewed',
+        requestRecordsConsent = false,
+        recordTypes = ['lab_report', 'prescription', 'discharge_summary'],
+      } = req.body;
 
       if (!['reviewed', 'sent', 'accepted', 'declined', 'cancelled'].includes(newStatus)) {
         return res.status(400).json({
@@ -368,6 +401,26 @@ router.patch(
 
       if (selectedHospitalId) {
         referral.selectedHospitalId = selectedHospitalId;
+      }
+
+      // If requested, initiate a consent request for the receiving hospital
+      // Referral acceptance does NOT auto-grant records consent.
+      let createdConsent = null;
+      if (requestRecordsConsent && referral.patientId && referral.selectedHospitalId) {
+        const { requestConsent } = require('../services/consentService');
+        createdConsent = await requestConsent({
+          patientId: referral.patientId,
+          requestingDoctorId: req.user._id,
+          requestingHospitalId: referral.selectedHospitalId,
+          purpose: 'referral',
+          recordTypes,
+          referralId: referral._id,
+          actorRole: req.user.role,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+        });
+        referral.recordsConsentStatus = 'requested';
+        referral.recordsConsentId = createdConsent._id;
       }
 
       referral.clinicianReview = {
@@ -392,14 +445,91 @@ router.patch(
         justification: `Clinician reviewed referral ${saved.referralId}. Status moved from ${prevStatus} to ${newStatus}. Override: ${overrideReason || 'None'}`,
         ipAddress: req.ip,
         userAgent: req.headers['user-agent'],
-        meta: { prevStatus, newStatus, selectedHospitalId },
+        meta: {
+          prevStatus,
+          newStatus,
+          selectedHospitalId,
+          recordsConsentStatus: saved.recordsConsentStatus,
+        },
       });
 
       return res.json({
         message: `Referral successfully updated to "${newStatus}". Clinician review recorded.`,
         referralId: saved.referralId,
         status: saved.status,
+        recordsConsentStatus: saved.recordsConsentStatus,
+        recordsConsentId: saved.recordsConsentId,
         clinicianReview: saved.clinicianReview,
+        consentRequest: createdConsent,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
+
+/**
+ * POST /api/referrals/:id/request-records-consent
+ * Explicitly sends a consent request to the patient for the receiving hospital.
+ * Restricted to: doctor (the creating doctor)
+ */
+router.post(
+  '/:id/request-records-consent',
+  authenticate,
+  authorizeRoles('doctor'),
+  async (req, res) => {
+    try {
+      const referral = await Referral.findById(req.params.id);
+      if (!referral) {
+        return res.status(404).json({ error: 'Not Found', message: 'Referral document not found.' });
+      }
+
+      if (referral.referringDoctorId && referral.referringDoctorId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Security Policy Violation: You cannot request consent on referrals initiated by another doctor.',
+        });
+      }
+
+      if (!referral.patientId) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'Referral does not have an associated patient account.',
+        });
+      }
+
+      const receivingHospitalId = req.body.receivingHospitalId || referral.selectedHospitalId;
+      if (!receivingHospitalId) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'Receiving hospital must be selected before requesting record consent.',
+        });
+      }
+
+      const { recordTypes = ['lab_report', 'prescription', 'discharge_summary'], purpose = 'referral' } = req.body;
+      const { requestConsent } = require('../services/consentService');
+
+      const consent = await requestConsent({
+        patientId: referral.patientId,
+        requestingDoctorId: req.user._id,
+        requestingHospitalId: receivingHospitalId,
+        purpose,
+        recordTypes,
+        referralId: referral._id,
+        actorRole: req.user.role,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+
+      referral.recordsConsentStatus = 'requested';
+      referral.recordsConsentId = consent._id;
+      await referral.save();
+
+      return res.status(201).json({
+        message: 'Consent request dispatched to patient for receiving hospital.',
+        referralId: referral.referralId,
+        recordsConsentStatus: referral.recordsConsentStatus,
+        consent,
       });
     } catch (err) {
       return res.status(500).json({ error: 'Server Error', message: err.message });

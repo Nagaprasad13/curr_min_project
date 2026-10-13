@@ -124,6 +124,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -214,7 +230,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.161Z",
+      "computedAt": "2026-10-13T17:17:37.812Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -361,6 +377,22 @@
         "available": true,
         "count": 2
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -451,7 +483,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.161Z",
+      "computedAt": "2026-10-13T17:17:37.812Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -571,6 +603,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -669,7 +717,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.161Z",
+      "computedAt": "2026-10-13T17:17:37.812Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -768,6 +816,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -851,7 +915,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.161Z",
+      "computedAt": "2026-10-13T17:17:37.813Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -998,6 +1062,22 @@
         "available": true,
         "count": 2
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -1088,7 +1168,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.161Z",
+      "computedAt": "2026-10-13T17:17:37.813Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -1208,6 +1288,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -1306,7 +1402,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.162Z",
+      "computedAt": "2026-10-13T17:17:37.813Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -1405,6 +1501,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -1488,7 +1600,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.162Z",
+      "computedAt": "2026-10-13T17:17:37.814Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -1635,6 +1747,22 @@
         "available": true,
         "count": 2
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -1725,7 +1853,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.162Z",
+      "computedAt": "2026-10-13T17:17:37.814Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -1872,6 +2000,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -1962,7 +2106,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.162Z",
+      "computedAt": "2026-10-13T17:17:37.814Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -2082,6 +2226,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -2182,7 +2342,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -2302,6 +2462,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -2402,7 +2578,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -2501,6 +2677,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -2584,7 +2776,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -2683,6 +2875,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -2764,7 +2972,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -2911,6 +3119,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -3001,7 +3225,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -3148,6 +3372,22 @@
         "available": true,
         "count": 2
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -3238,7 +3478,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -3385,6 +3625,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -3475,7 +3731,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -3595,6 +3851,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -3693,7 +3965,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -3813,6 +4085,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -3913,7 +4201,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -4012,6 +4300,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -4095,7 +4399,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.815Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -4194,6 +4498,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -4277,7 +4597,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -4424,6 +4744,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -4514,7 +4850,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -4661,6 +4997,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -4751,7 +5103,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -4871,6 +5223,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -4969,7 +5337,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -5068,6 +5436,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -5151,7 +5535,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -5250,6 +5634,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -5333,7 +5733,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -5480,6 +5880,22 @@
         "available": true,
         "count": 2
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -5570,7 +5986,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -5717,6 +6133,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -5807,7 +6239,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -5927,6 +6359,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -6025,7 +6473,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -6124,6 +6572,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -6207,7 +6671,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -6354,6 +6818,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -6444,7 +6924,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -6564,6 +7044,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -6662,7 +7158,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -6761,6 +7257,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -6842,7 +7354,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -6989,6 +7501,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -7079,7 +7607,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -7199,6 +7727,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -7297,7 +7841,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -7417,6 +7961,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -7515,7 +8075,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -7662,6 +8222,22 @@
         "available": true,
         "count": 1
       },
+      "ecg": {
+        "available": true,
+        "count": 5
+      },
+      "echo": {
+        "available": true,
+        "count": 2
+      },
+      "strokeUnit": {
+        "available": true,
+        "count": 1
+      },
+      "endocrinologyLab": {
+        "available": true,
+        "count": 1
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -7752,7 +8328,7 @@
       ],
       "rulesMissed": [],
       "gapToNextTier": [],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -7872,6 +8448,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -7970,7 +8562,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -8069,6 +8661,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -8152,7 +8760,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -8272,6 +8880,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 2
+      },
+      "echo": {
+        "available": true,
+        "count": 1
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "advanced"
@@ -8370,7 +8994,7 @@
         "Need to fulfill Tier 1 requirement: At least 3 fully operational surgical theatres (Current: 2)",
         "Need to fulfill Tier 1 requirement: At least 8 distinct medical/surgical specialty departments (Current: 6)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [
@@ -8469,6 +9093,22 @@
         "available": false,
         "count": 0
       },
+      "ecg": {
+        "available": true,
+        "count": 1
+      },
+      "echo": {
+        "available": false,
+        "count": 0
+      },
+      "strokeUnit": {
+        "available": false,
+        "count": 0
+      },
+      "endocrinologyLab": {
+        "available": false,
+        "count": 0
+      },
       "lab": {
         "available": true,
         "level": "basic"
@@ -8550,7 +9190,7 @@
         "Need to fulfill Tier 2 requirement: Diagnostic ultrasound imaging system",
         "Need to fulfill Tier 2 requirement: At least 1 operational surgical theatre (Current: 0)"
       ],
-      "computedAt": "2026-10-12T09:30:23.163Z",
+      "computedAt": "2026-10-13T17:17:37.816Z",
       "rulesVersion": "1.0.0"
     },
     "verificationHistory": [

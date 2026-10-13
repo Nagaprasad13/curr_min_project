@@ -1,13 +1,65 @@
 [
   {
+    "schemeId": "CMCHIS",
     "schemeCode": "CMCHIS",
     "name": "Chief Minister's Comprehensive Health Insurance Scheme (CMCHIS) - Tamil Nadu",
     "authority": "Government of Tamil Nadu / United India Insurance",
+    "shortDescription": "State welfare scheme offering health assurance coverage up to ₹5,00,000 per family per year on a family-floater basis across empanelled network hospitals in Tamil Nadu.",
+    "summary": "State welfare scheme offering health assurance coverage up to ₹5,00,000 per family per year.",
+    "eligibilityCriteria": [
+      {
+        "criterion": "Resident of Tamil Nadu (verified via Smart Family Ration Card or VAO certificate)",
+        "sourceUrl": "https://cmchistn.com",
+        "isConfirmed": true,
+        "fieldKey": "stateResident",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed on official portal cmchistn.com on 2026-10-13"
+      },
+      {
+        "criterion": "Annual family income less than ₹1,20,000 per year (certified by revenue authority)",
+        "sourceUrl": "https://cmchistn.com",
+        "isConfirmed": true,
+        "fieldKey": "annualFamilyIncome",
+        "thresholdValue": 120000,
+        "verificationNote": "Updated threshold of ₹1.2 lakh confirmed from Tamil Nadu Health Department notification (checked 2026-10-13)"
+      },
+      {
+        "criterion": "Eligible family members listed on the official Tamil Nadu Family Ration Card",
+        "sourceUrl": "https://cmchistn.com",
+        "isConfirmed": true,
+        "fieldKey": "rationCardRegistered",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed: family floater covers spouse, children, and dependent parents listed on the card"
+      },
+      {
+        "criterion": "TO VERIFY: Specific specialized procedures exceeding ₹5 lakh requiring special corpus approval",
+        "sourceUrl": "https://cmchistn.com",
+        "isConfirmed": false,
+        "fieldKey": "corpusExtension",
+        "thresholdValue": null,
+        "verificationNote": "Exact high-end procedure package list updates to be re-verified from current government gazette"
+      }
+    ],
+    "requiredDocuments": [
+      "Tamil Nadu Family Smart Ration Card",
+      "Income Certificate issued by Revenue Authorities / VAO (< ₹1,20,000/yr)",
+      "Aadhaar Card for each family member",
+      "Pre-authorization request from empanelled hospital insurance desk"
+    ],
+    "coveredTreatmentNotes": "Secondary and tertiary inpatient medical & surgical care, diagnostic packages, and specified day-care procedures.",
+    "participatingHospitalInfo": "hospital-reported, verify with scheme",
+    "officialApplicationUrl": "https://cmchistn.com",
     "officialUrl": "https://cmchistn.com",
-    "lastVerifiedDate": "2026-03-01T00:00:00.000Z",
-    "summary": "State health assurance scheme providing up to ₹5,00,000 per family per year for secondary and tertiary inpatient procedures across empaneled network hospitals in Tamil Nadu.",
-    "disclaimer": "Potential match, verify eligibility. Emblemed referral requires pre-authorization through the hospital insurance desk and valid smart ration card verification.",
-    "eligibleBeneficiariesDescription": "Families residing in Tamil Nadu with annual family income below specified threshold or designated vulnerable groups with valid CMCHIS Smart Card.",
+    "helplineInfo": "CMCHIS Toll-Free Helpline: 1800 425 3993",
+    "sourceUrls": [
+      "https://cmchistn.com",
+      "https://tnhealth.tn.gov.in"
+    ],
+    "lastVerifiedDate": "2026-10-13T00:00:00.000Z",
+    "status": "verified",
+    "rulesVersion": "2026.1",
+    "notice": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
+    "disclaimer": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
     "coveredSpecialties": [
       "Cardiology",
       "Pulmonology",
@@ -16,21 +68,71 @@
       "Medical Oncology",
       "General Surgery",
       "Pediatrics",
-      "Orthopedics",
-      "Obstetrics & Gynecology"
+      "Orthopedics"
     ],
     "annualCoverageInr": 500000,
     "isSynthetic": false
   },
   {
+    "schemeId": "PM-JAY",
     "schemeCode": "PM-JAY",
     "name": "Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana (AB PM-JAY)",
-    "authority": "National Health Authority (NHA) / State Health Agency Tamil Nadu",
+    "authority": "National Health Authority (NHA) / MoHFW, Government of India",
+    "shortDescription": "Centrally sponsored health assurance scheme providing ₹5,00,000 per family per year for secondary and tertiary care hospitalization to bottom 40% vulnerable population.",
+    "summary": "Centrally sponsored health assurance scheme providing ₹5,00,000 per family per year.",
+    "eligibilityCriteria": [
+      {
+        "criterion": "Deprived rural households or identified urban occupational categories mapped under SECC 2011 database",
+        "sourceUrl": "https://pmjay.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "seccDeprivationCategory",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed from NHA guidelines on 2026-10-13: D1-D7 rural deprivation and 11 urban worker categories"
+      },
+      {
+        "criterion": "All Senior Citizens aged 70 years and above irrespective of economic status (expanded provision)",
+        "sourceUrl": "https://beneficiary.nha.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "age70PlusProvision",
+        "thresholdValue": 70,
+        "verificationNote": "Confirmed via official Union Cabinet expansion notifications (checked 2026-10-13)"
+      },
+      {
+        "criterion": "Biometric / OTP Aadhaar e-KYC completed at Common Service Centre (CSC) or Ayushman Mitra kiosk",
+        "sourceUrl": "https://beneficiary.nha.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "eKycCompleted",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed on beneficiary.nha.gov.in (checked 2026-10-13)"
+      },
+      {
+        "criterion": "TO VERIFY: State-specific convergence package matching between CMCHIS and PM-JAY in Tamil Nadu",
+        "sourceUrl": "https://pmjay.gov.in",
+        "isConfirmed": false,
+        "fieldKey": "stateConvergenceSchedule",
+        "thresholdValue": null,
+        "verificationNote": "State Health Agency Tamil Nadu dual-card package rates change periodically; requires verification"
+      }
+    ],
+    "requiredDocuments": [
+      "Aadhaar Card (mandatory for authentication)",
+      "Ration Card / PM-JAY Family ID / Ration card showing household linkage",
+      "Active mobile number linked to Aadhaar"
+    ],
+    "coveredTreatmentNotes": "Secondary and tertiary hospitalization, medicines, diagnostics, and up to 15 days post-hospitalization follow-up.",
+    "participatingHospitalInfo": "hospital-reported, verify with scheme",
+    "officialApplicationUrl": "https://beneficiary.nha.gov.in",
     "officialUrl": "https://pmjay.gov.in",
-    "lastVerifiedDate": "2026-03-01T00:00:00.000Z",
-    "summary": "Centrally sponsored health protection scheme offering coverage up to ₹5,00,000 per eligible family per year for secondary and tertiary care hospitalization.",
-    "disclaimer": "Potential match, verify eligibility. Eligibility is governed by SECC 2011 criteria and requires biometric e-KYC authentication at the hospital Ayushman Mitra kiosk.",
-    "eligibleBeneficiariesDescription": "Deprived rural families and identified occupational categories of urban workers based on Socio-Economic Caste Census (SECC) database.",
+    "helplineInfo": "National Health Authority Toll-Free: 14555",
+    "sourceUrls": [
+      "https://pmjay.gov.in",
+      "https://beneficiary.nha.gov.in"
+    ],
+    "lastVerifiedDate": "2026-10-13T00:00:00.000Z",
+    "status": "verified",
+    "rulesVersion": "2026.1",
+    "notice": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
+    "disclaimer": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
     "coveredSpecialties": [
       "Cardiology",
       "Neurology",
@@ -41,6 +143,76 @@
       "Orthopedics"
     ],
     "annualCoverageInr": 500000,
+    "isSynthetic": false
+  },
+  {
+    "schemeId": "RAN",
+    "schemeCode": "RAN",
+    "name": "Rashtriya Arogya Nidhi (RAN)",
+    "authority": "Ministry of Health and Family Welfare (MoHFW), Government of India",
+    "shortDescription": "One-time financial assistance grant up to ₹15,00,000 for Below Poverty Line (BPL) patients suffering from major life-threatening diseases receiving treatment in Government super-speciality hospitals.",
+    "summary": "One-time financial assistance grant up to ₹15,00,000 for BPL patients in Government hospitals.",
+    "eligibilityCriteria": [
+      {
+        "criterion": "Patients living Below Poverty Line (BPL) certified by state revenue authorities",
+        "sourceUrl": "https://mohfw.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "bplStatus",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed from MoHFW RAN Scheme Guidelines (checked 2026-10-13)"
+      },
+      {
+        "criterion": "Suffering from major life-threatening disease (cardiology, oncology, nephrology, liver diseases)",
+        "sourceUrl": "https://mohfw.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "lifeThreateningIllness",
+        "thresholdValue": true,
+        "verificationNote": "Confirmed from MoHFW Technical Committee Guidelines (checked 2026-10-13)"
+      },
+      {
+        "criterion": "Treatment strictly in participating Government super-speciality hospitals / Regional Cancer Centres (Private hospitals not eligible)",
+        "sourceUrl": "https://mohfw.gov.in",
+        "isConfirmed": true,
+        "fieldKey": "hospitalTypeGovernment",
+        "thresholdValue": "government",
+        "verificationNote": "Confirmed: grants disbursed directly to Government Medical Superintendent (checked 2026-10-13)"
+      },
+      {
+        "criterion": "TO VERIFY: Specific state revolving fund spending caps and fast-track clearance thresholds",
+        "sourceUrl": "https://mohfw.gov.in",
+        "isConfirmed": false,
+        "fieldKey": "revolvingFundLimits",
+        "thresholdValue": null,
+        "verificationNote": "Current revolving fund emergency allocation per central hospital (₹2-5 Lakh) to be re-verified with MoHFW circular"
+      }
+    ],
+    "requiredDocuments": [
+      "Prescribed RAN Application Form countersigned by treating Head of Department and Medical Superintendent",
+      "Official Cost Estimation Certificate from treating Government Hospital",
+      "BPL Card / Income Certificate from Competent Revenue Authority",
+      "Aadhaar Card / Ration Card copy"
+    ],
+    "coveredTreatmentNotes": "One-time grant up to ₹15 Lakh for life-saving surgery, implants, and chemotherapy in Government institutions.",
+    "participatingHospitalInfo": "hospital-reported, verify with scheme (participating Government hospitals only)",
+    "officialApplicationUrl": "https://mohfw.gov.in",
+    "officialUrl": "https://mohfw.gov.in",
+    "helplineInfo": "MoHFW Central Helpdesk: 011-23061439",
+    "sourceUrls": [
+      "https://mohfw.gov.in",
+      "https://myscheme.gov.in/schemes/ran"
+    ],
+    "lastVerifiedDate": "2026-10-13T00:00:00.000Z",
+    "status": "verified",
+    "rulesVersion": "2026.1",
+    "notice": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
+    "disclaimer": "This is a possible match only, not confirmed eligibility. Eligibility, coverage and hospital participation must be confirmed with the scheme authority or the hospital. Coverage or free treatment is never guaranteed.",
+    "coveredSpecialties": [
+      "Cardiology",
+      "Nephrology",
+      "Medical Oncology",
+      "General Surgery"
+    ],
+    "annualCoverageInr": 1500000,
     "isSynthetic": false
   }
 ]

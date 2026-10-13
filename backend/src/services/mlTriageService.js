@@ -284,6 +284,7 @@ function createFallbackAssessment(patientData, reason = 'ML microservice unreach
     serviceFallback: true,
     fallbackReason: reason,
     disclaimer: MANDATORY_DISCLAIMER,
+    notice: MANDATORY_DISCLAIMER,
   };
 }
 

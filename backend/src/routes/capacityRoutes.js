@@ -117,9 +117,21 @@ router.put(
   }
 );
 
+router.post(
+  '/',
+  authenticate,
+  authorizeRoles('hospital_admin'),
+  requireHospitalOwnership,
+  async (req, res) => {
+    // Forward to the same logic
+    return router.handle({ ...req, method: 'PUT' }, res);
+  }
+);
+
 /**
  * GET /api/hospitals/:id/capacity/latest
  * Fetch the latest capacity telemetry snapshot for a hospital.
+ * Includes calculated age in hours/minutes and proactive staleness warning.
  */
 router.get('/latest', authenticate, async (req, res) => {
   try {
@@ -134,7 +146,33 @@ router.get('/latest', authenticate, async (req, res) => {
       });
     }
 
-    return res.json({ snapshot: latest });
+    const reportTime = new Date(latest.reportedAt || latest.timestamp);
+    const now = new Date();
+    const ageMinutes = Math.max(0, Math.round((now - reportTime) / (1000 * 60)));
+    const ageHours = (ageMinutes / 60).toFixed(1);
+    const thresholdMinutes = Number(latest.stalenessThresholdMinutes) || 120;
+    const isStale = ageMinutes > thresholdMinutes;
+    const isApproachingStale = !isStale && ageMinutes >= thresholdMinutes * 0.75;
+
+    let stalenessMessage = 'Telemetry is fresh and active.';
+    if (isStale) {
+      stalenessMessage = `Telemetry is STALE (${ageHours}h old > threshold ${thresholdMinutes / 60}h). Referral engine will treat capacity as 'unknown'. Please submit an update immediately.`;
+    } else if (isApproachingStale) {
+      stalenessMessage = `Warning: Telemetry is approaching staleness (${ageHours}h old, expires at ${thresholdMinutes / 60}h). Please update soon to maintain active referral status.`;
+    }
+
+    return res.json({
+      snapshot: latest,
+      telemetryAge: {
+        reportedAt: reportTime,
+        ageMinutes,
+        ageHours: Number(ageHours),
+        thresholdMinutes,
+        isStale,
+        isApproachingStale,
+        message: stalenessMessage,
+      },
+    });
   } catch (err) {
     return res.status(500).json({ error: 'Server Error', message: err.message });
   }

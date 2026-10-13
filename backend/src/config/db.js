@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 let mongoMemoryServerInstance = null;
@@ -13,8 +14,8 @@ async function connectDB(uri = process.env.MONGODB_URI) {
     return mongoose.connection;
   }
 
-  // In test mode or when explicitly requested, use MongoMemoryServer immediately
-  if (process.env.NODE_ENV === 'test' && !process.env.MONGODB_URI) {
+  // In test mode, use MongoMemoryServer to keep tests fast, isolated, and avoid altering Atlas data
+  if (process.env.NODE_ENV === 'test') {
     const { MongoMemoryServer } = require('mongodb-memory-server');
     if (!mongoMemoryServerInstance) {
       mongoMemoryServerInstance = await MongoMemoryServer.create();
@@ -26,17 +27,18 @@ async function connectDB(uri = process.env.MONGODB_URI) {
   }
 
   const targetUri = uri || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/carebridge';
+  const timeoutMs = process.env.MONGODB_URI ? 10000 : 2000;
+  const maskedUri = targetUri.replace(/:([^:@]+)@/, ':****@');
 
   try {
-    // Attempt standard connection with a short timeout if uri wasn't explicitly provided
     await mongoose.connect(targetUri, {
-      serverSelectionTimeoutMS: 1500,
+      serverSelectionTimeoutMS: timeoutMs,
     });
-    console.log(`[CareBridge Database] Connected to MongoDB at: ${targetUri}`);
+    console.log(`[CareBridge Database] Connected to MongoDB at: ${maskedUri}`);
     return mongoose.connection;
   } catch (err) {
-    console.warn(`[CareBridge Database] Standard MongoDB connection failed (${err.message}).`);
-    console.log(`[CareBridge Database] Initializing embedded in-memory MongoDB server for research prototype...`);
+    console.warn(`[CareBridge Database] MongoDB connection failed (${err.message}).`);
+    console.log(`[CareBridge Database] Initializing embedded in-memory MongoDB fallback server...`);
 
     try {
       const { MongoMemoryServer } = require('mongodb-memory-server');
