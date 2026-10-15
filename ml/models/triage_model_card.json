@@ -4,8 +4,17 @@
   "algorithm": "HistGradientBoostingClassifier with Platt Sigmoid Calibration",
   "dataset": "MIMIC-IV-ED Demo v2.2 (PhysioNet)",
   "population": "Emergency Department arrivals, Beth Israel Deaconess Medical Center, Boston, MA, USA",
-  "trainingDate": "2026-10-12",
+  "trainingDate": "2026-10-14",
   "target": "High Acuity (ESI acuity 1 or 2 vs 3, 4, 5)",
+  "cohort": {
+    "labeled_visits": 207,
+    "unique_patients": 56,
+    "train_visits": 166,
+    "train_patients": 42,
+    "test_visits": 41,
+    "test_patients": 14,
+    "test_high_acuity_cases": 25
+  },
   "operatingThreshold": 0.51,
   "metrics": {
     "sensitivity": 0.84,
@@ -28,15 +37,42 @@
       0.6581563272854062,
       0.9283289145392222
     ],
-    "brier_score_calibrated": 0.21864540176473082,
+    "brier_score_calibrated": 0.2186454017647308,
     "brier_score_uncalibrated": 0.2391190445212707,
     "expected_calibration_error": 0.11522793241605113
   },
   "baselines": {
-    "majority_class_auroc": 0.5,
-    "approximate_news2_auroc": 0.6724999999999999,
-    "logistic_regression_auroc": 0.81,
-    "random_forest_auroc": 0.7275
+    "majority_class": {
+      "auroc": 0.5,
+      "sensitivity": 1.0,
+      "specificity": 0.0,
+      "ppv": 0.6097560975609756,
+      "brier_score": 0.2425216587773368,
+      "missed_cases_count": 0,
+      "missed_cases_rate": 0.0
+    },
+    "approximate_news2": {
+      "auroc": 0.6724999999999999,
+      "classification_threshold": null
+    },
+    "logistic_regression": {
+      "auroc": 0.81,
+      "sensitivity": 0.76,
+      "specificity": 0.6875,
+      "ppv": 0.7916666666666666,
+      "brier_score": 0.17889287483197405,
+      "missed_cases_count": 6,
+      "missed_cases_rate": 24.0
+    },
+    "random_forest": {
+      "auroc": 0.7050000000000001,
+      "sensitivity": 0.68,
+      "specificity": 0.5625,
+      "ppv": 0.7083333333333334,
+      "brier_score": 0.2129821634998253,
+      "missed_cases_count": 8,
+      "missed_cases_rate": 32.0
+    }
   },
   "subgroups": {
     "Sex_F": {
@@ -52,7 +88,7 @@
     "Arrival_WALK IN": {
       "n": 15,
       "sensitivity": 0.8571428571428571,
-      "brier": 0.21123735746262773
+      "brier": 0.21123735746262776
     }
   },
   "robustness_missing_spo2": {

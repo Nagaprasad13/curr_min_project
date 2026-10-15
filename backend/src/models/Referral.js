@@ -135,6 +135,12 @@ const ReferralSchema = new mongoose.Schema({
   mlAssessment: {
     assessedAt: { type: Date },
     modelVersion: { type: String },
+    modelVersions: { type: mongoose.Schema.Types.Mixed, default: {} },
+    modelArtifacts: [{
+      modelName: { type: String },
+      modelVersion: { type: String },
+      artifactSha256Prefix: { type: String, default: null },
+    }],
     triageScore: { type: Number },
     triageCategory: { type: String },
     flaggedConditions: [{ type: String }],
@@ -164,8 +170,12 @@ const ReferralSchema = new mongoose.Schema({
   // Workflow states: draft -> reviewed -> sent -> accepted | declined | cancelled
   status: {
     type: String,
-    enum: ['draft', 'reviewed', 'sent', 'accepted', 'declined', 'cancelled', 'submitted'],
+      enum: ['draft', 'reviewed', 'sent', 'accepted', 'declined', 'cancelled', 'submitted', 'expired'],
     default: 'draft',
+    index: true,
+  },
+  expiresAt: {
+    type: Date,
     index: true,
   },
   recordsConsentStatus: {
@@ -206,6 +216,7 @@ const ReferralSchema = new mongoose.Schema({
 });
 
 ReferralSchema.index({ referringDoctorId: 1, createdAt: -1 });
+ReferralSchema.index({ patientId: 1, createdAt: -1 });
 ReferralSchema.index({ selectedHospitalId: 1, status: 1 });
 
 module.exports = mongoose.model('Referral', ReferralSchema);

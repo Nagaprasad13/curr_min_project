@@ -43,7 +43,11 @@ function classifyHospitalTier(hospital = {}, isVerified = false) {
   const hasLab = Boolean(equipment.lab?.available);
   const otCount = equipment.operationTheatres?.available ? (Number(equipment.operationTheatres.count) || 0) : 0;
 
-  const specialtiesCount = Array.isArray(hospital.specialties) ? hospital.specialties.length : 0;
+  const specialtiesCount = Array.isArray(hospital.specialists)
+    ? new Set(hospital.specialists
+      .filter(specialist => Number(specialist.count) > 0)
+      .map(specialist => specialist.specialty)).size
+    : new Set(Array.isArray(hospital.specialties) ? hospital.specialties : []).size;
   const has24x7Emergency = Boolean(hospital.has24x7Emergency);
 
   // Evaluate Tier 1 Criteria

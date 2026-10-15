@@ -120,7 +120,7 @@ $$\text{Score}(h, R) = 0.35 \cdot C(h, R) + 0.25 \cdot T(h, R) + 0.30 \cdot D(h,
 ### High-Sensitivity Pre-Referral Decision Support
 - **Triage Severity Model:** Calibrated HistGradientBoosting on MIMIC-IV-ED Demo ($N=41$ test visits).
   - Test AUROC: **0.702** [0.511–0.855], Sensitivity: **84.0%** [68.0–96.2%], Brier Score: **0.2186**.
-  - Outperformed approximate NEWS2 baseline (72.0% sensitivity) by catching 3 additional emergent cases.
+  - Achieved 84.0% sensitivity (21/25) on the held-out split; the approximate NEWS2 baseline's continuous-score AUROC was 0.672 (no cutoff metrics reported).
 - **5 Condition Screening Models (50-fold Repeated Stratified CV):**
   - Diabetes (Pima): **90.3% sensitivity**, AUROC 0.833 (threshold 0.24)
   - Heart Disease (Cleveland): **90.6% sensitivity**, AUROC 0.899 (threshold 0.28)

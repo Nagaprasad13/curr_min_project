@@ -13,8 +13,27 @@ const {
   generateSchemeCatalogue,
   generateSyntheticUsers,
 } = require('./syntheticDataGenerator');
+const {
+  ensureCredential,
+  CREDENTIALS_PATH,
+  loadSeedCredentials,
+  seedHospitalAccounts,
+  writeSeedCredentials,
+} = require('./seedHospitalAccounts');
 
-async function runSeed() {
+async function runSeed(options = {}) {
+  const {
+    exportEvaluationData = true,
+    seedSampleReferrals = true,
+    disconnect = true,
+    throwOnError = false,
+    credentialsPath = CREDENTIALS_PATH,
+  } = options;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Synthetic seed data and accounts are disabled in production.');
+  }
+
+  const seedCredentials = loadSeedCredentials(credentialsPath);
   console.log('================================================================');
   console.log(' CareBridge: Phase 2 Synthetic Seed Data Generation');
   console.log(' Target: Tamil Nadu, India (Research Prototype)');
@@ -59,11 +78,19 @@ async function runSeed() {
     await User.deleteMany({ isSynthetic: true });
 
     for (const u of rawUsers) {
+      const password = ensureCredential(seedCredentials, {
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        hospitalCode: u.hospitalCode || null,
+      });
       const userDoc = new User({
         ...u,
+        password,
         hospitalId: u.hospitalCode ? hospitalCodeMap.get(u.hospitalCode) : undefined,
       });
       const savedUser = await userDoc.save();
+      writeSeedCredentials(seedCredentials, credentialsPath);
 
       // If user is a hospital_admin, associate their adminUserId on the hospital document
       if (savedUser.role === 'hospital_admin' && savedUser.hospitalId) {
@@ -72,57 +99,72 @@ async function runSeed() {
     }
     console.log(`✓ Created ${rawUsers.length} role-based demo accounts with hashed passwords.`);
 
-    console.log('[5/6] Generating 500 synthetic referral scenarios with ground-truth suitability sets...');
-    const scenarios = generateSyntheticReferralScenarios(rawHospitals);
+    const scenarios = exportEvaluationData || seedSampleReferrals
+      ? generateSyntheticReferralScenarios(rawHospitals)
+      : [];
 
-    const dataDir = path.join(__dirname, '..', '..', 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+    if (exportEvaluationData) {
+      console.log('[5/6] Exporting synthetic evaluation datasets...');
+      const dataDir = path.join(__dirname, '..', '..', 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+
+      fs.writeFileSync(
+        path.join(dataDir, 'synthetic_hospitals.json'),
+        JSON.stringify(rawHospitals, null, 2),
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(dataDir, 'synthetic_referral_scenarios.json'),
+        JSON.stringify(scenarios, null, 2),
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(dataDir, 'synthetic_schemes.json'),
+        JSON.stringify(rawSchemes, null, 2),
+        'utf-8'
+      );
+      console.log(`✓ Exported synthetic datasets to ${dataDir}`);
+    } else {
+      console.log('[5/6] Evaluation dataset export disabled; evaluation files remain untouched.');
     }
 
-    fs.writeFileSync(
-      path.join(dataDir, 'synthetic_hospitals.json'),
-      JSON.stringify(rawHospitals, null, 2),
-      'utf-8'
-    );
-    fs.writeFileSync(
-      path.join(dataDir, 'synthetic_referral_scenarios.json'),
-      JSON.stringify(scenarios, null, 2),
-      'utf-8'
-    );
-    fs.writeFileSync(
-      path.join(dataDir, 'synthetic_schemes.json'),
-      JSON.stringify(rawSchemes, null, 2),
-      'utf-8'
-    );
-    console.log(`✓ Exported synthetic datasets to ${dataDir}`);
-
-    console.log('[6/6] Seeding sample active referral requests into database...');
     await Referral.deleteMany({ isSynthetic: true });
-    const doctorUser = await User.findOne({ role: 'doctor' });
-    const patientUser = await User.findOne({ role: 'patient' });
+    if (seedSampleReferrals) {
+      console.log('[6/6] Seeding sample active referral requests into database...');
+      const doctorUser = await User.findOne({ role: 'doctor' });
+      const patientUser = await User.findOne({ role: 'patient' });
 
-    const sampleReferralDocs = scenarios.slice(0, 10).map((scn, idx) => ({
-      referralId: `REF-2026-${String(idx + 1).padStart(4, '0')}`,
-      patientId: patientUser ? patientUser._id : undefined,
-      patientName: `Synthetic Patient ${idx + 1} (${scn.patientSummary.gender}, ${scn.patientSummary.age}y)`,
-      referringDoctorId: doctorUser ? doctorUser._id : undefined,
-      referringHospitalId: doctorUser && doctorUser.hospitalId ? doctorUser.hospitalId : undefined,
-      patientSummary: scn.patientSummary,
-      requirements: scn.requirements,
-      rankedRecommendations: [],
-      status: 'submitted',
-      recordsConsentStatus: 'not_requested',
-      clinicalDisclaimerAcknowledged: true,
-      decisionSupportDisclaimer: 'Decision support only. A clinician must review.',
-      isSynthetic: true,
-    }));
-    await Referral.insertMany(sampleReferralDocs);
-    console.log(`✓ Inserted 10 sample active referrals in MongoDB.`);
+      const sampleReferralDocs = scenarios.slice(0, 10).map((scn, idx) => ({
+        referralId: `REF-2026-${String(idx + 1).padStart(4, '0')}`,
+        patientId: patientUser ? patientUser._id : undefined,
+        patientName: `Synthetic Patient ${idx + 1} (${scn.patientSummary.gender}, ${scn.patientSummary.age}y)`,
+        referringDoctorId: doctorUser ? doctorUser._id : undefined,
+        referringHospitalId: doctorUser && doctorUser.hospitalId ? doctorUser.hospitalId : undefined,
+        patientSummary: scn.patientSummary,
+        requirements: scn.requirements,
+        rankedRecommendations: [],
+        status: 'submitted',
+        recordsConsentStatus: 'not_requested',
+        clinicalDisclaimerAcknowledged: true,
+        decisionSupportDisclaimer: 'Decision support only. A clinician must review.',
+        isSynthetic: true,
+      }));
+      await Referral.insertMany(sampleReferralDocs);
+      console.log(`✓ Inserted ${sampleReferralDocs.length} sample active referrals in MongoDB.`);
+    } else {
+      console.log('[6/6] Sample referral seeding disabled.');
+    }
 
     console.log('[7/7] Seeding Phase 6 & 7: Consent records, verified schemes & condition-specialty mapping...');
     const { seedPhase6 } = require('./seedPhase6');
-    await seedPhase6(insertedHospitals);
+    await seedPhase6(insertedHospitals, seedCredentials, credentialsPath);
+    const seededEmails = new Set((await User.find({ isSynthetic: true }).select('email').lean()).map(user => user.email));
+    for (const email of Object.keys(seedCredentials)) {
+      if (!seededEmails.has(email)) delete seedCredentials[email];
+    }
+    writeSeedCredentials(seedCredentials, credentialsPath);
 
     const { seedConditionSpecialtyMap } = require('./seedConditionMap');
     const seededMappings = await seedConditionSpecialtyMap();
@@ -132,6 +174,11 @@ async function runSeed() {
     const { seedPractitioners } = require('./seedPractitioners');
     const seededPractitioners = await seedPractitioners(insertedHospitals);
     console.log(`✓ Seeded ${seededPractitioners.length} medical practitioners and derived all hospital specialists.`);
+    const accountSummary = await seedHospitalAccounts(insertedHospitals, seedCredentials, credentialsPath);
+    writeSeedCredentials(seedCredentials, credentialsPath);
+    console.log(`✓ Hospital accounts provisioned: ${await User.countDocuments({ role: 'hospital_admin' })} admins and ${await User.countDocuments({ role: 'doctor' })} doctors.`);
+    console.log(`  New administrators: ${accountSummary.createdAdmins}; practitioner-linked doctor accounts: ${accountSummary.linkedDoctors}.`);
+    console.log(`  Generated credentials written to the git-ignored file: ${require('./seedHospitalAccounts').CREDENTIALS_PATH}`);
 
     // Summary statistics table
     console.log('\n=================== SEED GENERATION SUMMARY ===================');
@@ -148,19 +195,21 @@ async function runSeed() {
     console.log(`  - Rejected (Non-compliant):     ${insertedHospitals.filter(h => h.verificationStatus === 'rejected').length}`);
     console.log('---------------------------------------------------------------');
     console.log('DEMO ACCOUNTS:');
-    console.log('  1. admin.kovai@carebridge.tn.gov.in    (Role: hospital_admin, Kovai Apex Hospital)');
-    console.log('  2. admin.salem@carebridge.tn.gov.in    (Role: hospital_admin, Salem Mohan Kumaramangalam)');
-    console.log('  3. reviewer@carebridge.tn.gov.in       (Role: platform_reviewer, TNHSP Audit Directorate)');
-    console.log('  4. doctor@carebridge.tn.gov.in         (Role: doctor, Referring Pulmonologist)');
-    console.log('  5. patient@carebridge.tn.gov.in        (Role: patient, Erode District)');
-    console.log('  (Password for all demo accounts: AdminPassword123! / ReviewerPassword123! / DoctorPassword123! / PatientPassword123!)');
+    console.log('  1. admin.kovai@carebridge.invalid      (Role: hospital_admin, Kovai Apex Hospital)');
+    console.log('  2. admin.salem@carebridge.invalid      (Role: hospital_admin, Salem Mohan Kumaramangalam)');
+    console.log('  3. reviewer@carebridge.invalid         (Role: platform_reviewer, synthetic reviewer)');
+    console.log('  4. doctor@carebridge.invalid           (Role: doctor, practitioner-linked Salem account)');
+    console.log('  5. patient@carebridge.invalid          (Role: patient, synthetic patient)');
+    console.log('  Passwords are unique per account; see the git-ignored seed-credentials.json file.');
     console.log('===============================================================\n');
+    return { hospitals: insertedHospitals, seedCredentials };
 
   } catch (error) {
     console.error('Seed script encountered an error:', error);
     process.exitCode = 1;
+    if (throwOnError) throw error;
   } finally {
-    await disconnectDB();
+    if (disconnect) await disconnectDB();
   }
 }
 

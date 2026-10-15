@@ -92,6 +92,11 @@ router.post('/login', loginLimiter.check, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password.' });
     }
 
+    if (process.env.NODE_ENV === 'production' && user.isSynthetic) {
+      await loginLimiter.recordFailure(req);
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password.' });
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       await loginLimiter.recordFailure(req);
@@ -475,6 +480,12 @@ router.post(
       let targetHospitalId = hospitalId;
       if (req.user.role === 'hospital_admin') {
         targetHospitalId = req.user.hospitalId;
+        if (!targetHospitalId) {
+          return res.status(403).json({
+            error: 'Forbidden',
+            message: 'Your account is not assigned to a hospital and cannot create staff invitations.',
+          });
+        }
       }
 
       if (!targetHospitalId) {
@@ -535,7 +546,7 @@ router.post('/forgot-password', async (req, res) => {
       // In non-production development mode, log the reset URL to the terminal
       if (process.env.NODE_ENV !== 'production') {
         console.log(`[Dev Auth Stub] Password reset link for ${user.email}:`);
-        console.log(`  http://localhost:5173/reset-password?token=${resetTokenRaw}`);
+        console.log(`  http://localhost:3000/reset-password?token=${resetTokenRaw}`);
       }
       // In production mode, NO token or link is logged to console (strict privacy hygiene)
     }
@@ -729,6 +740,31 @@ router.post('/2fa/disable', authenticate, async (req, res) => {
  * Development-only demo login. Only available when DEMO_MODE=true AND NODE_ENV !== 'production'.
  * Server strictly refuses demo login in production environments.
  */
+router.get('/demo-accounts', async (req, res) => {
+  if (process.env.NODE_ENV === 'production' || process.env.DEMO_MODE !== 'true') {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'Demo authentication is disabled.',
+    });
+  }
+
+  const records = await User.find({
+    isSynthetic: true,
+    role: { $in: ['patient', 'doctor', 'hospital_admin', 'platform_reviewer'] },
+  })
+    .select('name email role')
+    .sort({ role: 1, name: 1 })
+    .lean();
+  const roles = new Set();
+  const accounts = records.filter(account => {
+    if (roles.has(account.role)) return false;
+    roles.add(account.role);
+    return true;
+  });
+
+  return res.json({ accounts });
+});
+
 router.post('/demo-login', async (req, res) => {
   if (process.env.NODE_ENV === 'production' || process.env.DEMO_MODE !== 'true') {
     return res.status(403).json({
@@ -742,9 +778,9 @@ router.post('/demo-login', async (req, res) => {
     return res.status(400).json({ error: 'Bad Request', message: 'Target demo email is required.' });
   }
 
-  const user = await User.findOne({ email: email.toLowerCase().trim() });
+  const user = await User.findOne({ email: email.toLowerCase().trim(), isSynthetic: true });
   if (!user) {
-    return res.status(404).json({ error: 'Not Found', message: `Demo user ${email} not found in database.` });
+    return res.status(404).json({ error: 'Not Found', message: 'Synthetic demo account not found.' });
   }
 
   const { accessToken } = await issueSessionCookies(user, req, res);
@@ -780,6 +816,21 @@ router.get('/me', authenticate, async (req, res) => {
       isTwoFactorEnabled: req.user.isTwoFactorEnabled || false,
     },
   });
+});
+
+/**
+ * POST /api/auth/logout
+ * Clears session cookies and invalidates user session.
+ */
+router.post('/logout', async (req, res) => {
+  try {
+    res.clearCookie('accessToken', getCookieOptions({ isRefresh: false }));
+    res.clearCookie('refreshToken', getCookieOptions({ isRefresh: true }));
+    res.clearCookie('carebridge_csrf');
+    return res.json({ message: 'Successfully logged out and session cleared.' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server Error', message: err.message });
+  }
 });
 
 module.exports = router;

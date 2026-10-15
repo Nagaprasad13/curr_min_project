@@ -32,6 +32,7 @@ const AuditLogSchema = new mongoose.Schema({
       'BREAK_GLASS_ACCESS',
       'CREATE_REFERRAL',
       'UPDATE_CAPACITY',
+      'UPDATE_MODEL_STATUS',
       'QUERY_REFERRAL_ENGINE',
       'EXPORT_REPORT',
       'REGISTER_HOSPITAL',
@@ -56,7 +57,7 @@ const AuditLogSchema = new mongoose.Schema({
   },
   resourceType: {
     type: String,
-    enum: ['Hospital', 'HospitalCapacity', 'Referral', 'Consent', 'PatientRecord', 'Scheme', 'ClinicalDecisionSupport', 'ConditionSpecialtyMap', 'User'],
+    enum: ['Hospital', 'HospitalCapacity', 'Referral', 'Consent', 'PatientRecord', 'Scheme', 'ClinicalDecisionSupport', 'ConditionSpecialtyMap', 'ModelRegistry', 'User'],
     required: true,
   },
   resourceId: {
@@ -104,5 +105,6 @@ const AuditLogSchema = new mongoose.Schema({
 });
 
 AuditLogSchema.index({ timestamp: -1, action: 1 });
+AuditLogSchema.index({ patientId: 1, timestamp: -1 });
 
 module.exports = mongoose.model('AuditLog', AuditLogSchema);

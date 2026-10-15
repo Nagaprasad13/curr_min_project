@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { apiFetch as fetch } from '../api';
 
-export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLogin }) {
+export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLogin, authError }) {
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'forgot' | 'demo'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [requires2FA, setRequires2FA] = useState(false);
+  const [enrollmentToken, setEnrollmentToken] = useState('');
+  const [enrollmentSecret, setEnrollmentSecret] = useState('');
+  const [enrollmentCode, setEnrollmentCode] = useState('');
 
   // Registration state
   const [name, setName] = useState('');
-  const [district, setDistrict] = useState('Salem');
+  const [district, setDistrict] = useState('');
   const [phone, setPhone] = useState('');
   const [isStaffRegister, setIsStaffRegister] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
@@ -23,6 +27,23 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [demoAccounts, setDemoAccounts] = useState([]);
+  const [demoAccountsError, setDemoAccountsError] = useState(null);
+
+  useEffect(() => {
+    if (!isDemoMode) return undefined;
+    const controller = new AbortController();
+    fetch('/api/auth/demo-accounts', { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Demo accounts could not be loaded.');
+        setDemoAccounts(data.accounts || []);
+      })
+      .catch((loadError) => {
+        if (!controller.signal.aborted) setDemoAccountsError(loadError.message);
+      });
+    return () => controller.abort();
+  }, [isDemoMode]);
 
   // Submit Login
   const handleLogin = async (e) => {
@@ -38,6 +59,20 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
       });
       const data = await res.json();
 
+      if (res.status === 403 && data.requires2FAEnrollment && data.enrollmentToken) {
+        setEnrollmentToken(data.enrollmentToken);
+        const setupResponse = await fetch('/api/auth/2fa/generate', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${data.enrollmentToken}` },
+          credentials: 'include',
+        });
+        const setupData = await setupResponse.json();
+        if (!setupResponse.ok) throw new Error(setupData.message || 'Two-factor setup could not be started.');
+        setEnrollmentSecret(setupData.secret);
+        setAuthMode('enroll2fa');
+        return;
+      }
+
       if (res.status === 403 && data.requires2FA) {
         setRequires2FA(true);
         setError('Two-Factor Authentication required. Please enter your 6-digit TOTP code.');
@@ -49,6 +84,27 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
         throw new Error(data.message || 'Login failed. Please verify your credentials.');
       }
 
+      onLoginSuccess(data.user, data.token);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnableTwoFactor = async (event) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/2fa/enable', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${enrollmentToken}` },
+        credentials: 'include',
+        body: JSON.stringify({ secret: enrollmentSecret, code: enrollmentCode }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Two-factor setup could not be completed.');
       onLoginSuccess(data.user, data.token);
     } catch (err) {
       setError(err.message);
@@ -104,7 +160,7 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
 
       if (!res.ok) throw new Error(data.message);
 
-      setSuccessMsg('If an account exists, instructions have been generated. (In development, check the backend console for the simulated link).');
+      setSuccessMsg('If the address matches an account, password reset instructions will follow. This response does not confirm whether an account exists.');
       setResetStep('submit');
     } catch (err) {
       setError(err.message);
@@ -140,39 +196,57 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '12px',
-        padding: '28px',
-        boxShadow: 'var(--shadow-lg)'
-      }}>
-        {/* Brand & Title */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8' }}>CareBridge</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Health Informatics Referral System
+    <>
+    <a className="skip-link" href="#main-content">Skip to main content</a>
+    <main id="main-content" className="login-shell">
+      <section className="login-layout" aria-label="CareBridge account access">
+        <aside className="login-intro">
+          <div className="login-brand-mark" aria-hidden="true">+</div>
+          <div className="login-eyebrow">SYNTHETIC CARE NETWORK</div>
+          <h1>CareBridge</h1>
+          <p className="login-intro-lead">Better-connected care starts here.</p>
+          <p className="login-intro-copy">
+            Simulated facility information supports research workflows for patients and care teams.
+          </p>
+          <div className="login-role-list" aria-label="Available account roles">
+            <span>Patient</span>
+            <span>Doctor</span>
+            <span>Hospital admin</span>
+            <span>Main admin · reviewer</span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: 4 }}>
-            Research Prototype | Synthetic Clinical Data Only
+          <div className="login-trust-note">
+            <span aria-hidden="true">✓</span>
+            <span>Simulated capability matching · Clinician review required</span>
           </div>
-        </div>
+        </aside>
+
+        <section className="login-card">
+          <div className="login-card-heading">
+            <div className="login-card-kicker">WELCOME TO CAREBRIDGE</div>
+            <h2>{authMode === 'register' ? 'Create your account' : authMode === 'forgot' ? 'Reset your password' : authMode === 'demo' ? 'Explore demo accounts' : authMode === 'enroll2fa' ? 'Set up two-factor authentication' : 'Sign in to continue'}</h2>
+            <p>{authMode === 'demo' ? 'Select a role to enter the demo workspace.' : authMode === 'enroll2fa' ? 'Add this account to an authenticator app, then enter its current six-digit code.' : 'Use your registered email and password to access your workspace.'}</p>
+          </div>
 
         {/* Auth Mode Tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 20, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
+        {authMode !== 'enroll2fa' && <div className="login-mode-tabs" role="tablist" aria-label="Account actions">
           <button
             type="button"
-            className={`btn ${authMode === 'login' ? 'btn-primary' : 'btn-outline'}`}
-            style={{ flex: 1, fontSize: '0.82rem', padding: '6px 10px' }}
+            role="tab"
+            aria-selected={authMode === 'login'}
+            tabIndex={authMode === 'login' ? 0 : -1}
+            className={`btn login-mode-tab ${authMode === 'login' ? 'is-active' : ''}`}
+            style={{ flex: 1, fontSize: '0.85rem', padding: '8px 12px' }}
             onClick={() => { setAuthMode('login'); setError(null); setSuccessMsg(null); }}
           >
             Sign In
           </button>
           <button
             type="button"
-            className={`btn ${authMode === 'register' ? 'btn-primary' : 'btn-outline'}`}
-            style={{ flex: 1, fontSize: '0.82rem', padding: '6px 10px' }}
+            role="tab"
+            aria-selected={authMode === 'register'}
+            tabIndex={authMode === 'register' ? 0 : -1}
+            className={`btn login-mode-tab ${authMode === 'register' ? 'is-active' : ''}`}
+            style={{ flex: 1, fontSize: '0.85rem', padding: '8px 12px' }}
             onClick={() => { setAuthMode('register'); setError(null); setSuccessMsg(null); }}
           >
             Register
@@ -180,23 +254,26 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
           {isDemoMode && (
             <button
               type="button"
-              className={`btn ${authMode === 'demo' ? 'btn-warning' : 'btn-outline'}`}
+              role="tab"
+              aria-selected={authMode === 'demo'}
+              tabIndex={authMode === 'demo' ? 0 : -1}
+              className={`btn login-mode-tab ${authMode === 'demo' ? 'is-active' : ''}`}
               style={{ flex: 1, fontSize: '0.82rem', padding: '6px 10px' }}
               onClick={() => { setAuthMode('demo'); setError(null); setSuccessMsg(null); }}
             >
               Demo Logins
             </button>
           )}
-        </div>
+        </div>}
 
-        {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', color: '#fca5a5', padding: '10px 14px', borderRadius: 8, fontSize: '0.82rem', marginBottom: 16 }}>
-            ⚠️ {error}
+        {(error || authError) && (
+          <div role="alert" aria-live="polite" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 14px', borderRadius: 8, fontSize: '0.85rem', marginBottom: 16 }}>
+            ⚠️ {error || authError}
           </div>
         )}
 
         {successMsg && (
-          <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#6ee7b7', padding: '10px 14px', borderRadius: 8, fontSize: '0.82rem', marginBottom: 16 }}>
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', padding: '10px 14px', borderRadius: 8, fontSize: '0.85rem', marginBottom: 16 }}>
             ✓ {successMsg}
           </div>
         )}
@@ -204,25 +281,30 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
         {/* 1. LOGIN FORM */}
         {authMode === 'login' && (
           <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label htmlFor="login-email">Email Address</label>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label className="form-label" htmlFor="login-email">Email Address</label>
               <input
                 id="login-email"
                 type="email"
                 className="form-control"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="doctor@carebridge.tn.gov.in"
+                autoComplete="username"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setRequires2FA(false);
+                  setTwoFactorCode('');
+                }}
+                placeholder="doctor@example.invalid"
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label htmlFor="login-password">Password</label>
+                <label className="form-label" htmlFor="login-password">Password</label>
                 <button
                   type="button"
-                  style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                  className="forgot-password-link"
                   onClick={() => { setAuthMode('forgot'); setError(null); }}
                 >
                   Forgot password?
@@ -234,14 +316,15 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
                 className="form-control"
                 required
                 value={password}
+                autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
               />
             </div>
 
             {requires2FA && (
-              <div className="form-group" style={{ background: 'rgba(56, 189, 248, 0.1)', padding: 12, borderRadius: 8, border: '1px solid #0284c7' }}>
-                <label htmlFor="login-2fa" style={{ color: '#38bdf8' }}>6-Digit 2FA Code (TOTP)</label>
+              <div className="form-group" style={{ background: '#ecfdf5', padding: 14, borderRadius: 8, border: '1px solid #a7f3d0', marginBottom: 14 }}>
+                <label htmlFor="login-2fa" style={{ color: '#047857', fontWeight: 600 }}>6-Digit 2FA Code (TOTP)</label>
                 <input
                   id="login-2fa"
                   type="text"
@@ -256,7 +339,7 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
               </div>
             )}
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.95rem' }} disabled={loading}>
               {loading ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
@@ -278,7 +361,7 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
 
             {isStaffRegister && (
               <div className="form-group">
-                <label htmlFor="reg-invite">Official Invite Code</label>
+                <label htmlFor="reg-invite">Invitation code</label>
                 <input
                   id="reg-invite"
                   type="text"
@@ -316,7 +399,7 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="patient@carebridge.tn.gov.in"
+                placeholder="patient@example.invalid"
               />
             </div>
 
@@ -336,18 +419,14 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
             <div className="form-row" style={{ display: 'flex', gap: 12 }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label htmlFor="reg-district">District</label>
-                <select
+                <input
                   id="reg-district"
                   className="form-control"
+                  type="text"
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                >
-                  <option value="Salem">Salem</option>
-                  <option value="Coimbatore">Coimbatore</option>
-                  <option value="Erode">Erode</option>
-                  <option value="Dharmapuri">Dharmapuri</option>
-                  <option value="Namakkal">Namakkal</option>
-                </select>
+                  placeholder="Enter district"
+                />
               </div>
 
               <div className="form-group" style={{ flex: 1 }}>
@@ -386,7 +465,7 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
                     required
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="doctor@carebridge.tn.gov.in"
+                    placeholder="doctor@example.invalid"
                   />
                 </div>
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
@@ -437,45 +516,64 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
 
         {/* 4. DEMO MODE TAB (ONLY PRESENT WHEN DEMO_MODE=true) */}
         {authMode === 'demo' && isDemoMode && (
-          <div>
-            <div style={{
-              background: 'rgba(245, 158, 11, 0.15)',
-              border: '1px solid #f59e0b',
-              padding: '10px 12px',
-              borderRadius: 8,
-              fontSize: '0.78rem',
-              color: '#fcd34d',
-              marginBottom: 16
-            }}>
-              ⚙️ <strong>DEMO ENVIRONMENT ACTIVE:</strong> Issues authenticated sessions with real server cookies for pre-seeded research evaluation accounts.
+          <div className="demo-login-panel">
+            <div className="demo-login-note">
+              <strong>Demo environment</strong>
+              <span>Choose a role to open its pre-seeded research account.</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: 'Hospital Admin (Salem Mohan - Tier 2)', email: 'admin.salem@carebridge.tn.gov.in', role: 'hospital_admin' },
-                { label: 'Dr. S. Sundaram, MD (Referring Doctor)', email: 'doctor@carebridge.tn.gov.in', role: 'doctor' },
-                { label: 'Dr. K. Swaminathan (Platform Reviewer)', email: 'reviewer@carebridge.tn.gov.in', role: 'platform_reviewer' },
-                { label: 'M. Anandhi (Patient 1)', email: 'patient@carebridge.tn.gov.in', role: 'patient' },
-                { label: 'Hospital Admin (Kovai Apex - Tier 1)', email: 'admin.kovai@carebridge.tn.gov.in', role: 'hospital_admin' },
-              ].map((persona) => (
+            <div className="demo-login-list">
+              {demoAccountsError && <p role="alert">{demoAccountsError}</p>}
+              {!demoAccountsError && demoAccounts.length === 0 && <p role="status">Loading synthetic demo accounts…</p>}
+              {demoAccounts.map((account) => (
                 <button
-                  key={persona.email}
+                  key={account.email}
                   type="button"
-                  className="btn btn-outline"
-                  style={{ textAlign: 'left', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  onClick={() => onDemoLogin(persona.email)}
+                  className="demo-login-option"
+                  onClick={() => onDemoLogin?.(account.email)}
+                  disabled={loading}
                 >
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{persona.label}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{persona.email}</div>
+                    <span className="demo-login-title">{account.name}</span>
+                    <span className="demo-login-detail">{account.email}</span>
                   </div>
-                  <span className="badge badge-secondary" style={{ textTransform: 'capitalize' }}>{persona.role}</span>
+                  <span className="demo-login-role">{account.role.replaceAll('_', ' ')}<span aria-hidden="true">→</span></span>
                 </button>
               ))}
             </div>
           </div>
         )}
-      </div>
-    </div>
+
+        {authMode === 'enroll2fa' && (
+          <form onSubmit={handleEnableTwoFactor} aria-label="Two-factor authentication enrollment">
+            <div className="clinical-notice-box">
+              <strong>Authenticator setup key</strong>
+              <p>Enter this key in your authenticator app and keep it private.</p>
+              <code className="totp-secret">{enrollmentSecret}</code>
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="enroll-2fa-code">Six-digit authenticator code</label>
+              <input
+                id="enroll-2fa-code"
+                className="form-control"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                value={enrollmentCode}
+                onChange={(event) => setEnrollmentCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+              />
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={loading || enrollmentCode.length !== 6}>
+              {loading ? 'Verifying…' : 'Verify and continue'}
+            </button>
+          </form>
+        )}
+      </section>
+      </section>
+    </main>
+    </>
   );
 }

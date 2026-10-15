@@ -1,6 +1,6 @@
 /**
  * CareBridge Internationalization (i18n) Scaffold
- * Provides structured English interface strings with scaffolding for future Tamil (தமிழ்) translation.
+ * Provides structured English interface strings as a scaffold for future localization.
  * 
  * NOTE: Medical terminology and clinical disclaimers are preserved in English
  * until formal clinician-validated localization review is completed.
@@ -11,7 +11,7 @@ export const STRINGS = {
     common: {
       appName: 'CareBridge',
       tagline: 'Capability-Verified, Freshness-Aware Hospital Referral Engine',
-      prototypeNotice: 'RESEARCH PROTOTYPE. NOT FOR REAL CLINICAL CARE.',
+      prototypeNotice: 'Synthetic data. Not for real patient care.',
       clinicalDisclaimer: 'Decision support only. A clinician must review.',
       loading: 'Loading data...',
       save: 'Save Changes',
@@ -30,13 +30,13 @@ export const STRINGS = {
       patient: 'Patient Portal',
       doctor: 'Doctor Referral & Decision Support',
       hospital_admin: 'Hospital Admin & Capacity Telemetry',
-      platform_reviewer: 'TNHSP Platform Reviewer & Auditor',
+      platform_reviewer: 'Platform reviewer',
     },
     hospitalAdmin: {
       profileTitle: 'Hospital Profile & Clinical Capabilities',
       proposedTier: 'Proposed Capability Tier',
-      effectiveTier: 'Confirmed Effective Tier',
-      unconfirmedWarning: 'Unconfirmed Tier (Pending Formal TNHSP Review)',
+      effectiveTier: 'Effective tier (simulated)',
+      unconfirmedWarning: 'Proposed tier (simulation)',
       consistencyCheckTitle: 'Automated Capability Consistency Audit',
       updateCapacityTitle: 'Capacity & Bed Availability Telemetry',
       telemetryAge: 'Telemetry Age',
@@ -46,14 +46,14 @@ export const STRINGS = {
     },
     reviewer: {
       queueTitle: 'Hospital Verification & Tier Audit Queue',
-      approve: 'Verify & Confirm Tier',
+      approve: 'Record simulated verification',
       reject: 'Reject Submission',
       rejectReasonRequired: 'A specific rejection reason is strictly required.',
       specialtyMapTitle: 'Condition-Specialty Escalation Mapping Sheet',
       specialtyMapDesc: 'Reviewer sign-off on clinical triage and specialty routing rules.',
       schemeManagementTitle: 'Healthcare Assurance Schemes Catalogue',
       sweepOutdated: 'Sweep Outdated Schemes (>180d)',
-      markVerified: 'Mark Verified Against Official Portal',
+      markVerified: 'Record research source review',
     },
     doctor: {
       newAssessmentTitle: 'Clinical Triage & Condition Screening Intake',
@@ -66,8 +66,8 @@ export const STRINGS = {
       overrideReason: 'Clinical Justification for Urgency Override',
       insufficientDataWarning: 'Insufficient Intake Data: Vitals incomplete for algorithmic risk assessment.',
       referralsTitle: 'Capability-Verified Hospital Recommendations',
-      straightLineDistance: 'Straight-line Haversine distance',
-      capacityUnknownPhone: 'Capacity Unknown - Confirm availability by phone prior to transfer',
+      straightLineDistance: 'Straight-line distance',
+      capacityUnknownPhone: 'Unknown, confirm by phone',
       excludedTitle: 'Clinically Excluded Hospitals',
       recordsConsentTitle: 'Patient Clinical Records & Consent Status',
       requestConsent: 'Request Records Consent',
@@ -82,35 +82,14 @@ export const STRINGS = {
       revokeConsent: 'Revoke Consent Immediately',
       accessHistory: 'Transparent Record Access Audit Log',
       myReferrals: 'My Referral Status',
-      schemeMatches: 'Healthcare Scheme Potential Matches',
-      possibleMatchNotice: 'Possible match only. Official enrollment & pre-authorization required.',
+      schemeMatches: 'Possible scheme matches',
+      possibleMatchNotice: 'Possible match only. Not confirmed eligibility.',
     },
     schemes: {
-      forbiddenWordsNotice: 'CareBridge never guarantees coverage or claims free treatment.',
-      matchPotential: 'Potential Match',
+      disclaimer: 'Possible match only. Not confirmed eligibility. Check current details with the programme directly.',
+      matchPotential: 'Possible match',
       unlikelyMatch: 'Unlikely Match',
       undeterminedMatch: 'Cannot Determine (Missing Input Criteria)',
-    },
-  },
-  // Scaffold for Tamil (ta) localization (non-clinical strings)
-  ta: {
-    common: {
-      appName: 'கேர்பிரிட்ஜ் (CareBridge)',
-      tagline: 'திறன்-சரிபார்க்கப்பட்ட, புதிய தகவல் அடிப்படையிலான மருத்துவமனை பரிந்துரை தளம்',
-      prototypeNotice: 'ஆராய்ச்சி முன்மாதிரி மட்டுமே. நேரடி மருத்துவ சிகிச்சைக்கு அல்ல.',
-      clinicalDisclaimer: 'முடிவெடுக்கும் ஆதரவு மட்டுமே. மருத்துவர் மதிப்பாய்வு செய்ய வேண்டும்.',
-      loading: 'ஏற்றுகிறது...',
-      save: 'சேமி',
-      cancel: 'ரத்து செய்',
-      confirm: 'உறுதிப்படுத்து',
-      submit: 'சமர்ப்பி',
-      back: 'பின்செல்',
-      status: 'நிலை',
-      actions: 'செயல்கள்',
-      refresh: 'புதுப்பி',
-      error: 'பிழை ஏற்பட்டது.',
-      empty: 'பதிவுகள் எதுவும் இல்லை.',
-      district: 'மாவட்டம்',
     },
   },
 };

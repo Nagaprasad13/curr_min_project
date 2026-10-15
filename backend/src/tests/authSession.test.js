@@ -48,11 +48,11 @@ describe('Phase 8.1: Real Authentication, Sessions & Security Hardening Tests', 
       isSynthetic: true,
     });
     reviewerToken = signToken({ id: reviewerUser._id, email: reviewerUser.email, role: reviewerUser.role });
-  });
+  }, 180000);
 
   afterAll(async () => {
     await disconnectDB();
-  });
+  }, 180000);
 
   describe('1. Registration Role Integrity', () => {
     it('allows patient self-registration', async () => {
@@ -421,6 +421,22 @@ describe('Phase 8.1: Real Authentication, Sessions & Security Hardening Tests', 
       expect(res.headers['set-cookie']).toBeDefined();
       delete process.env.DEMO_MODE;
     });
+
+    it('lists only synthetic role accounts when demo mode is enabled', async () => {
+      process.env.DEMO_MODE = 'true';
+      try {
+        const res = await request(app).get('/api/auth/demo-accounts');
+
+        expect(res.status).toBe(200);
+        expect(res.body.accounts).toEqual(expect.arrayContaining([
+          expect.objectContaining({ email: 'admin.sess@carebridge.test', role: 'hospital_admin' }),
+          expect.objectContaining({ email: 'reviewer.sess@carebridge.test', role: 'platform_reviewer' }),
+        ]));
+        expect(res.body.accounts.some(account => account.email === 'patient.self@carebridge.test')).toBe(false);
+      } finally {
+        delete process.env.DEMO_MODE;
+      }
+    });
   });
 
   describe('8. Phase 8.1 Rigorous Security Boundary Follow-Ups', () => {
@@ -531,7 +547,7 @@ describe('Phase 8.1: Real Authentication, Sessions & Security Hardening Tests', 
         password: 'AdminPassword123!',
         role: 'hospital_admin',
         isTwoFactorEnabled: false,
-        isSynthetic: true,
+        isSynthetic: false,
       });
 
       // Temporarily set NODE_ENV to production
@@ -561,7 +577,7 @@ describe('Phase 8.1: Real Authentication, Sessions & Security Hardening Tests', 
         role: 'hospital_admin',
         hospitalId: testHospital._id,
         isTwoFactorEnabled: false,
-        isSynthetic: true,
+        isSynthetic: false,
       });
 
       // 1. Production mode login returns 403 with limited-scope enrollmentToken

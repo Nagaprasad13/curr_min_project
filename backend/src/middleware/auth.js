@@ -103,10 +103,8 @@ async function requireHospitalOwnership(req, res, next) {
     }
 
     if (req.user.role === 'hospital_admin') {
-      const isOwnerByHospitalRef = req.user.hospitalId && req.user.hospitalId.toString() === hospital._id.toString();
-      const isOwnerByAdminUser = hospital.adminUserId && hospital.adminUserId.toString() === req.user._id.toString();
-
-      if (!isOwnerByHospitalRef && !isOwnerByAdminUser) {
+      const isOwner = req.user.hospitalId && req.user.hospitalId.toString() === hospital._id.toString();
+      if (!isOwner) {
         return res.status(403).json({
           error: 'Forbidden',
           message: 'Security Policy Violation: You do not possess administrative authority over this hospital.',
@@ -124,8 +122,62 @@ async function requireHospitalOwnership(req, res, next) {
   }
 }
 
+/**
+ * Limits hospital context reads to the assigned hospital for doctors and admins.
+ * Reviewers may inspect any hospital; this middleware is for read-only context routes.
+ */
+async function requireHospitalContext(req, res, next) {
+  try {
+    const hospitalId = req.params.id;
+    if (!hospitalId) {
+      return res.status(400).json({ error: 'Bad Request', message: 'Hospital ID parameter is required.' });
+    }
+    const hospital = await Hospital.findById(hospitalId);
+    if (!hospital) {
+      return res.status(404).json({ error: 'Not Found', message: `Hospital with ID ${hospitalId} not found.` });
+    }
+    if (req.user.role === 'platform_reviewer') {
+      req.targetHospital = hospital;
+      return next();
+    }
+    if (['hospital_admin', 'doctor'].includes(req.user.role) &&
+        req.user.hospitalId?.toString() === hospital._id.toString()) {
+      req.targetHospital = hospital;
+      return next();
+    }
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'Access is limited to the hospital assigned to your account.',
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server Error', message: err.message });
+  }
+}
+
+function requireHospitalAssignment(req, res, next) {
+  if (req.user?.role !== 'doctor' || !req.user.hospitalId) {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'A doctor account assigned to a hospital is required for this workflow.',
+    });
+  }
+  Hospital.exists({ _id: req.user.hospitalId })
+    .then(hospital => {
+      if (!hospital) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'The doctor account is not assigned to an existing hospital.',
+        });
+      }
+      next();
+    })
+    .catch(err => res.status(500).json({ error: 'Server Error', message: err.message }));
+}
+
 module.exports = {
   authenticate,
   authorizeRoles,
   requireHospitalOwnership,
+  requireHospitalContext,
+  requireHospitalAssignment,
 };

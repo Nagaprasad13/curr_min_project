@@ -12,7 +12,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { generateSyntheticHospitals } = require('../scripts/syntheticDataGenerator');
+const mongoose = require('mongoose');
+const { connectDB, disconnectDB } = require('../config/db');
+const Practitioner = require('../models/Practitioner');
+const {
+  generateSyntheticHospitals,
+  generateSyntheticPractitioners,
+} = require('../scripts/syntheticDataGenerator');
 const { generateEvaluationScenarios } = require('./scenarioGenerator');
 const { simulateStaleness } = require('./staleness/stalenessModel');
 const { evaluateScenarioResult, computeBootstrapCI, computePairedComparison, computeMean } = require('./metrics');
@@ -141,6 +147,35 @@ function runModelRecommendation({
  * Main benchmark experiment runner.
  */
 async function runStalenessBenchmark() {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'test';
+
+  try {
+    await connectDB();
+    const hospitals = generateSyntheticHospitals(12345);
+    hospitals.forEach(hospital => {
+      hospital._id = new mongoose.Types.ObjectId();
+    });
+
+    await Practitioner.deleteMany({});
+    await Practitioner.insertMany(generateSyntheticPractitioners(hospitals));
+    const practitioners = await Practitioner.find({
+      employmentStatus: 'active',
+      verificationStatus: 'verified',
+    }).select('hospitalId specialty employmentStatus verificationStatus').lean();
+
+    return await runStalenessBenchmarkWithData(hospitals, practitioners);
+  } finally {
+    await disconnectDB();
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  }
+}
+
+async function runStalenessBenchmarkWithData(hospitals, practitioners) {
   console.log('========================================================================');
   console.log(' CareBridge Phase 4: Full Factorial Telemetry Staleness Benchmark');
   console.log(' Preregistration: /evaluation/PREREGISTRATION.md');
@@ -152,8 +187,7 @@ async function runStalenessBenchmark() {
   const startTime = Date.now();
 
   // 1. Initialize Network Data
-  const hospitals = generateSyntheticHospitals(12345);
-  const scenarios = generateEvaluationScenarios(hospitals, 42);
+  const scenarios = generateEvaluationScenarios(hospitals, 42, practitioners);
 
   const STALENESS_LEVELS = [0, 10, 20, 30, 40, 50]; // Percent
   const MECHANISMS = ['mixed', 'aged', 'missing'];

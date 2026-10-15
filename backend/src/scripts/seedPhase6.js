@@ -1,9 +1,13 @@
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
-const bcrypt = require('bcryptjs');
 const Hospital = require('../models/Hospital');
 const User = require('../models/User');
+const {
+  ensureCredential,
+  loadSeedCredentials,
+  writeSeedCredentials,
+} = require('./seedHospitalAccounts');
 const PatientRecord = require('../models/PatientRecord');
 const Scheme = require('../models/Scheme');
 const Consent = require('../models/Consent');
@@ -358,7 +362,11 @@ const RECORD_TEMPLATES = [
 /**
  * Seeds Phase 6 synthetic records, 2 hospitals, 10 patients, and official schemes.
  */
-async function seedPhase6(hospitals = null) {
+async function seedPhase6(
+  hospitals = null,
+  seedCredentials = loadSeedCredentials(),
+  credentialsPath
+) {
   console.log('--- Phase 6 Seed: Consent Record Sharing & Scheme Catalogue ---');
 
   // 1. Ensure 2 simulated hospitals exist (Hospital A and Hospital B)
@@ -398,21 +406,29 @@ async function seedPhase6(hospitals = null) {
 
   // 2. Seed 10 Synthetic Patients
   const createdPatients = [];
-  const hashedPassword = await bcrypt.hash('PatientPassword123!', 10);
 
   for (const p of SYNTHETIC_PATIENTS) {
     let patientDoc = await User.findOne({ email: p.email });
+    const password = ensureCredential(seedCredentials, {
+      name: p.name,
+      email: p.email,
+      role: 'patient',
+      district: p.district,
+    });
     if (!patientDoc) {
-      patientDoc = await new User({
+      patientDoc = new User({
         name: p.name,
         email: p.email,
-        password: hashedPassword,
         role: 'patient',
         district: p.district,
         phone: p.phone,
         isSynthetic: true,
-      }).save();
+      });
     }
+    patientDoc.password = password;
+    patientDoc.isSynthetic = true;
+    await patientDoc.save();
+    writeSeedCredentials(seedCredentials, credentialsPath);
     createdPatients.push(patientDoc);
   }
   console.log(`✓ Seeded ${createdPatients.length} synthetic patient accounts.`);

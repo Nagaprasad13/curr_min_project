@@ -2,7 +2,7 @@
 
 *Scenario:* **Emergency Referral of Acute Respiratory Failure (Salem to Coimbatore Network)**  
 *Total Time:* 4 minutes 30 seconds  
-*Target Portals:* React Vite UI (`http://localhost:5173`) & Express Backend (`http://localhost:5000`)  
+*Target Portals:* React Vite UI (`http://localhost:3000`) & Express Backend (`http://localhost:5000`)  
 
 ---
 
@@ -22,7 +22,7 @@
    ```powershell
    cd backend && npm run demo:reset
    ```
-3. Open browser at `http://localhost:5173`.
+3. Open browser at `http://localhost:3000`.
 
 ---
 

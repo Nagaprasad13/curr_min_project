@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   },
   isSynthetic: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   // Optional 2FA (TOTP)
   isTwoFactorEnabled: {

@@ -1,75 +1,121 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch as fetch } from '../api';
 import { getTranslation } from '../i18n/strings';
+import { Modal, Skeleton } from '../design-system/components';
 
-export default function HospitalAdminPortal({ token, adminUser }) {
+export default function HospitalAdminPortal({ token, adminUser, initialTab = 'telemetry' }) {
   const [hospital, setHospital] = useState(null);
   const [consistencyChecks, setConsistencyChecks] = useState(null);
   const [latestCapacity, setLatestCapacity] = useState(null);
   const [telemetryAge, setTelemetryAge] = useState(null);
+  const [initialContextLoading, setInitialContextLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
   // Capacity update form state
   const [capacityForm, setCapacityForm] = useState({
-    generalAvailable: 25,
-    generalTotal: 100,
-    emergencyAvailable: 5,
-    emergencyTotal: 15,
-    icuAvailable: 2,
-    icuTotal: 10,
-    ventilatorsAvailable: 1,
-    ventilatorsTotal: 8,
-    emergencyStatus: 'available',
-    cathLabStatus: 'available',
-    ctScanStatus: 'available',
-    mriStatus: 'unavailable',
-    dialysisStatus: 'available',
-    bloodBankStatus: 'available',
-    stalenessMinutes: 120,
+    generalAvailable: '',
+    generalTotal: '',
+    emergencyAvailable: '',
+    emergencyTotal: '',
+    icuAvailable: '',
+    icuTotal: '',
+    ventilatorsAvailable: '',
+    ventilatorsTotal: '',
+    emergencyStatus: 'unknown',
+    cathLabStatus: 'unknown',
+    ctScanStatus: 'unknown',
+    mriStatus: 'unknown',
+    dialysisStatus: 'unknown',
+    bloodBankStatus: 'unknown',
+    stalenessMinutes: '',
   });
 
-  const [activeTab, setActiveTab] = useState('telemetry'); // 'telemetry' | 'practitioners'
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [practitioners, setPractitioners] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [pracForm, setPracForm] = useState({
     fullName: '',
     qualification: '',
-    specialty: 'General Medicine',
+    specialty: '',
     registrationNumber: '',
     availability: 'on_call_24x7',
   });
+  const [inviteRole, setInviteRole] = useState('doctor');
+  const [createdInvite, setCreatedInvite] = useState(null);
 
-  const hospitalId = adminUser?.hospitalId || '6acdf89630cd8eb4c8160001';
+  const hospitalId = adminUser?.hospitalId || null;
 
   useEffect(() => {
-    if (token) {
-      loadHospitalDetails();
-      loadLatestCapacity();
-      loadPractitioners();
+    if (adminUser && hospitalId) {
+      const controller = new AbortController();
+      setInitialContextLoading(true);
+      Promise.all([
+        loadHospitalDetails(controller.signal),
+        loadLatestCapacity(controller.signal),
+        loadPractitioners(controller.signal),
+      ]).finally(() => {
+        if (!controller.signal.aborted) setInitialContextLoading(false);
+      });
+      return () => controller.abort();
+    } else if (adminUser) {
+      setErrorMsg('This hospital administrator account is not assigned to a hospital.');
     }
-  }, [token, hospitalId]);
+  }, [adminUser, hospitalId]);
 
-  const loadPractitioners = async () => {
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
+  const loadPractitioners = async (signal) => {
     try {
       const res = await fetch(`/api/hospitals/${hospitalId}/practitioners`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
         setPractitioners(data.practitioners || []);
+      } else {
+        setErrorMsg(data.message || 'Practitioner roster could not be loaded.');
       }
     } catch (err) {
-      console.warn('Could not load practitioners:', err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     }
   };
 
-  const loadHospitalDetails = async () => {
+  const handleCreateInvite = async () => {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const response = await fetch('/api/auth/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ role: inviteRole, hospitalId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'The staff invitation could not be created.');
+      setCreatedInvite(data.invite);
+      setSuccessMsg('Staff invitation created for this hospital.');
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadHospitalDetails = async (signal) => {
     try {
       setLoading(true);
       setErrorMsg(null);
       const res = await fetch(`/api/hospitals/${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
@@ -79,16 +125,17 @@ export default function HospitalAdminPortal({ token, adminUser }) {
         setErrorMsg(data.message || 'Failed to load hospital profile');
       }
     } catch (err) {
-      setErrorMsg(err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
-  const loadLatestCapacity = async () => {
+  const loadLatestCapacity = async (signal) => {
     try {
       const res = await fetch(`/api/hospitals/${hospitalId}/capacity/latest`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
@@ -97,24 +144,36 @@ export default function HospitalAdminPortal({ token, adminUser }) {
         if (data.snapshot?.beds) {
           setCapacityForm((prev) => ({
             ...prev,
-            generalAvailable: data.snapshot.beds.general?.available ?? prev.generalAvailable,
-            generalTotal: data.snapshot.beds.general?.total ?? prev.generalTotal,
-            emergencyAvailable: data.snapshot.beds.emergency?.available ?? prev.emergencyAvailable,
-            emergencyTotal: data.snapshot.beds.emergency?.total ?? prev.emergencyTotal,
-            icuAvailable: data.snapshot.beds.icu?.available ?? prev.icuAvailable,
-            icuTotal: data.snapshot.beds.icu?.total ?? prev.icuTotal,
-            ventilatorsAvailable: data.snapshot.beds.ventilators?.available ?? prev.ventilatorsAvailable,
-            ventilatorsTotal: data.snapshot.beds.ventilators?.total ?? prev.ventilatorsTotal,
+            generalAvailable: data.snapshot.beds.general?.available ?? '',
+            generalTotal: data.snapshot.beds.general?.total ?? '',
+            emergencyAvailable: data.snapshot.beds.emergency?.available ?? '',
+            emergencyTotal: data.snapshot.beds.emergency?.total ?? '',
+            icuAvailable: data.snapshot.beds.icu?.available ?? '',
+            icuTotal: data.snapshot.beds.icu?.total ?? '',
+            ventilatorsAvailable: data.snapshot.beds.ventilators?.available ?? '',
+            ventilatorsTotal: data.snapshot.beds.ventilators?.total ?? '',
           }));
         }
+      } else {
+        setErrorMsg(data.message || 'Latest capacity report could not be loaded.');
       }
     } catch (err) {
-      console.warn('Could not load latest capacity snapshot:', err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     }
   };
 
   const handleCapacitySubmit = async (e) => {
     e.preventDefault();
+    const requiredCounts = [
+      capacityForm.generalAvailable, capacityForm.generalTotal,
+      capacityForm.emergencyAvailable, capacityForm.emergencyTotal,
+      capacityForm.icuAvailable, capacityForm.icuTotal,
+      capacityForm.ventilatorsAvailable, capacityForm.ventilatorsTotal,
+    ];
+    if (requiredCounts.some((value) => value === '' || !Number.isFinite(Number(value)))) {
+      setErrorMsg('Enter all available and total capacity counts before submitting.');
+      return;
+    }
     try {
       setLoading(true);
       setErrorMsg(null);
@@ -255,9 +314,15 @@ export default function HospitalAdminPortal({ token, adminUser }) {
 
   return (
     <div id="hospital-admin-portal-view" className="portal-container">
+      {initialContextLoading && <Skeleton lines={4} />}
       {errorMsg && (
         <div className="clinical-warning-banner" role="alert">
-          ⚠️ {errorMsg}
+          ⚠️ {errorMsg} <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+            setErrorMsg(null);
+            loadHospitalDetails();
+            loadLatestCapacity();
+            loadPractitioners();
+          }}>Retry loading</button>
         </div>
       )}
       {successMsg && (
@@ -283,6 +348,12 @@ export default function HospitalAdminPortal({ token, adminUser }) {
           </div>
         </div>
       )}
+      {!telemetryAge && (
+        <div className="ds-alert ds-alert-warning" role="status">
+          <span className="ds-alert-icon" aria-hidden="true">!</span>
+          <div><strong>Capacity state: Unknown</strong><div>Unknown, confirm by phone. No recent capacity report is available.</div></div>
+        </div>
+      )}
 
       {/* Portal Tab Navigation */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, borderBottom: '2px solid #e2e8f0', paddingBottom: 8 }}>
@@ -302,13 +373,30 @@ export default function HospitalAdminPortal({ token, adminUser }) {
         </button>
       </div>
 
+      <section className="card" aria-labelledby="staff-invite-title">
+        <h3 id="staff-invite-title">Invite staff to this hospital</h3>
+        <label htmlFor="staff-invite-role">Staff role</label>
+        <select id="staff-invite-role" value={inviteRole} onChange={(event) => setInviteRole(event.target.value)}>
+          <option value="doctor">Doctor</option>
+          <option value="hospital_admin">Hospital admin</option>
+        </select>
+        <button type="button" className="btn btn-outline btn-sm" onClick={handleCreateInvite} disabled={loading || !hospitalId}>
+          {loading ? 'Creating invite…' : 'Create invite code'}
+        </button>
+        {createdInvite && (
+          <p role="status">
+            Code for this hospital: <code>{createdInvite.code}</code> · expires {new Date(createdInvite.expiresAt).toLocaleString()}
+          </p>
+        )}
+      </section>
+
       {activeTab === 'telemetry' && (
         <div className="grid-2-col">
         {/* Left Column: Hospital Profile & Capability Tiering */}
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">🏥 Hospital Profile & Clinical Capabilities</h2>
-            <p className="card-desc">Simulated facility profile under the Tamil Nadu Clinical Establishments Act.</p>
+            <p className="card-desc">Simulated facility profile. Synthetic data does not represent legal or regulatory compliance.</p>
           </div>
 
           {hospital ? (
@@ -323,7 +411,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
               <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <div>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Capability Tier:</span>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Effective capability tier:</span>
                     <h3 style={{ margin: '2px 0', color: '#1e293b' }}>
                       {hospital.tier}
                       {hospital.tierStatus === 'unconfirmed' && (
@@ -333,7 +421,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
                       )}
                       {hospital.tierStatus === 'confirmed' && (
                         <span className="badge badge-success" style={{ marginLeft: 8 }}>
-                          CONFIRMED BY TNHSP
+                          Simulated verification (synthetic data)
                         </span>
                       )}
                     </h3>
@@ -558,7 +646,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
             <div>
               <h2 className="card-title">👨‍⚕️ Medical Practitioners & Specialist Roster</h2>
               <p className="card-desc">
-                Active verified clinicians dynamically determine this facility's capability tier and referral eligibility.
+                Practitioners with simulated verification status contribute to this prototype's capability tier and referral matching.
               </p>
             </div>
             <button
@@ -576,7 +664,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
             Hospital Admins may update on-duty / on-leave employment status.
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto' }} role="region" aria-label="Practitioner roster table" tabIndex="0">
             <table className="table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
@@ -642,9 +730,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
 
           {/* Modal to Register Practitioner */}
           {showAddModal && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-              <div style={{ background: '#ffffff', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-                <h3 style={{ margin: '0 0 16px 0', color: '#1e293b' }}>Register New Medical Practitioner</h3>
+            <Modal open title="Register practitioner" onClose={() => setShowAddModal(false)}>
                 <form onSubmit={handleAddPractitioner}>
                   <div style={{ marginBottom: 12 }}>
                     <label className="form-label" htmlFor="prac-name">Full Name (with Dr. prefix)</label>
@@ -674,27 +760,18 @@ export default function HospitalAdminPortal({ token, adminUser }) {
 
                   <div style={{ marginBottom: 12 }}>
                     <label className="form-label" htmlFor="prac-spec">Clinical Specialty</label>
-                    <select
+                    <input
                       id="prac-spec"
                       className="form-input"
                       value={pracForm.specialty}
                       onChange={(e) => setPracForm({ ...pracForm, specialty: e.target.value })}
+                      placeholder="Enter specialty"
                       required
-                    >
-                      <option value="Cardiology">Cardiology</option>
-                      <option value="Neurology">Neurology</option>
-                      <option value="Nephrology">Nephrology</option>
-                      <option value="Pulmonology">Pulmonology</option>
-                      <option value="Orthopedics">Orthopedics</option>
-                      <option value="General Medicine">General Medicine</option>
-                      <option value="General Surgery">General Surgery</option>
-                      <option value="Obstetrics & Gynecology">Obstetrics & Gynecology</option>
-                      <option value="Pediatrics">Pediatrics</option>
-                    </select>
+                    />
                   </div>
 
                   <div style={{ marginBottom: 12 }}>
-                    <label className="form-label" htmlFor="prac-reg">State Medical Council Registration No.</label>
+                    <label className="form-label" htmlFor="prac-reg">Professional registration reference (synthetic)</label>
                     <input
                       id="prac-reg"
                       className="form-input"
@@ -737,8 +814,7 @@ export default function HospitalAdminPortal({ token, adminUser }) {
                     </button>
                   </div>
                 </form>
-              </div>
-            </div>
+            </Modal>
           )}
         </div>
       )}

@@ -3,7 +3,7 @@ const router = express.Router();
 const Referral = require('../models/Referral');
 const Hospital = require('../models/Hospital');
 const HospitalCapacity = require('../models/HospitalCapacity');
-const { authenticate, authorizeRoles } = require('../middleware/auth');
+const { authenticate, authorizeRoles, requireHospitalAssignment } = require('../middleware/auth');
 const { rankReferralHospitals } = require('../services/referralEngineService');
 const { recordAuditLog } = require('../services/auditService');
 const { assessPatient, predictSeverity, MANDATORY_DISCLAIMER } = require('../services/mlTriageService');
@@ -42,6 +42,7 @@ router.post(
   '/assess',
   authenticate,
   authorizeRoles('doctor'),
+  requireHospitalAssignment,
   async (req, res) => {
     try {
       const patientData = req.body || {};
@@ -65,13 +66,15 @@ router.post(
           redFlagCount: (assessment.red_flags || []).length,
           conditionsEvaluated: (assessment.condition_risks || []).length,
           fallbackUsed: Boolean(assessment.serviceFallback),
+          modelVersions: assessment.model_versions || {},
+          modelArtifacts: assessment.model_artifacts || [],
         },
       });
 
       return res.json(assessment);
     } catch (err) {
       console.error('[REFERRAL ASSESS ERROR]:', err);
-      return res.status(500).json({ error: 'Server Error', message: err.message });
+      return res.status(err.statusCode || 500).json({ error: 'Server Error', message: err.message });
     }
   }
 );
@@ -85,6 +88,7 @@ router.post(
   '/predict-severity',
   authenticate,
   authorizeRoles('doctor'),
+  requireHospitalAssignment,
   async (req, res) => {
     try {
       const result = await predictSeverity(req.body || {});
@@ -104,13 +108,16 @@ router.post(
           riskCategory: result.riskCategory,
           riskScore: result.riskScore,
           fallbackUsed: Boolean(result.serviceFallback),
+          modelName: result.modelName,
+          modelVersion: result.modelVersion,
+          artifactSha256Prefix: result.artifactSha256Prefix,
         },
       });
 
       return res.json(result);
     } catch (err) {
       console.error('[TRIAGE PREDICTION ERROR]:', err);
-      return res.status(500).json({ error: 'Server Error', message: err.message });
+      return res.status(err.statusCode || 500).json({ error: 'Server Error', message: err.message });
     }
   }
 );
@@ -124,6 +131,7 @@ router.post(
   '/recommend',
   authenticate,
   authorizeRoles('doctor'),
+  requireHospitalAssignment,
   async (req, res) => {
     try {
       const {
@@ -195,7 +203,11 @@ router.post(
           urgencyConfirmedByDoctor: urgencyConfirmedByDoctor !== undefined ? urgencyConfirmedByDoctor : true,
           urgencyOverrideReason,
         },
-        mlAssessment: mlAssessment || undefined,
+        mlAssessment: mlAssessment ? {
+          ...mlAssessment,
+          modelVersions: mlAssessment.modelVersions || mlAssessment.model_versions || {},
+          modelArtifacts: mlAssessment.modelArtifacts || mlAssessment.model_artifacts || [],
+        } : undefined,
         engineVersion: '1.0.0',
         configSnapshot: {
           freshness: freshnessConfig,
@@ -205,6 +217,7 @@ router.post(
         rankedRecommendations: engineResult.recommendations,
         excludedHospitals: engineResult.excludedHospitals,
         status: 'draft',
+        expiresAt: new Date(Date.now() + 30 * 1000), // 30 seconds validity window
         doctorNotes,
         clinicalDisclaimerAcknowledged: true,
         decisionSupportDisclaimer: engineResult.decisionSupportNotice || MANDATORY_DISCLAIMER,
@@ -227,7 +240,10 @@ router.post(
         meta: {
           eligibleCount: engineResult.recommendations.length,
           topHospitalId: engineResult.recommendations[0]?.hospitalId,
+          modelVersions: mlAssessment?.modelVersions || mlAssessment?.model_versions || {},
+          modelArtifacts: mlAssessment?.modelArtifacts || mlAssessment?.model_artifacts || [],
           capacityMode,
+          expiresAt: saved.expiresAt,
         },
       });
 
@@ -257,6 +273,8 @@ router.post(
         referralId: saved.referralId,
         referralDbId: saved._id,
         status: saved.status,
+        expiresAt: saved.expiresAt,
+        expiresInSeconds: 30,
         summary: engineResult.summary,
         recommendations: engineResult.recommendations,
         excludedHospitals: engineResult.excludedHospitals,
@@ -268,6 +286,48 @@ router.post(
     }
   }
 );
+
+/**
+ * GET /api/referrals
+ * Lists only the signed-in patient's or doctor's referrals.
+ */
+router.get('/', authenticate, authorizeRoles('patient', 'doctor'), async (req, res) => {
+  try {
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 25));
+    const query = req.user.role === 'patient'
+      ? { patientId: req.user._id }
+      : { referringDoctorId: req.user._id };
+    if (req.query.status) query.status = String(req.query.status).slice(0, 40);
+
+    const [referrals, total] = await Promise.all([
+      Referral.find(query)
+        .populate('selectedHospitalId', 'name district')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      Referral.countDocuments(query),
+    ]);
+    const safeReferrals = referrals.map((referral) => ({
+      referralId: referral.referralId,
+      status: referral.status,
+      recordsConsentStatus: referral.recordsConsentStatus || 'not_requested',
+      selectedHospital: referral.selectedHospitalId
+        ? { name: referral.selectedHospitalId.name, district: referral.selectedHospitalId.district }
+        : null,
+      createdAt: referral.createdAt,
+      ...(req.user.role === 'doctor' ? {
+        patientName: referral.patientName,
+        requirements: referral.requirements,
+      } : {}),
+    }));
+    return res.json({ referrals: safeReferrals, page, limit, total, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    console.error('[GET REFERRALS ERROR]:', err);
+    return res.status(500).json({ error: 'Server Error', message: err.message });
+  }
+});
 
 /**
  * GET /api/referrals/:id
@@ -295,6 +355,12 @@ router.get('/:id', authenticate, async (req, res) => {
 
     if (!referral) {
       return res.status(404).json(GENERIC_REFERRAL_404);
+    }
+
+    // Auto-expire referral if past validity window and still draft
+    if (referral.expiresAt && referral.expiresAt < new Date() && referral.status === 'draft') {
+      referral.status = 'expired';
+      await referral.save();
     }
 
     const currentUser = req.user;
@@ -332,7 +398,7 @@ router.get('/:id', authenticate, async (req, res) => {
 
     // Doctor access check: Must be the referring doctor
     if (currentUser.role === 'doctor') {
-      if (referral.referringDoctorId && referral.referringDoctorId.toString() !== currentUser._id.toString()) {
+      if (!referral.referringDoctorId || referral.referringDoctorId.toString() !== currentUser._id.toString()) {
         return res.status(404).json(GENERIC_REFERRAL_404);
       }
     } else if (currentUser.role !== 'platform_reviewer') {
@@ -373,10 +439,22 @@ router.patch(
       }
 
       // Check doctor ownership
-      if (referral.referringDoctorId && referral.referringDoctorId.toString() !== req.user._id.toString()) {
+      if (!referral.referringDoctorId || referral.referringDoctorId.toString() !== req.user._id.toString()) {
         return res.status(403).json({
           error: 'Forbidden',
           message: 'Security Policy Violation: You cannot review referrals initiated by another doctor.',
+        });
+      }
+
+      // Check if 30-second validity window expired
+      if (referral.expiresAt && referral.expiresAt < new Date()) {
+        referral.status = 'expired';
+        await referral.save();
+        return res.status(400).json({
+          error: 'Referral Expired',
+          message: 'This referral code has expired (30-second validity window elapsed). Please generate a fresh referral recommendation.',
+          referralId: referral.referralId,
+          status: 'expired',
         });
       }
 
@@ -484,7 +562,7 @@ router.post(
         return res.status(404).json({ error: 'Not Found', message: 'Referral document not found.' });
       }
 
-      if (referral.referringDoctorId && referral.referringDoctorId.toString() !== req.user._id.toString()) {
+      if (!referral.referringDoctorId || referral.referringDoctorId.toString() !== req.user._id.toString()) {
         return res.status(403).json({
           error: 'Forbidden',
           message: 'Security Policy Violation: You cannot request consent on referrals initiated by another doctor.',

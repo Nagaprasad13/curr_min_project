@@ -5,6 +5,7 @@ package-lock.json
 # Environment variables
 .env
 .env.local
+/backend/seed-credentials.json
 
 # ML Datasets (Strictly Local - Never Commit Clinical/MIMIC Data)
 ml/data/

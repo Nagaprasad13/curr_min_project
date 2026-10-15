@@ -31,9 +31,14 @@ function createSeededRandom(seed = 123456789) {
  * @param {number} [seed=42]
  * @returns {Array<object>} 500 scenarios
  */
-function generateEvaluationScenarios(hospitals, seed = 42) {
+function generateEvaluationScenarios(hospitals, seed = 42, practitioners = []) {
   const rand = createSeededRandom(seed);
   const scenarios = [];
+  const activeVerifiedSpecialists = new Set(
+    practitioners
+      .filter(p => p.employmentStatus === 'active' && p.verificationStatus === 'verified')
+      .map(p => `${String(p.hospitalId)}::${p.specialty}`)
+  );
 
   const CLINICAL_TEMPLATES = [
     { specialty: 'Cardiology', equipment: ['cardiacCathLab', 'ventilators'], bedType: 'icu', urgency: 'emergency' },
@@ -154,10 +159,8 @@ function generateEvaluationScenarios(hospitals, seed = 42) {
       if (h.verificationStatus !== 'verified') return;
       if (!(h.specialties || []).includes(template.specialty)) return;
 
-      // Derived specialist count check: hospital must have >= 1 active verified specialist in specialty
-      const specialistInfo = (h.specialists || []).find(s => s.specialty === template.specialty);
-      const specialistCount = specialistInfo ? Number(specialistInfo.count) : 0;
-      if (specialistCount <= 0) return;
+      // Ground truth reads the verified roster, not the referral engine's cached aggregate.
+      if (!activeVerifiedSpecialists.has(`${hospId}::${template.specialty}`)) return;
 
       // Equipment check
       const equipment = h.equipment || {};

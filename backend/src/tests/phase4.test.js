@@ -10,7 +10,10 @@
  * 6. Reproducibility guarantee.
  */
 
-const { generateSyntheticHospitals } = require('../scripts/syntheticDataGenerator');
+const {
+  generateSyntheticHospitals,
+  generateSyntheticPractitioners,
+} = require('../scripts/syntheticDataGenerator');
 const { generateEvaluationScenarios } = require('../evaluation/scenarioGenerator');
 const { simulateStaleness, createMulberry32 } = require('../evaluation/staleness/stalenessModel');
 const { evaluateScenarioResult, checkCapabilityMatch, computeBootstrapCI } = require('../evaluation/metrics');
@@ -24,7 +27,7 @@ describe('Phase 4: Telemetry Staleness & Drift Experiments', () => {
 
   beforeAll(() => {
     hospitals = generateSyntheticHospitals(12345);
-    const scenarios = generateEvaluationScenarios(hospitals, 42);
+    const scenarios = generateEvaluationScenarios(hospitals, 42, generateSyntheticPractitioners(hospitals));
     testScenario = scenarios[0];
   });
 

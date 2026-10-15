@@ -12,6 +12,7 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import json
 import joblib
+from datetime import date
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -67,6 +68,22 @@ def bootstrap_metric_ci(y_true, y_prob, metric_fn, n_bootstraps=1000, alpha=0.05
     if not scores:
         return np.nan, np.nan
     return float(np.percentile(scores, 100 * (alpha / 2))), float(np.percentile(scores, 100 * (1 - alpha / 2)))
+
+
+def summarize_binary_predictions(y_true, y_prob, threshold=0.5):
+    """Summarizes held-out baseline metrics at a fixed probability threshold."""
+    predictions = (y_prob >= threshold).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_true, predictions, labels=[0, 1]).ravel()
+
+    return {
+        "auroc": float(roc_auc_score(y_true, y_prob)),
+        "sensitivity": float(recall_score(y_true, predictions, zero_division=0)),
+        "specificity": float(tn / (tn + fp)) if tn + fp else 0.0,
+        "ppv": float(precision_score(y_true, predictions, zero_division=0)),
+        "brier_score": float(brier_score_loss(y_true, y_prob)),
+        "missed_cases_count": int(fn),
+        "missed_cases_rate": float(fn / (fn + tp) * 100) if fn + tp else 0.0,
+    }
 
 
 def build_preprocessing_pipeline():
@@ -236,17 +253,30 @@ def run_triage_training():
     print(f"Brier Score (Calibrated):      {brier_cal:.4f} [{brier_ci[0]:.4f}, {brier_ci[1]:.4f}]")
     print(f"Expected Calibration Error (ECE): {ece:.4f}")
 
-    # Comparative vs Baselines
-    lr_auroc = float(roc_auc_score(y_test, lr_prob_test))
-    news2_auroc = float(roc_auc_score(y_test, news2_prob_test))
-    rf_auroc = float(roc_auc_score(y_test, rf_prob_test))
+    # Comparative held-out metrics vs baselines (fixed 0.50 threshold).
+    baseline_metrics = {
+        "majority_class": summarize_binary_predictions(y_test, y_pred_prob_majority),
+        "approximate_news2": {
+            "auroc": float(roc_auc_score(y_test, news2_prob_test)),
+            "classification_threshold": None,
+        },
+        "logistic_regression": summarize_binary_predictions(y_test, lr_prob_test),
+        "random_forest": summarize_binary_predictions(y_test, rf_prob_test),
+    }
 
-    print("\n--- COMPARISON WITH BASELINES (Test AUROC) ---")
-    print(f"1. Majority Class:              0.500")
-    print(f"2. Approximate NEWS2 Score:     {news2_auroc:.3f}")
-    print(f"3. L2 Logistic Regression:      {lr_auroc:.3f}")
-    print(f"4. Random Forest:               {rf_auroc:.3f}")
-    print(f"5. Calibrated HistGradBoost:    {auroc:.3f}")
+    print("\n--- COMPARISON WITH BASELINES (Test Metrics, Threshold 0.50) ---")
+    for name, metrics in baseline_metrics.items():
+        if name == "approximate_news2":
+            print(f"{name}: AUROC={metrics['auroc']:.3f} (continuous score; no cutoff metrics reported)")
+            continue
+        print(
+            f"{name}: AUROC={metrics['auroc']:.3f}, "
+            f"Sensitivity={metrics['sensitivity']:.3f}, "
+            f"Specificity={metrics['specificity']:.3f}, "
+            f"PPV={metrics['ppv']:.3f}, "
+            f"Brier={metrics['brier_score']:.4f}, "
+            f"Missed={metrics['missed_cases_count']}/{int(np.sum(y_test))}"
+        )
 
     # Subgroup Analysis
     print("\n--- SUBGROUP AUDITS (US Demo Hospital Cohort) ---")
@@ -295,8 +325,17 @@ def run_triage_training():
         "algorithm": "HistGradientBoostingClassifier with Platt Sigmoid Calibration",
         "dataset": "MIMIC-IV-ED Demo v2.2 (PhysioNet)",
         "population": "Emergency Department arrivals, Beth Israel Deaconess Medical Center, Boston, MA, USA",
-        "trainingDate": "2026-10-12",
+        "trainingDate": date.today().isoformat(),
         "target": "High Acuity (ESI acuity 1 or 2 vs 3, 4, 5)",
+        "cohort": {
+            "labeled_visits": int(len(df)),
+            "unique_patients": int(df['subject_id'].nunique()),
+            "train_visits": int(len(train_df)),
+            "train_patients": int(train_df['subject_id'].nunique()),
+            "test_visits": int(len(test_df)),
+            "test_patients": int(test_df['subject_id'].nunique()),
+            "test_high_acuity_cases": int(np.sum(y_test)),
+        },
         "operatingThreshold": best_thresh,
         "metrics": {
             "sensitivity": sens_test,
@@ -314,12 +353,7 @@ def run_triage_training():
             "brier_score_uncalibrated": brier_uncal,
             "expected_calibration_error": ece
         },
-        "baselines": {
-            "majority_class_auroc": 0.500,
-            "approximate_news2_auroc": news2_auroc,
-            "logistic_regression_auroc": lr_auroc,
-            "random_forest_auroc": rf_auroc
-        },
+        "baselines": baseline_metrics,
         "subgroups": subgroups,
         "robustness_missing_spo2": {
             "sensitivity": sens_no_spo2,

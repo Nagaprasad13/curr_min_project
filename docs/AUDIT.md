@@ -4,6 +4,7 @@
 > **Date of Audit:** 2026-10-13  
 > **Environment:** Node.js v22.19.0 | MongoDB Atlas Cluster (`hospital_referral`) / In-Memory Fallback | Python 3.11  
 > **Scope:** Phases 1–7 Codebase, Authentication, Persistence, Clinical Data Models, ML Model Pipelines, UI/UX, and Accessibility.
+> **Historical snapshot:** This report predates Phase 8.4a account provisioning. Its seed counts and demo-login details are not current; the seed workflow now creates per-hospital accounts with unique local credentials.
 
 ---
 
@@ -21,21 +22,8 @@
     5. No CSRF token mechanism exists.
 
 ### 1.2 Is the "Simulated User" switcher client-side only?
-* **Frontend State ([frontend/src/App.jsx](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/frontend/src/App.jsx#L8-L81)):**
-  * **YES.** A hardcoded client-side array `DEMO_PERSONAS` contains plaintext credentials for 5 seed accounts:
-    ```javascript
-    // App.jsx Lines 8-44
-    const DEMO_PERSONAS = [
-      { label: 'Hospital Admin (Salem - Tier 2)', email: 'admin.salem@carebridge.tn.gov.in', password: 'AdminPassword123!', role: 'hospital_admin' },
-      { label: 'Dr. S. Sundaram, MD (Referring Doctor)', email: 'doctor@carebridge.tn.gov.in', password: 'DoctorPassword123!', role: 'doctor' },
-      { label: 'Dr. K. Swaminathan (Platform Reviewer)', email: 'reviewer@carebridge.tn.gov.in', password: 'ReviewerPassword123!', role: 'platform_reviewer' },
-      { label: 'M. Anandhi (Patient 1)', email: 'patient@carebridge.tn.gov.in', password: 'PatientPassword123!', role: 'patient' },
-      { label: 'Hospital Admin (Kovai Apex - Tier 1)', email: 'admin.kovai@carebridge.tn.gov.in', password: 'AdminPassword123!', role: 'hospital_admin' },
-    ];
-    ```
-  * A `<select id="persona-selector">` triggers auto-login on selection change.
-  * **No standard login, registration, logout, or password recovery views exist in the UI.** Normal visitors are automatically logged in as the first demo persona on page load.
-  * **Client-side role navigation bypass:** The top navigation tabs (`Hospital Admin`, `Platform Reviewer`, `Doctor Referral & Triage`, `Patient Portal`) allow any user to toggle tabs in the UI regardless of the authenticated `user.role`.
+* **Current behavior:** Demo selection is a role picker in the login page and calls the server-side `POST /api/auth/demo-login` endpoint. It is available only when demo mode is explicitly enabled in a non-production environment.
+* Seeded account passwords are unique and stored locally in the git-ignored `backend/seed-credentials.json`; no seeded password is embedded in the frontend bundle or repository documentation.
 
 ### 1.3 Which endpoints trust client-supplied role or user ID?
 1. **`POST /api/auth/register` ([backend/src/routes/authRoutes.js](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/routes/authRoutes.js#L80-L109)):**
@@ -60,7 +48,7 @@ The live MongoDB database was directly queried via Node.js script ([backend/src/
 | :--- | :---: | :---: | :--- | :--- |
 | **`hospitals`** | **40** | Populated | `_id, name, code, registrationNumber, licenseNumber, district, state, location, address, ownership, has24x7Emergency, verificationStatus, verifiedAt, verifiedBy, rejectionReason, tier, proposedTier, tierStatus, tierRationale, tierDetails, departments, specialties, specialists, equipment, bedCounts, schemeParticipation, evidenceDocuments, verificationHistory, contact, isSynthetic, consistencyWarnings, adminUserId` | `specialists` is an embedded array of static counts, not derived from practitioner documents. |
 | **`hospitalcapacities`**| **48** | Populated | `_id, hospitalId, timestamp, stalenessThresholdMinutes, beds, services, reportedBy, isSynthetic, reportedAt, specialistsOnCall` | `specialistsOnCall` array populated with synthetic names in only a subset of telemetry records. |
-| **`users`** | **15** | Populated | `_id, name, email, password, role, hospitalId, phone, district, isSynthetic` | Role breakdown: **11 patients, 2 hospital admins, 1 platform reviewer, and ONLY 1 DOCTOR** (`doctor@carebridge.tn.gov.in`). |
+| **`users`** | **15** | Populated at the historical audit date | `_id, name, email, password, role, hospitalId, phone, district, isSynthetic` | Historical pre-8.4a role breakdown: **11 patients, 2 hospital admins, 1 platform reviewer, and 1 doctor**. |
 | **`referrals`** | **11** | Populated | `_id, referralId, patientId, patientName, referringDoctorId, referringHospitalId, patientSummary, requirements, mlAssessment, engineVersion, rankedRecommendations, status, recordsConsentStatus, clinicalDisclaimerAcknowledged, decisionSupportDisclaimer, isSynthetic, candidates, excludedHospitals` | Status breakdown: 10 `submitted`, 1 `draft`. No historical `accepted`, `declined`, or `transferred` referrals in the seed set. |
 | **`consents`** | **7** | Populated | `_id, consentId, patientId, requestingHospitalId, toHospitalId, requestingDoctorId, referralId, purpose, recordTypes, scope, dateRange, status, includeSensitiveRecords, expiresAt, decisionHistory, consentTextVersion, breakGlass, digitalSignature, isSynthetic` | Status breakdown: 4 `granted`, 3 `revoked`. No `requested` (pending) or `expired` consent documents in initial state. |
 | **`patientrecords`** | **83** | Populated | `_id, recordId, patientId, sourceHospitalId, type, title, recordDate, provenance, contentRef, contentMimeType, sensitivityLevel, sensitiveCategory, isSynthetic` | Files stored on local disk under `storage/records/`. Metadata points correctly. |
@@ -74,10 +62,7 @@ The live MongoDB database was directly queried via Node.js script ([backend/src/
 
 ### 3.1 Does any doctor/specialist data exist per hospital?
 * **NO.** There is **no collection for individual doctors or healthcare practitioners** in the system (`practitioners` does not exist).
-* In the entire `users` collection, only **1 single doctor** exists across all 40 hospitals:
-  * Name: `Dr. S. Sundaram, MD`
-  * Email: `doctor@carebridge.tn.gov.in`
-  * Associated with only a single hospital.
+* At the historical audit date, the `users` collection held only one doctor account across the 40 hospitals. Phase 8.4a replaces this seed setup with practitioner-linked accounts for every hospital. Current seed credentials are in the git-ignored local credentials file, not in this report.
 
 ### 3.2 Are specialist counts in hospitals derived from real records or hard-coded numbers?
 * **HARD-CODED.** Specialist numbers are generated via pseudo-random arithmetic inside [backend/src/scripts/syntheticDataGenerator.js](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/backend/src/scripts/syntheticDataGenerator.js#L189-L265):
@@ -208,4 +193,3 @@ The live MongoDB database was directly queried via Node.js script ([backend/src/
 | **UI & UX** | Responsive Layout | Zero `@media` queries; layout broken < 1024px | **High** | Implement responsive CSS down to 360px with collapsible sidebar. |
 | **Governance** | Misleading Authority Text| "CONFIRMED BY TNHSP" on synthetic data | **High** | Replace all instances with "Simulated verification (synthetic data)". |
 | **Deployment** | Secret Management | Static fallback secrets in source code | **Medium** | Fail-fast config validation at startup; complete Docker & docker-compose configurations. |
-

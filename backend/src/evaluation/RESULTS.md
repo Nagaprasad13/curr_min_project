@@ -18,7 +18,7 @@ Across 30 independent test seeds ($K = 30$, Seeds 101–130) and 500 clinical re
 2. **Honest Quantification of the Cost of Caution (H2 Nuance & Distance Cost)**:
    - Because `unknown_aware` penalizes stale telemetry, it avoids dispatching patients to unconfirmed facilities.
    - Within the evaluated 40-hospital regional network, `unknown_aware` maintained 100% Top-1 suitability across the network by expanding its search horizon: **mean straight-line transit distance increased from 24.8 km (0% staleness) to 33.6 km (20% staleness) and 60.4 km (50% staleness)**.
-   - In contrast, `assume_available` maintained an artificially short mean distance (20.0 km at 50% staleness), but at the grave clinical cost of a **19.3% false-available rate** (dispatching patients to facilities that were in reality full).
+   - In contrast, `assume_available` maintained an artificially short mean distance (20.0 km at 50% staleness), while producing **19.3% false-available referral errors in simulation** (recommendations to facilities that were full in the simulated network).
 3. **Outperformance Over Conventional Heuristics (H3 Confirmed)**:
    - Both capacity-aware CareBridge modes vastly outperformed the common proximity heuristic `Nearest Verified` (which achieved only **50.2% Top-1 suitability** and a **27.8% false-available rate**) and the quaternary bias heuristic `Always Tier 1` (**67.6% Top-1 suitability** and **32.4% false-available rate**).
 

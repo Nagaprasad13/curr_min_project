@@ -13,11 +13,10 @@ const Consent = require('../models/Consent');
 const Referral = require('../models/Referral');
 const { signToken } = require('../config/jwt');
 const { rankReferralHospitals } = require('../services/referralEngineService');
-const { assessPatient } = require('../services/mlTriageService');
 const { requestConsent, grantConsent, revokeConsent, verifyActiveConsent, getConsentedPatientRecords } = require('../services/consentService');
 const { evaluateSchemePotentialMatches, MANDATORY_NOTICE } = require('../services/schemeService');
 
-async function runGuidedDemo() {
+async function runGuidedDemo(options = {}) {
   console.log('================================================================');
   console.log(' 🚀 CareBridge: Phase 7 Guided End-to-End Demo Walkthrough');
   console.log(' Research Prototype - Tamil Nadu Referral Simulation');
@@ -28,12 +27,12 @@ async function runGuidedDemo() {
     await connectDB();
 
     // Fetch demo users
-    const adminSalem = await User.findOne({ email: 'admin.salem@carebridge.tn.gov.in' });
-    const doctorSalem = await User.findOne({ email: 'doctor@carebridge.tn.gov.in' });
+    const adminSalem = await User.findOne({ email: 'admin.salem@carebridge.invalid' });
+    const doctorSalem = await User.findOne({ email: 'doctor@carebridge.invalid' });
     const patientKavitha = await User.findOne({ role: 'patient' });
 
     if (!adminSalem || !doctorSalem || !patientKavitha) {
-      throw new Error('Demo accounts missing. Run "npm run seed" first.');
+      throw new Error('Demo accounts missing. Run "npm run seed-demo" first.');
     }
 
     // -------------------------------------------------------------------------
@@ -88,11 +87,16 @@ async function runGuidedDemo() {
     // STEP 3: Screening + triage suggestion, red-flag check, urgency confirmed
     // -------------------------------------------------------------------------
     console.log('\n👉 STEP 3: ML Triage & Screening suggestions generated + Doctor urgency confirmation');
-    const assessment = await assessPatient(patientVitals);
-    console.log(`   - Model Suggested Urgency: ${assessment.urgency.toUpperCase()}`);
-    console.log(`   - Red Flag Triggers: ${(assessment.red_flags || []).length} detected (Severe hypoxemia SpO2 < 90%)`);
-    console.log(`   - Screened Specialty: ${assessment.specialties ? assessment.specialties[0] : 'Pulmonology'}`);
-    console.log(`   - Doctor Action: Confirmed Urgency as "EMERGENCY" (Justification recorded in audit log)`);
+    const assessmentFixture = await Referral.findOne({ referralId: 'DEMO-REF-2026-0001' });
+    if (!assessmentFixture?.mlAssessment) {
+      throw new Error('Red-flag demo assessment is missing. Run "npm run seed-demo" first.');
+    }
+    console.log(`   - Demo assessment version: ${assessmentFixture.mlAssessment.modelVersion}`);
+    console.log(`   - Inference executed: ${Boolean(assessmentFixture.mlAssessment.rawAssessment?.inferenceExecuted)}`);
+    console.log(`   - Red Flag Triggers: ${(assessmentFixture.mlAssessment.rawAssessment?.redFlags || []).length}`);
+    console.log(`   - Screened Specialty: ${assessmentFixture.requirements.requiredSpecialty}`);
+    const overrideFixture = await Referral.findOne({ referralId: 'DEMO-REF-2026-0004' });
+    console.log(`   - Urgency step: ${overrideFixture.requirements.urgency}; reason: ${overrideFixture.requirements.urgencyOverrideReason}`);
 
     // -------------------------------------------------------------------------
     // STEP 4: Referral engine returns ranked hospitals with explanations
@@ -122,6 +126,9 @@ async function runGuidedDemo() {
       allHospitals,
       capMap
     );
+    if (!rankedResult.recommendations.length) {
+      throw new Error('Referral engine returned no eligible facilities for the guided demo.');
+    }
 
     console.log(`   Found ${rankedResult.recommendations.length} eligible hospitals:`);
     rankedResult.recommendations.slice(0, 3).forEach((h, idx) => {
@@ -131,6 +138,14 @@ async function runGuidedDemo() {
         console.log(`        ⚠️ FLAG: Capacity unknown, confirm by phone prior to transfer!`);
       }
     });
+    const unknownCapacityFixture = await Referral.findOne({ referralId: 'DEMO-REF-2026-0006' });
+    const unknownCapacityHospital = unknownCapacityFixture?.rankedRecommendations
+      .find(hospital => hospital.capacityAgeLabel === 'Never reported');
+    if (!unknownCapacityHospital) {
+      throw new Error('Seeded unknown-capacity referral example is missing. Run "npm run seed-demo" first.');
+    }
+    console.log(`   Seeded ranked referral example: ${unknownCapacityFixture.referralId}`);
+    console.log(`     [#${unknownCapacityHospital.rank}] ${unknownCapacityHospital.hospitalName} - capacity ${unknownCapacityHospital.capacityAgeLabel}.`);
 
     console.log(`   ✓ Key Demonstration Properties Observed:`);
     console.log(`     - Hospitals without Pulmonology were clinically excluded (Total excluded: ${rankedResult.excludedHospitals.length}).`);
@@ -212,7 +227,18 @@ async function runGuidedDemo() {
     // Revocation check
     const verifiedConsentDoc = await Consent.findOne({ consentId: consentDoc.consentId });
     const isAccessActive = verifiedConsentDoc && verifiedConsentDoc.status === 'granted' && !verifiedConsentDoc.revokedAt;
-    console.log(`   ✓ Subsequent access check: ${isAccessActive ? 'Active' : 'TERMINATED (Access blocked immediately under Zero Client Trust)'}`);
+    const postRevokeConsent = await verifyActiveConsent({
+      patientId: patientKavitha._id,
+      doctorUser: { _id: doctorSalem._id, role: 'doctor', hospitalId: targetHospital.hospitalId },
+    });
+    const postRevokeRecords = await getConsentedPatientRecords({
+      patientId: patientKavitha._id,
+      doctorUser: { _id: doctorSalem._id, role: 'doctor', hospitalId: targetHospital.hospitalId },
+    });
+    if (isAccessActive || postRevokeConsent || postRevokeRecords.accessGranted) {
+      throw new Error('Consent revocation did not stop record access.');
+    }
+    console.log('   ✓ Subsequent server-side check: TERMINATED (record access blocked immediately).');
 
     // -------------------------------------------------------------------------
     // DEMO PATH B: Incomplete assessment inputs showing "insufficient data"
@@ -220,24 +246,32 @@ async function runGuidedDemo() {
     console.log('\n================================================================');
     console.log(' 🧪 DEMO PATH B: Incomplete Assessment Intake Handling');
     console.log('================================================================');
-    const incompleteIntake = { age: 54, gender: 'M' }; // Zero vitals recorded
-    console.log('   Submitting intake with age & gender only (missing heart rate, SpO2, BP)...');
-
-    const incompleteAssessment = await assessPatient(incompleteIntake);
+    console.log('   Showing the seeded synthetic intake with age & gender only and no vitals...');
+    const incompleteFixture = await Referral.findOne({ referralId: 'DEMO-REF-2026-0002' });
+    if (!incompleteFixture?.mlAssessment) {
+      throw new Error('Insufficient-data demo assessment is missing. Run "npm run seed-demo" first.');
+    }
     console.log(`   ✓ System Response:`);
-    console.log(`     - Triage Warning: "${incompleteAssessment.dataQualityWarning || 'Insufficient intake vitals recorded'}"`);
-    console.log(`     - Service Fallback Active: ${Boolean(incompleteAssessment.serviceFallback)}`);
-    console.log(`     - Refused forced algorithmic acuity prediction.`);
+    console.log(`     - Triage Warning: "${incompleteFixture.mlAssessment.rawAssessment?.dataQualityWarning}"`);
+    console.log(`     - Assessment version: ${incompleteFixture.mlAssessment.modelVersion}`);
+    console.log('     - Static synthetic fixture only; no model inference or acuity prediction was run.');
 
     console.log('\n================================================================');
     console.log(' 🎉 ALL GUIDED DEMO SCENARIOS COMPLETED SUCCESSFULLY');
     console.log('================================================================\n');
+    return {
+      completed: true,
+      steps: 7,
+      assessmentFixtureId: assessmentFixture.referralId,
+      insufficientDataFixtureId: 'DEMO-REF-2026-0002',
+    };
 
   } catch (err) {
     console.error('Demo execution failed:', err);
+    if (options.throwOnError) throw err;
     process.exitCode = 1;
   } finally {
-    await disconnectDB();
+    if (options.disconnect !== false) await disconnectDB();
   }
 }
 

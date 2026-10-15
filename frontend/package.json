@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run check:contrast && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:contrast": "node scripts/check-contrast.js"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
@@ -14,7 +17,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@babel/parser": "^8.0.7",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.2"
+    "axe-core": "^4.14.0",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.2",
+    "vitest": "^2.1.9"
   }
 }

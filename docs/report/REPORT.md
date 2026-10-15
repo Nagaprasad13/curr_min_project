@@ -195,9 +195,9 @@ False-Available Rate (%) vs Telemetry Staleness Level
 ### 5.3 Clinical ML Triage & Screening Performance
 Evaluated on retrospective benchmark cohorts using patient-split partitions (`GroupShuffleSplit` for triage; 5-fold CV $\times$ 10 repeats for screening):
 
-| Diagnostic Model | Cohort / Benchmark | Metric | Result (95% CI) | Clinical Impact |
+| Diagnostic Model | Cohort / Benchmark | Metric | Result (95% CI) | Evaluation Interpretation |
 | :--- | :--- | :--- | :---: | :--- |
-| **Triage Severity** | MIMIC-IV-ED Demo ($N=41$ held-out) | Sensitivity<br>AUROC<br>Brier Score | **84.0%** [68.0–96.2%]<br>**0.702** [0.511–0.855]<br>**0.2186** | Outperformed NEWS2 (72.0% sensitivity), detecting 3 additional emergent visits |
+| **Triage Severity** | MIMIC-IV-ED Demo ($N=41$ held-out visits, 14 subjects) | Sensitivity<br>AUROC<br>Brier Score | **84.0%** [68.0–96.2%]<br>**0.702** [0.511–0.855]<br>**0.2186** | Retrospective benchmark result; approximate NEWS2 AUROC was 0.672, with no NEWS2 cutoff metrics reported |
 | **Diabetes Screening** | Pima Indians ($N=768$) | Sensitivity<br>AUROC | **90.3%** [86.8–94.0%]<br>**0.833** [0.806–0.862] | Preregistered $\ge 90\%$ recall achieved at threshold 0.24 |
 | **Heart Disease Screening** | Cleveland ($N=303$) | Sensitivity<br>AUROC | **90.6%** [85.7–95.3%]<br>**0.899** [0.863–0.931] | Preregistered $\ge 90\%$ recall achieved at threshold 0.28 |
 | **Liver Disease Screening** | ILPD ($N=583$) | Sensitivity<br>AUROC | **90.4%** [87.4–92.9%]<br>**0.744** [0.704–0.780] | High-sensitivity screening for hepatic referrals |

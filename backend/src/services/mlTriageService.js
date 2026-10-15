@@ -19,6 +19,14 @@ const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
 const DEFAULT_TIMEOUT_MS = parseInt(process.env.ML_SERVICE_TIMEOUT_MS || '4000', 10);
 const MANDATORY_DISCLAIMER = 'Decision support only. A clinician must review.';
 
+class MlServiceError extends Error {
+  constructor(statusCode, message) {
+    super(message);
+    this.name = 'MlServiceError';
+    this.statusCode = statusCode;
+  }
+}
+
 /**
  * Embedded clinical red flag evaluator (used for fallback).
  */
@@ -269,6 +277,9 @@ function createFallbackAssessment(patientData, reason = 'ML microservice unreach
   return {
     status: 'success',
     urgency: finalUrgency,
+    modelName: 'rule_based_fallback',
+    modelVersion: 'fallback_clinical_rules_1.0',
+    artifactSha256Prefix: null,
     triage_urgency_suggestion: triageUrgency,
     specialties: uniqueSpecialties.slice(0, 3),
     required_facilities: Array.from(requiredFacilities).sort(),
@@ -281,6 +292,11 @@ function createFallbackAssessment(patientData, reason = 'ML microservice unreach
       screening_pipeline: 'fallback_clinical_rules_1.0',
       red_flags_config: '1.0.0',
     },
+    model_artifacts: [{
+      modelName: 'rule_based_fallback',
+      modelVersion: 'fallback_clinical_rules_1.0',
+      artifactSha256Prefix: null,
+    }],
     serviceFallback: true,
     fallbackReason: reason,
     disclaimer: MANDATORY_DISCLAIMER,
@@ -314,23 +330,22 @@ async function predictSeverity(payload) {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
-
-    const res = await fetch(`${ML_SERVICE_URL}/predict-severity`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.warn(`[ML Service HTTP ${res.status}]: ${errBody}. Using fallback.`);
-      return fallbackSeverity(payload, `HTTP ${res.status}`);
+    try {
+      const res = await fetch(`${ML_SERVICE_URL}/predict-severity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new MlServiceError(res.status, `ML model request rejected (${res.status}): ${await res.text()}`);
+      }
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
     }
-
-    return await res.json();
   } catch (err) {
+    if (err instanceof MlServiceError) throw err;
     console.warn(`[ML Service predictSeverity error: ${err.message}]. Using fallback.`);
     return fallbackSeverity(payload, err.message);
   }
@@ -347,7 +362,9 @@ function fallbackSeverity(payload, reason) {
     thresholdUsed: 0.51,
     topContributors: isHigh ? ['Abnormal physiological vitals'] : ['Baseline vital parameters within non-critical range'],
     missingInputs: [],
+    modelName: 'rule_based_fallback',
     modelVersion: 'fallback_news2_1.0',
+    artifactSha256Prefix: null,
     dataSource: 'Rule-Based NEWS2 Approximation Fallback',
     serviceFallback: true,
     fallbackReason: reason,
@@ -366,25 +383,24 @@ async function assessPatient(patientData) {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
-
-    const res = await fetch(`${ML_SERVICE_URL}/assess`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patientData),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.warn(`[ML Service /assess HTTP ${res.status}]: ${errBody}. Using fallback.`);
-      return createFallbackAssessment(patientData, `HTTP ${res.status}`);
+    try {
+      const res = await fetch(`${ML_SERVICE_URL}/assess`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patientData),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new MlServiceError(res.status, `ML assessment request rejected (${res.status}): ${await res.text()}`);
+      }
+      const data = await res.json();
+      data.serviceFallback = false;
+      return data;
+    } finally {
+      clearTimeout(timer);
     }
-
-    const data = await res.json();
-    data.serviceFallback = false;
-    return data;
   } catch (err) {
+    if (err instanceof MlServiceError) throw err;
     console.warn(`[ML Service assessPatient error: ${err.message}]. Using fallback.`);
     return createFallbackAssessment(patientData, err.message);
   }
@@ -397,4 +413,5 @@ module.exports = {
   evaluateRedFlagsFallback,
   createFallbackAssessment,
   MANDATORY_DISCLAIMER,
+  MlServiceError,
 };

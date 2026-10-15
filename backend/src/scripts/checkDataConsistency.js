@@ -1,5 +1,6 @@
 const Hospital = require('../models/Hospital');
 const Practitioner = require('../models/Practitioner');
+const User = require('../models/User');
 const { connectDB, disconnectDB } = require('../config/db');
 
 /**
@@ -18,8 +19,33 @@ async function checkDataConsistency() {
   const hospitals = await Hospital.find({}).lean();
   let totalClaimsChecked = 0;
   const inconsistencies = [];
+  const hospitalsWithoutAdmins = [];
+  const hospitalsWithoutTwoLinkedDoctors = [];
+  const mismatchedDoctorLinks = [];
 
   for (const hospital of hospitals) {
+    const adminCount = await User.countDocuments({
+      role: 'hospital_admin',
+      hospitalId: hospital._id,
+    });
+    if (adminCount < 1) {
+      hospitalsWithoutAdmins.push({ hospitalCode: hospital.code, hospitalName: hospital.name });
+    }
+
+    const linkedDoctorCount = await Practitioner.countDocuments({
+      hospitalId: hospital._id,
+      employmentStatus: 'active',
+      verificationStatus: 'verified',
+      userId: { $ne: null },
+    });
+    if (linkedDoctorCount < 2) {
+      hospitalsWithoutTwoLinkedDoctors.push({
+        hospitalCode: hospital.code,
+        hospitalName: hospital.name,
+        linkedVerifiedDoctors: linkedDoctorCount,
+      });
+    }
+
     const specialties = hospital.specialties || [];
 
     for (const specialty of specialties) {
@@ -73,9 +99,27 @@ async function checkDataConsistency() {
     }
   }
 
-  const hasErrors = inconsistencies.length > 0 || unlistedPractitioners.length > 0;
+  const linkedPractitioners = await Practitioner.find({ userId: { $ne: null } }).lean();
+  for (const practitioner of linkedPractitioners) {
+    const user = await User.findById(practitioner.userId).select('role hospitalId').lean();
+    if (!user || user.role !== 'doctor' ||
+        user.hospitalId?.toString() !== practitioner.hospitalId.toString()) {
+      mismatchedDoctorLinks.push({
+        practitionerId: practitioner.practitionerId,
+        practitionerHospitalId: practitioner.hospitalId.toString(),
+        userId: practitioner.userId.toString(),
+        userHospitalId: user?.hospitalId?.toString() || null,
+        userRole: user?.role || null,
+      });
+    }
+  }
 
-  if (hasErrors) {
+  const hasErrors = inconsistencies.length > 0 || unlistedPractitioners.length > 0;
+  const hasAccountErrors = hospitalsWithoutAdmins.length > 0 ||
+    hospitalsWithoutTwoLinkedDoctors.length > 0 ||
+    mismatchedDoctorLinks.length > 0;
+
+  if (hasErrors || hasAccountErrors) {
     if (inconsistencies.length > 0) {
       console.error(`\n❌ DIRECT INCONSISTENCY CHECK FAILED: Found ${inconsistencies.length} orphaned specialty claims!\n`);
       console.table(inconsistencies);
@@ -84,21 +128,42 @@ async function checkDataConsistency() {
       console.error(`\n❌ REVERSE INCONSISTENCY CHECK FAILED: Found ${unlistedPractitioners.length} active verified practitioners with unlisted specialties!\n`);
       console.table(unlistedPractitioners);
     }
+    if (hospitalsWithoutAdmins.length > 0) {
+      console.error(`\n❌ ACCOUNT CHECK FAILED: ${hospitalsWithoutAdmins.length} hospitals have no administrator.\n`);
+      console.table(hospitalsWithoutAdmins);
+    }
+    if (hospitalsWithoutTwoLinkedDoctors.length > 0) {
+      console.error(`\n❌ ACCOUNT CHECK FAILED: ${hospitalsWithoutTwoLinkedDoctors.length} hospitals have fewer than two linked verified doctors.\n`);
+      console.table(hospitalsWithoutTwoLinkedDoctors);
+    }
+    if (mismatchedDoctorLinks.length > 0) {
+      console.error(`\n❌ ACCOUNT CHECK FAILED: ${mismatchedDoctorLinks.length} linked doctor accounts do not match their practitioners.\n`);
+      console.table(mismatchedDoctorLinks);
+    }
     return {
       passed: false,
       inconsistencies,
       unlistedPractitioners,
+      hospitalsWithoutAdmins,
+      hospitalsWithoutTwoLinkedDoctors,
+      mismatchedDoctorLinks,
       totalClaimsChecked,
     };
   }
 
   console.log('✓ PASS: All hospitals have active verified practitioners for 100% of claimed specialties.');
   console.log('✓ PASS: 100% of active verified practitioners belong to listed hospital specialties (reverse check passed).');
-  console.log('✓ Zero orphaned specialty claims and zero unlisted practitioner specialties detected.\n');
+  console.log(`✓ PASS: All ${hospitals.length} hospitals have at least one hospital administrator.`);
+  console.log('✓ PASS: Every hospital has at least two active verified practitioners linked to doctor users.');
+  console.log('✓ PASS: Every linked doctor user has role=doctor and the same hospitalId as their practitioner.');
+  console.log('✓ Zero specialty/account consistency violations detected.\n');
   return {
     passed: true,
     inconsistencies: [],
     unlistedPractitioners: [],
+    hospitalsWithoutAdmins: [],
+    hospitalsWithoutTwoLinkedDoctors: [],
+    mismatchedDoctorLinks: [],
     totalClaimsChecked,
   };
 }

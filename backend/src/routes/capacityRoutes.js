@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const HospitalCapacity = require('../models/HospitalCapacity');
-const { authenticate, authorizeRoles, requireHospitalOwnership } = require('../middleware/auth');
+const { authenticate, authorizeRoles, requireHospitalOwnership, requireHospitalContext } = require('../middleware/auth');
 const { recordAuditLog } = require('../services/auditService');
 
 /**
@@ -133,15 +133,16 @@ router.post(
  * Fetch the latest capacity telemetry snapshot for a hospital.
  * Includes calculated age in hours/minutes and proactive staleness warning.
  */
-router.get('/latest', authenticate, async (req, res) => {
+router.get('/latest', authenticate, requireHospitalContext, async (req, res) => {
   try {
     const latest = await HospitalCapacity.findOne({ hospitalId: req.params.id })
       .sort({ timestamp: -1, reportedAt: -1 })
       .lean();
 
     if (!latest) {
-      return res.status(404).json({
-        error: 'Not Found',
+      return res.json({
+        snapshot: null,
+        telemetryAge: null,
         message: 'No capacity telemetry snapshots found for this hospital.',
       });
     }

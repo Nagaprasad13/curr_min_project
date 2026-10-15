@@ -1,4 +1,4 @@
-/**
+    /**
  * CareBridge Synthetic Data Generator (Updated for Phase 2)
  * Generates:
  * 1. 40 Synthetic Tamil Nadu Hospitals across districts (Salem, Erode, Coimbatore, Chennai, Madurai, Trichy, Vellore, Thanjavur, Tirunelveli, Dindigul)
@@ -52,7 +52,7 @@ function createSeededRandom(seed = 123456789) {
   };
 }
 
-const rand = createSeededRandom(42);
+let rand = createSeededRandom(42);
 
 /**
  * Calculates Haversine distance in kilometers between two lat/lon points.
@@ -76,6 +76,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
  * Each hospital runs through the pure classifyHospitalTier service.
  */
 function generateSyntheticHospitals() {
+  rand = createSeededRandom(42);
   const hospitals = [];
 
   const hospitalBlueprints = [
@@ -372,6 +373,31 @@ function generateSyntheticHospitals() {
   });
 
   return hospitals;
+}
+
+/**
+ * Generates a synthetic practitioner roster independently of hospital specialist aggregates.
+ */
+function generateSyntheticPractitioners(hospitals) {
+  let practitionerNumber = 1;
+
+  return hospitals.flatMap(hospital => (hospital.specialties || []).map(specialty => {
+    const registrationNumber = `SYN-TNC-${String(practitionerNumber).padStart(4, '0')}`;
+    const practitioner = {
+      practitionerId: `EVAL-PRAC-${String(practitionerNumber).padStart(4, '0')}`,
+      hospitalId: hospital._id || hospital.code,
+      fullName: `Synthetic Practitioner ${String(practitionerNumber).padStart(4, '0')}`,
+      qualification: 'MBBS',
+      specialty,
+      registrationNumber,
+      employmentStatus: 'active',
+      availability: hospital.has24x7Emergency ? 'on_call_24x7' : 'shift_day',
+      verificationStatus: hospital.verificationStatus === 'verified' ? 'verified' : 'pending_verification',
+      isSynthetic: true,
+    };
+    practitionerNumber += 1;
+    return practitioner;
+  }));
 }
 
 /**
@@ -698,8 +724,7 @@ function generateSyntheticUsers(hospitals) {
   return [
     {
       name: 'Admin - Kovai Apex Super Specialty Hospital',
-      email: 'admin.kovai@carebridge.tn.gov.in',
-      password: 'AdminPassword123!',
+      email: 'admin.kovai@carebridge.invalid',
       role: 'hospital_admin',
       hospitalCode: kovaiHosp.code,
       phone: '+91 98422 78901',
@@ -708,8 +733,7 @@ function generateSyntheticUsers(hospitals) {
     },
     {
       name: 'Admin - Salem Mohan Kumaramangalam Hospital',
-      email: 'admin.salem@carebridge.tn.gov.in',
-      password: 'AdminPassword123!',
+      email: 'admin.salem@carebridge.invalid',
       role: 'hospital_admin',
       hospitalCode: salemHosp.code,
       phone: '+91 94431 11223',
@@ -718,8 +742,7 @@ function generateSyntheticUsers(hospitals) {
     },
     {
       name: 'Dr. K. Swaminathan (Platform Quality Reviewer)',
-      email: 'reviewer@carebridge.tn.gov.in',
-      password: 'ReviewerPassword123!',
+      email: 'reviewer@carebridge.invalid',
       role: 'platform_reviewer',
       phone: '+91 94420 99887',
       district: 'Chennai',
@@ -727,8 +750,7 @@ function generateSyntheticUsers(hospitals) {
     },
     {
       name: 'Dr. S. Sundaram, MD (Referring Pulmonologist)',
-      email: 'doctor@carebridge.tn.gov.in',
-      password: 'DoctorPassword123!',
+      email: 'doctor@carebridge.invalid',
       role: 'doctor',
       hospitalCode: salemHosp.code,
       phone: '+91 94431 23456',
@@ -737,8 +759,7 @@ function generateSyntheticUsers(hospitals) {
     },
     {
       name: 'M. Anandhi (Patient Representative)',
-      email: 'patient@carebridge.tn.gov.in',
-      password: 'PatientPassword123!',
+      email: 'patient@carebridge.invalid',
       role: 'patient',
       phone: '+91 97890 45678',
       district: 'Erode',
@@ -752,6 +773,7 @@ module.exports = {
   SPECIALTY_LIST,
   haversineDistance,
   generateSyntheticHospitals,
+  generateSyntheticPractitioners,
   generateSyntheticCapacities,
   generateSyntheticReferralScenarios,
   generateSchemeCatalogue,

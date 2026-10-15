@@ -101,15 +101,34 @@ function runReproducibilityCheck() {
     const mlText = fs.readFileSync(mlResultsPath, 'utf-8');
     const hasTriageAuroc = mlText.includes('0.702');
     const hasTriageSens = mlText.includes('0.840');
-    const hasDiabetesSens = mlText.includes('90.3%');
-    const hasChdSens = mlText.includes('90.0%');
-    const hasCkdSens = mlText.includes('95.2%');
+    const screeningConditions = [
+      'Diabetes',
+      'Heart Disease',
+      'Liver Disease',
+      'Kidney Disease (CKD)',
+      'Thyroid (Hypothyroid)',
+    ];
+    const screeningSensitivities = new Map(
+      mlText.split(/\r?\n/)
+        .map(line => line.split('|').map(cell => cell.trim()))
+        .filter(cells => screeningConditions.includes((cells[1] || '').replace(/\*/g, '').trim()))
+        .map(cells => {
+          const match = (cells[6] || '').match(/([\d.]+)%/);
+          return [cells[1].replace(/\*/g, '').trim(), match ? Number(match[1]) : NaN];
+        })
+    );
+    const hasScreeningSensitivities = screeningConditions.every(condition =>
+      screeningSensitivities.has(condition) && screeningSensitivities.get(condition) >= 90
+    );
+    const screeningSummary = screeningConditions
+      .map(condition => `${condition} ${screeningSensitivities.get(condition) ?? 'missing'}%`)
+      .join(', ');
 
     console.log(`   - Primary Triage Calibrated HistGradientBoosting AUROC: 0.702 (Present: ${hasTriageAuroc})`);
     console.log(`   - Primary Triage Sensitivity: 0.840 (Present: ${hasTriageSens})`);
-    console.log(`   - Screening Models High-Sensitivity Target (>=90%): Verified (Diabetes 90.3%, CHD 90.0%, CKD 95.2%)`);
+    console.log(`   - Screening model sensitivities in ml/RESULTS.md: ${screeningSummary} (All >=90%: ${hasScreeningSensitivities})`);
 
-    if (hasTriageAuroc && hasTriageSens && hasDiabetesSens) {
+    if (hasTriageAuroc && hasTriageSens && hasScreeningSensitivities) {
       console.log('   ✓ Phase 5 ML models satisfy preregistered high-sensitivity clinical constraints.');
     } else {
       console.warn('   ⚠️ Discrepancy observed in Phase 5 ML metrics.');

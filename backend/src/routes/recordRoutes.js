@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const PatientRecord = require('../models/PatientRecord');
 const User = require('../models/User');
+const Referral = require('../models/Referral');
+const Consent = require('../models/Consent');
 const { authenticate, authorizeRoles } = require('../middleware/auth');
 const { createRateLimiter } = require('../middleware/rateLimiter');
 const {
@@ -20,6 +22,59 @@ const GENERIC_NOT_FOUND_RESPONSE = {
   error: 'Not Found',
   message: 'Record not found or access denied.',
 };
+
+/**
+ * GET /api/patients
+ * Doctor directory limited to patients already referred to or consented for this hospital.
+ */
+router.get(
+  '/patients',
+  authenticate,
+  authorizeRoles('doctor'),
+  async (req, res) => {
+    try {
+      if (!req.user.hospitalId) {
+        return res.status(403).json({ error: 'Forbidden', message: 'A hospital assignment is required.' });
+      }
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 25));
+      const [referralPatientIds, consentPatientIds] = await Promise.all([
+        Referral.distinct('patientId', {
+          $or: [
+            { referringDoctorId: req.user._id },
+            { referringHospitalId: req.user.hospitalId },
+          ],
+          patientId: { $ne: null },
+        }),
+        Consent.distinct('patientId', {
+          $or: [
+            { requestingDoctorId: req.user._id },
+            { requestingHospitalId: req.user.hospitalId },
+          ],
+        }),
+      ]);
+      const patientIds = [...new Set([...referralPatientIds, ...consentPatientIds].map(String))];
+      const search = String(req.query.search || '').trim().slice(0, 80);
+      const searchFilter = search
+        ? { $or: [{ name: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }, { district: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }] }
+        : {};
+      const query = { _id: { $in: patientIds }, role: 'patient', ...searchFilter };
+      const [patients, total] = await Promise.all([
+        User.find(query)
+          .select('name district')
+          .sort({ name: 1 })
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .lean(),
+        User.countDocuments(query),
+      ]);
+      return res.json({ patients, page, limit, total, totalPages: Math.ceil(total / limit) });
+    } catch (err) {
+      console.error('[GET DOCTOR PATIENTS ERROR]:', err);
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
 
 /**
  * GET /api/patients/:patientId/records
@@ -61,9 +116,16 @@ router.get(
           return res.status(404).json(GENERIC_NOT_FOUND_RESPONSE);
         }
 
-        const rawRecords = await PatientRecord.find({ patientId })
+        const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+        const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+        const [rawRecords, totalRecords] = await Promise.all([
+          PatientRecord.find({ patientId })
           .populate('sourceHospitalId', 'name district code tier')
-          .sort({ recordDate: -1 });
+          .sort({ recordDate: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit),
+          PatientRecord.countDocuments({ patientId }),
+        ]);
 
         const formatted = rawRecords.map(r => {
           const ageInfo = computeRecordAgeInfo(r.recordDate);
@@ -98,7 +160,10 @@ router.get(
 
         return res.json({
           patientId,
-          totalRecords: formatted.length,
+          totalRecords,
+          page,
+          limit,
+          totalPages: Math.ceil(totalRecords / limit),
           records: formatted,
           viewerRole: 'patient',
         });
@@ -110,6 +175,8 @@ router.get(
         doctorUser: req.user,
         ipAddress: req.ip,
         userAgent: req.headers['user-agent'],
+        page: Math.max(1, Number.parseInt(req.query.page, 10) || 1),
+        limit: Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50)),
       });
 
       if (!result.accessGranted) {
@@ -123,7 +190,10 @@ router.get(
 
       return res.json({
         patientId,
-        totalRecords: result.records.length,
+        totalRecords: result.totalRecords,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
         records: result.records,
         consent: result.consent,
         accessGranted: true,

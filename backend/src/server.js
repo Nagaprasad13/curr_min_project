@@ -16,6 +16,8 @@ const recordRoutes = require('./routes/recordRoutes');
 const schemeRoutes = require('./routes/schemeRoutes');
 const specialtyMapRoutes = require('./routes/specialtyMapRoutes');
 const practitionerRoutes = require('./routes/practitionerRoutes');
+const modelRoutes = require('./routes/modelRoutes');
+const ModelRegistry = require('./models/ModelRegistry');
 
 const cookieParser = require('cookie-parser');
 const { csrfProtection } = require('./middleware/csrf');
@@ -37,6 +39,8 @@ app.use(
 
 // Middleware
 const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   process.env.FRONTEND_URL,
@@ -122,6 +126,7 @@ app.use('/api', recordRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/specialty-map', specialtyMapRoutes);
 app.use('/api/hospitals/:id/practitioners', practitionerRoutes);
+app.use('/api/models', modelRoutes);
 
 // Serve static frontend in production/prototype if built
 const frontendDistPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
@@ -147,7 +152,8 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-  connectDB().then(() => {
+  connectDB().then(async () => {
+    await ModelRegistry.init();
     app.listen(PORT, () => {
       console.log(`CareBridge Backend Server running on http://localhost:${PORT}`);
       console.log(`Clinical Disclaimer: Decision support only. Clinician review required.`);

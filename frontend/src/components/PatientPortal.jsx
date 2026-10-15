@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch as fetch } from '../api';
+import { Modal, Skeleton } from '../design-system/components';
+import { safeSchemeText } from '../schemeCopy';
 
-export default function PatientPortal({ token, patientUser }) {
-  const [activeTab, setActiveTab] = useState('consents'); // 'records' | 'consents' | 'referrals' | 'schemes' | 'history'
+export default function PatientPortal({ token, patientUser, initialTab = 'consents' }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const [consents, setConsents] = useState([]);
   const [accessHistory, setAccessHistory] = useState([]);
   const [myRecords, setMyRecords] = useState([]);
   const [myReferrals, setMyReferrals] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -19,103 +23,99 @@ export default function PatientPortal({ token, patientUser }) {
 
   // Scheme matching state
   const [schemeInputs, setSchemeInputs] = useState({
-    stateResident: true,
-    annualFamilyIncome: 95000,
-    rationCardType: 'PHH',
-    age: 48,
-    treatmentCategory: 'Cardiology',
-    hasLifeThreateningIllness: false,
-    treatmentHospitalType: 'government',
+    stateResident: '',
+    annualFamilyIncome: '',
+    rationCardType: '',
+    age: '',
+    treatmentCategory: '',
+    hasLifeThreateningIllness: '',
+    treatmentHospitalType: '',
   });
   const [matchResults, setMatchResults] = useState(null);
   const [matchLoading, setMatchLoading] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      loadConsents();
-      loadAccessHistory();
-      loadMyRecords();
-      loadMyReferrals();
+    if (patientUser?.id || patientUser?._id) {
+      const controller = new AbortController();
+      setInitialLoading(true);
+      Promise.all([
+        loadConsents(controller.signal),
+        loadAccessHistory(controller.signal),
+        loadMyRecords(controller.signal),
+        loadMyReferrals(controller.signal),
+      ]).finally(() => {
+        if (!controller.signal.aborted) setInitialLoading(false);
+      });
+      return () => controller.abort();
     }
-  }, [token]);
+  }, [patientUser?.id, patientUser?._id]);
 
-  const loadConsents = async () => {
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
+  const loadConsents = async (signal) => {
     try {
       setLoading(true);
       setError(null);
       const res = await fetch('/api/consents', {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
         setConsents(data.consents || []);
-      }
+      } else throw new Error(data.message || 'Consent requests could not be loaded.');
     } catch (err) {
-      setError(err.message);
+      if (!signal?.aborted) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
-  const loadAccessHistory = async () => {
+  const loadAccessHistory = async (signal) => {
     try {
       const res = await fetch('/api/consents/access-history', {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
         setAccessHistory(data.accessReport || []);
-      }
+      } else throw new Error(data.message || 'Access history could not be loaded.');
     } catch (err) {
-      console.warn('Error fetching access history:', err.message);
+      if (!signal?.aborted) setError(err.message);
     }
   };
 
-  const loadMyRecords = async () => {
+  const loadMyRecords = async (signal) => {
     try {
       const patientId = patientUser?.id || patientUser?._id;
       if (!patientId) return;
       const res = await fetch(`/api/patients/${patientId}/records`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
       if (res.ok) {
         setMyRecords(data.records || []);
-      }
+      } else throw new Error(data.message || 'Records could not be loaded.');
     } catch (err) {
-      console.warn('Error fetching own records:', err.message);
+      if (!signal?.aborted) setError(err.message);
     }
   };
 
-  const loadMyReferrals = async () => {
+  const loadMyReferrals = async (signal) => {
     try {
-      // In synthetic seed, referrals exist; we fetch sample status
-      const res = await fetch('/api/referrals/6ace2c7ce3e4fb59acb387ba', {
+      const res = await fetch('/api/referrals', {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
-      if (res.ok && data.referralId) {
-        setMyReferrals([data]);
-      } else {
-        // Fallback demo state
-        setMyReferrals([
-          {
-            referralId: 'REF-2026-0001',
-            status: 'submitted',
-            recordsConsentStatus: 'granted',
-            selectedHospital: { name: 'Kovai Apex Super Speciality Hospital', district: 'Coimbatore' },
-          },
-        ]);
-      }
+      if (res.ok) setMyReferrals(data.referrals || []);
+      else throw new Error(data.message || 'Referral list could not be loaded.');
     } catch (err) {
-      setMyReferrals([
-        {
-          referralId: 'REF-2026-0001',
-          status: 'submitted',
-          recordsConsentStatus: 'granted',
-          selectedHospital: { name: 'Kovai Apex Super Speciality Hospital', district: 'Coimbatore' },
-        },
-      ]);
+      if (!signal?.aborted) setError(err.message);
     }
   };
 
@@ -224,7 +224,17 @@ export default function PatientPortal({ token, patientUser }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ inputs: schemeInputs }),
+        body: JSON.stringify({
+          inputs: {
+            stateResident: schemeInputs.stateResident === '' ? null : schemeInputs.stateResident === 'true',
+            annualFamilyIncome: schemeInputs.annualFamilyIncome === '' ? null : Number(schemeInputs.annualFamilyIncome),
+            age: schemeInputs.age === '' ? null : Number(schemeInputs.age),
+            rationCardType: schemeInputs.rationCardType || null,
+            treatmentCategory: schemeInputs.treatmentCategory || null,
+            hasLifeThreateningIllness: schemeInputs.hasLifeThreateningIllness === '' ? null : schemeInputs.hasLifeThreateningIllness === 'true',
+            treatmentHospitalType: schemeInputs.treatmentHospitalType || null,
+          },
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -251,21 +261,29 @@ export default function PatientPortal({ token, patientUser }) {
 
   return (
     <div id="patient-portal-view" className="portal-container">
-      {error && <div className="clinical-warning-banner" role="alert">⚠️ {error}</div>}
+      {error && <div className="clinical-warning-banner" role="alert">⚠️ {error} <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+        setError(null);
+        loadConsents();
+        loadAccessHistory();
+        loadMyRecords();
+        loadMyReferrals();
+      }}>Retry loading</button></div>}
       {successMsg && <div className="clinical-notice-box" role="status" style={{ marginBottom: 16 }}>{successMsg}</div>}
+      {initialLoading && <Skeleton lines={3} />}
 
       {/* Patient Profile Bar */}
       <div className="card" style={{ padding: 12, marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <div>
             <h3 style={{ margin: 0, color: '#1e293b' }}>
-              👤 {patientUser?.name || 'P. Anandhi (Patient 1)'}
+              👤 {patientUser?.name || 'Patient'}
             </h3>
             <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
-              District: <strong>{patientUser?.district || 'Salem'}</strong> · CareBridge ID: {patientUser?.id || 'PT-2026-001'}
+              {patientUser?.district && <>District: <strong>{patientUser.district}</strong> · </>}
+              {patientUser?.id && <>CareBridge ID: {patientUser.id}</>}
             </span>
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#0284c7' }}>
+          <div style={{ fontSize: '0.82rem', color: 'var(--color-primary)' }}>
             🔒 Zero Client Trust Architecture (You control record access)
           </div>
         </div>
@@ -319,9 +337,9 @@ export default function PatientPortal({ token, patientUser }) {
           </div>
 
           {consents.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '0.88rem' }}>No consent requests recorded yet.</p>
+            <p style={{ color: '#64748b', fontSize: '0.88rem' }}>No consent requests are waiting. Your care team can send a request when record sharing is needed.</p>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto' }} role="region" aria-label="Consent requests table" tabIndex="0">
               <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
@@ -443,8 +461,9 @@ export default function PatientPortal({ token, patientUser }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {myReferrals.map((ref, idx) => (
-              <div key={idx} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
+            {myReferrals.length === 0 && <p>No referrals are linked to this account yet.</p>}
+            {myReferrals.map((ref) => (
+              <div key={ref.referralId} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <div>
                     <h3 style={{ margin: '0 0 4px 0' }}>Referral #{ref.referralId}</h3>
@@ -471,14 +490,21 @@ export default function PatientPortal({ token, patientUser }) {
         <div className="card">
           <div className="card-header">
             <div>
-              <h2 className="card-title">🛡️ Government Healthcare Scheme Potential Matches</h2>
+              <h2 className="card-title">🛡️ Possible programme matches</h2>
               <p className="card-desc">
-                Check potential alignment with Chief Minister's Comprehensive Health Insurance Scheme (CMCHIS) and PM-JAY.
+                Compare your details with public programme descriptions for CMCHIS and PM-JAY. Possible match only. Not confirmed eligibility.
               </p>
             </div>
           </div>
 
           <form onSubmit={handleMatchSchemes} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div>
+              <label className="form-label" htmlFor="sc-resident">Tamil Nadu resident?</label>
+              <select id="sc-resident" className="form-input" value={schemeInputs.stateResident}
+                onChange={(e) => setSchemeInputs({ ...schemeInputs, stateResident: e.target.value })}>
+                <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
+              </select>
+            </div>
             <div>
               <label className="form-label" htmlFor="sc-income">Annual Family Income (INR)</label>
               <input
@@ -486,7 +512,7 @@ export default function PatientPortal({ token, patientUser }) {
                 className="form-input"
                 type="number"
                 value={schemeInputs.annualFamilyIncome}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, annualFamilyIncome: Number(e.target.value) })}
+                onChange={(e) => setSchemeInputs({ ...schemeInputs, annualFamilyIncome: e.target.value })}
               />
             </div>
             <div>
@@ -497,6 +523,7 @@ export default function PatientPortal({ token, patientUser }) {
                 value={schemeInputs.rationCardType}
                 onChange={(e) => setSchemeInputs({ ...schemeInputs, rationCardType: e.target.value })}
               >
+                <option value="">Not provided</option>
                 <option value="PHH">PHH (Priority Household)</option>
                 <option value="AAY">AAY (Antyodaya Anna Yojana)</option>
                 <option value="BPL">BPL (Below Poverty Line)</option>
@@ -511,8 +538,29 @@ export default function PatientPortal({ token, patientUser }) {
                 className="form-input"
                 type="number"
                 value={schemeInputs.age}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, age: Number(e.target.value) })}
+                onChange={(e) => setSchemeInputs({ ...schemeInputs, age: e.target.value })}
               />
+            </div>
+            <div>
+              <label className="form-label" htmlFor="sc-category">Treatment category</label>
+              <input id="sc-category" className="form-input" value={schemeInputs.treatmentCategory}
+                onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentCategory: e.target.value })} />
+            </div>
+            <div>
+              <label className="form-label" htmlFor="sc-lifethreatening">Life-threatening illness?
+                <select id="sc-lifethreatening" className="form-input" value={schemeInputs.hasLifeThreateningIllness}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, hasLifeThreateningIllness: e.target.value })}>
+                  <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
+                </select>
+              </label>
+            </div>
+            <div>
+              <label className="form-label" htmlFor="sc-hospital-type">Treatment hospital type
+                <select id="sc-hospital-type" className="form-input" value={schemeInputs.treatmentHospitalType}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentHospitalType: e.target.value })}>
+                  <option value="">Not provided</option><option value="government">Government</option><option value="private">Private</option>
+                </select>
+              </label>
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}>
@@ -532,16 +580,14 @@ export default function PatientPortal({ token, patientUser }) {
               {matchResults.map((m) => (
                 <div key={m.schemeId} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <h4 style={{ margin: 0 }}>{m.schemeName}</h4>
+                    <h4 style={{ margin: 0 }}>{safeSchemeText(m.schemeName)}</h4>
                     <span className={`badge ${m.matchStatus === 'potential match' ? 'badge-success' : 'badge-warning'}`}>
-                      {m.matchStatus}
+                      {m.matchStatus === 'potential match' ? 'Possible match' : 'No match identified'}
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 8px 0' }}>
-                    Authority: {m.authority}
-                  </p>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 8px 0' }}>Programme information source: {safeSchemeText(m.authority)}</p>
                   <div className="clinical-notice-box" style={{ fontSize: '0.78rem', marginTop: 8 }}>
-                    {m.notice}
+                    Possible match only. Not confirmed eligibility. Contact the programme directly for current information.
                   </div>
                 </div>
               ))}
@@ -561,7 +607,7 @@ export default function PatientPortal({ token, patientUser }) {
             <button className="btn btn-outline btn-sm" onClick={loadAccessHistory}>↻ Refresh</button>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto' }} role="region" aria-label="Record access history table" tabIndex="0">
             <table className="data-table" style={{ width: '100%', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
@@ -590,9 +636,7 @@ export default function PatientPortal({ token, patientUser }) {
 
       {/* Grant Scope Modal */}
       {selectedConsent && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 500 }}>
-            <h3 style={{ margin: '0 0 8px 0' }}>Grant Record Sharing: {selectedConsent.consentId}</h3>
+        <Modal open title={`Review record sharing: ${selectedConsent.consentId}`} onClose={() => setSelectedConsent(null)}>
             <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 12 }}>
               Facility: <strong>{selectedConsent.requestingHospitalId?.name}</strong>
             </p>
@@ -639,13 +683,12 @@ export default function PatientPortal({ token, patientUser }) {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button className="btn btn-outline" onClick={() => setSelectedConsent(null)}>Cancel</button>
-              <button id="confirm-grant-btn" className="btn btn-success" onClick={handleGrant}>
+              <button type="button" className="btn btn-outline" onClick={() => setSelectedConsent(null)}>Cancel</button>
+              <button type="button" id="confirm-grant-btn" className="btn btn-success" onClick={handleGrant}>
                 Confirm Grant
               </button>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

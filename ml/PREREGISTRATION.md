@@ -124,7 +124,7 @@ The CareBridge ML module produces clinical decision support for a patient's stru
 ## 7. Preregistration Deviations & Changes Log
 *(Any post-training adjustments or data alterations must be logged below with full rationale)*
 
-- **Post-Training Audit (2026-10-12):**
-  1. *Triage Severity Sensitivity:* On the held-out test split ($N = 41$ visits, 25 true high-acuity cases), operating threshold 0.510 yielded 84.0% sensitivity (21/25 cases identified) due to integer patient count discretization, outperforming the approximate NEWS2 baseline (72.0% sensitivity, 18/25 cases). All 5 condition screening models strictly attained $\ge 90.0\%$ sensitivity on out-of-fold cross-validation.
+- **Post-Training Audit (2026-10-14):**
+  1. *Triage Severity Sensitivity:* On the held-out test split (41 visits from 14 subjects, 25 true high-acuity cases), operating threshold 0.510 yielded 84.0% sensitivity (21/25 cases identified). The approximate NEWS2 baseline achieved 0.672 AUROC on its continuous score; its class metrics are not reported because no classification cutoff was preregistered. All 5 condition screening models attained at least 90.0% sensitivity on out-of-fold cross-validation.
   2. *Data Preprocessing (CKD ARFF Parsing):* Three rows in `chronic_kidney_disease.arff` with irregular trailing commas were normalized to standard 25-feature length during loading rather than dropping rows, preserving the full $N = 400$ dataset.
-
+  3. *Baseline Reproduction:* The fixed-seed rerun corrected held-out logistic-regression metrics to 0.810 AUROC / 0.760 sensitivity / 0.688 specificity, and random-forest metrics to 0.705 / 0.680 / 0.563. Classifier baseline metrics use a fixed 0.50 probability cutoff.

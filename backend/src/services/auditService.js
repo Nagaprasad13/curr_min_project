@@ -21,6 +21,7 @@ async function recordAuditLog({
   ipAddress = '127.0.0.1',
   userAgent,
   meta = {},
+  strict = false,
 }) {
   try {
     const logId = `AUD-${Date.now()}-${uuidv4().substring(0, 8).toUpperCase()}`;
@@ -45,8 +46,8 @@ async function recordAuditLog({
     await logEntry.save();
     return logEntry;
   } catch (err) {
-    // Non-blocking log failure warning to preserve API availability
     console.error(`[Audit Log Failure] Failed to record audit log for action ${action}:`, err.message);
+    if (strict) throw err;
     return null;
   }
 }

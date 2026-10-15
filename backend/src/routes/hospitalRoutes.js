@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Hospital = require('../models/Hospital');
 const User = require('../models/User');
+const Practitioner = require('../models/Practitioner');
+const HospitalCapacity = require('../models/HospitalCapacity');
 const { authenticate, authorizeRoles, requireHospitalOwnership } = require('../middleware/auth');
 const { validateBody, hospitalValidationSchema, hospitalUpdateValidationSchema } = require('../middleware/validate');
 const { classifyHospitalTier } = require('../services/tierClassificationService');
@@ -206,6 +208,8 @@ router.put(
 router.get('/', optionalAuthenticate, async (req, res) => {
   try {
     const { district, tier, verificationStatus, specialty } = req.query;
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
 
     const query = {};
 
@@ -225,15 +229,10 @@ router.get('/', optionalAuthenticate, async (req, res) => {
       // Public / doctor / patient can ONLY view verified hospitals
       query.verificationStatus = 'verified';
     } else if (currentUser.role === 'hospital_admin') {
-      // Admin sees verified hospitals OR their own hospital
+      // Hospital admins are scoped to their assigned facility.
+      query._id = currentUser.hospitalId || null;
       if (verificationStatus) {
         query.verificationStatus = verificationStatus;
-      } else {
-        query.$or = [
-          { verificationStatus: 'verified' },
-          { _id: currentUser.hospitalId },
-          { adminUserId: currentUser._id },
-        ];
       }
     } else if (currentUser.role === 'platform_reviewer') {
       // Reviewers can see any status
@@ -242,9 +241,10 @@ router.get('/', optionalAuthenticate, async (req, res) => {
       }
     }
 
-    const hospitals = await Hospital.find(query)
-      .sort({ name: 1 })
-      .lean();
+    const [hospitals, total] = await Promise.all([
+      Hospital.find(query).sort({ name: 1 }).skip((page - 1) * limit).limit(limit).lean(),
+      Hospital.countDocuments(query),
+    ]);
 
     // Augment records with explicit disclosure
     const formatted = hospitals.map(h => ({
@@ -257,6 +257,10 @@ router.get('/', optionalAuthenticate, async (req, res) => {
 
     return res.json({
       count: formatted.length,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
       userRole: currentUser ? currentUser.role : 'public',
       hospitals: formatted,
     });
@@ -264,6 +268,95 @@ router.get('/', optionalAuthenticate, async (req, res) => {
     return res.status(500).json({ error: 'Server Error', message: err.message });
   }
 });
+
+/**
+ * GET /api/hospitals/reviewer-directory
+ * Reviewer-only directory with synthetic admin, practitioner-status, and capacity metadata.
+ */
+router.get(
+  '/reviewer-directory',
+  authenticate,
+  authorizeRoles('platform_reviewer'),
+  async (req, res) => {
+    try {
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+      const [hospitals, total] = await Promise.all([
+        Hospital.find({}).sort({ name: 1 }).skip((page - 1) * limit).limit(limit).lean(),
+        Hospital.countDocuments({}),
+      ]);
+      const hospitalIds = hospitals.map(hospital => hospital._id);
+      const [admins, practitionerGroups, capacityRows] = await Promise.all([
+        User.find({ role: 'hospital_admin', hospitalId: { $in: hospitalIds } })
+          .select('name email hospitalId')
+          .lean(),
+        Practitioner.aggregate([
+          { $match: { hospitalId: { $in: hospitalIds } } },
+          {
+            $group: {
+              _id: {
+                hospitalId: '$hospitalId',
+                verificationStatus: '$verificationStatus',
+                employmentStatus: '$employmentStatus',
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        HospitalCapacity.aggregate([
+          { $match: { hospitalId: { $in: hospitalIds } } },
+          { $sort: { reportedAt: -1, timestamp: -1, createdAt: -1 } },
+          {
+            $group: {
+              _id: '$hospitalId',
+              reportedAt: {
+                $first: { $ifNull: ['$reportedAt', { $ifNull: ['$timestamp', '$createdAt'] }] },
+              },
+            },
+          },
+        ]),
+      ]);
+
+      const adminsByHospital = new Map();
+      for (const admin of admins) {
+        const key = admin.hospitalId.toString();
+        if (!adminsByHospital.has(key)) adminsByHospital.set(key, []);
+        adminsByHospital.get(key).push({ name: admin.name, email: admin.email });
+      }
+
+      const countsByHospital = new Map();
+      for (const group of practitionerGroups) {
+        const key = group._id.hospitalId.toString();
+        if (!countsByHospital.has(key)) countsByHospital.set(key, {});
+        const counts = countsByHospital.get(key);
+        counts[group._id.verificationStatus] ||= {};
+        counts[group._id.verificationStatus][group._id.employmentStatus] = group.count;
+      }
+
+      const capacityByHospital = new Map(
+        capacityRows.map(row => [row._id.toString(), row.reportedAt])
+      );
+      const now = Date.now();
+      const directory = hospitals.map(hospital => {
+        const key = hospital._id.toString();
+        const reportedAt = capacityByHospital.get(key) || null;
+        const ageMinutes = reportedAt ? Math.max(0, Math.floor((now - new Date(reportedAt).getTime()) / 60000)) : null;
+        return {
+          hospitalId: hospital._id,
+          code: hospital.code,
+          name: hospital.name,
+          district: hospital.district,
+          admins: adminsByHospital.get(key) || [],
+          practitionerCounts: countsByHospital.get(key) || {},
+          latestCapacity: reportedAt ? { reportedAt, ageMinutes } : null,
+        };
+      });
+      return res.json({ count: directory.length, total, page, limit, totalPages: Math.ceil(total / limit), hospitals: directory });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
 
 /**
  * GET /api/hospitals/:id
@@ -285,11 +378,15 @@ router.get('/:id', optionalAuthenticate, async (req, res) => {
     }
 
     const currentUser = req.user;
-    const isOwner = currentUser && (
-      (currentUser.hospitalId && currentUser.hospitalId.toString() === hospital._id.toString()) ||
-      (hospital.adminUserId && hospital.adminUserId.toString() === currentUser._id.toString())
-    );
+    const isOwner = currentUser?.hospitalId?.toString() === hospital._id.toString();
     const isReviewer = currentUser && currentUser.role === 'platform_reviewer';
+
+    if (currentUser && ['hospital_admin', 'doctor'].includes(currentUser.role) && !isOwner) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Access is limited to the hospital assigned to your account.',
+      });
+    }
 
     if (hospital.verificationStatus !== 'verified' && !isOwner && !isReviewer) {
       return res.status(403).json({

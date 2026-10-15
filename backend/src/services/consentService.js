@@ -135,14 +135,18 @@ async function grantConsent({
     throw new Error('Consent request has expired and cannot be granted.');
   }
 
+  let scopeWasNarrowed = false;
+
   // Allow patient to narrow record types (must be subset of requested)
   if (Array.isArray(narrowedRecordTypes) && narrowedRecordTypes.length > 0) {
+    const requestedRecordTypeCount = consent.recordTypes.length;
     const validNarrowed = narrowedRecordTypes.filter(rt => consent.recordTypes.includes(rt));
     if (validNarrowed.length === 0) {
       throw new Error('Narrowed record types must include at least one originally requested type.');
     }
     consent.recordTypes = validNarrowed;
     consent.scope = validNarrowed;
+    scopeWasNarrowed = validNarrowed.length < requestedRecordTypeCount;
   }
 
   // Allow patient to shorten expiry, but never extend beyond requested
@@ -162,10 +166,12 @@ async function grantConsent({
   consent.status = 'granted';
   consent.grantedAt = new Date();
   consent.decisionHistory.push({
-    status: 'granted',
+    status: scopeWasNarrowed ? 'narrowed' : 'granted',
     changedBy: patientId,
     changedAt: new Date(),
-    reason: 'Explicit patient authorization granted via patient portal',
+    reason: scopeWasNarrowed
+      ? 'Patient granted access with a narrowed record-type scope'
+      : 'Explicit patient authorization granted via patient portal',
     consentTextVersion: consent.consentTextVersion,
   });
 
@@ -350,6 +356,8 @@ async function getConsentedPatientRecords({
   doctorUser,
   ipAddress = '127.0.0.1',
   userAgent = '',
+  page = 1,
+  limit = null,
 }) {
   const consent = await verifyActiveConsent({ patientId, doctorUser });
 
@@ -394,9 +402,14 @@ async function getConsentedPatientRecords({
     }
   }
 
-  const rawRecords = await PatientRecord.find(query)
+  const totalRecords = await PatientRecord.countDocuments(query);
+  let recordsQuery = PatientRecord.find(query)
     .populate('sourceHospitalId', 'name district code tier')
     .sort({ recordDate: -1 });
+  if (limit) {
+    recordsQuery = recordsQuery.skip((page - 1) * limit).limit(limit);
+  }
+  const rawRecords = await recordsQuery;
 
   // Format with provenance, age computation, and warning flags
   const formattedRecords = rawRecords.map(rec => {
@@ -453,6 +466,10 @@ async function getConsentedPatientRecords({
 
   return {
     records: formattedRecords,
+    totalRecords,
+    page,
+    limit,
+    totalPages: limit ? Math.ceil(totalRecords / limit) : 1,
     consent: {
       consentId: consent.consentId,
       purpose: consent.purpose,
@@ -547,8 +564,8 @@ async function executeBreakGlassAccess({
  * Retrieves the transparent patient-facing access audit report.
  * Shows who accessed what, when, and under which consent.
  */
-async function getPatientAccessHistory(patientId) {
-  const logs = await AuditLog.find({
+async function getPatientAccessHistory(patientId, { page = 1, limit = 50 } = {}) {
+  const query = {
     patientId,
     action: {
       $in: [
@@ -561,32 +578,44 @@ async function getPatientAccessHistory(patientId) {
         'DENIED_RECORD_ACCESS',
       ],
     },
-  })
-    .populate('hospitalId', 'name district code')
-    .populate('actorId', 'name role')
-    .sort({ timestamp: -1 })
-    .lean();
+  };
+  const [logs, total] = await Promise.all([
+    AuditLog.find(query)
+      .populate('hospitalId', 'name district code')
+      .populate('actorId', 'name role')
+      .sort({ timestamp: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    AuditLog.countDocuments(query),
+  ]);
 
-  return logs.map(l => ({
-    logId: l.logId,
-    action: l.action,
-    timestamp: l.timestamp,
-    actor: {
-      name: l.actorId ? l.actorId.name : 'Unknown User',
-      role: l.actorRole,
-    },
-    hospital: {
-      name: l.hospitalId ? l.hospitalId.name : 'Platform System',
-      district: l.hospitalId ? l.hospitalId.district : 'N/A',
-    },
-    outcome: l.accessGranted ? 'Granted' : 'Denied',
-    justification: l.justification,
-    details: {
-      consentId: l.meta ? l.meta.consentId : undefined,
-      typesAccessed: l.meta ? (l.meta.allowedTypes || l.meta.requestedTypes || []) : [],
-      recordsReturned: l.meta ? l.meta.recordsReturned : undefined,
-    },
-  }));
+  return {
+    logs: logs.map(l => ({
+      logId: l.logId,
+      action: l.action,
+      timestamp: l.timestamp,
+      actor: {
+        name: l.actorId ? l.actorId.name : 'Unknown User',
+        role: l.actorRole,
+      },
+      hospital: {
+        name: l.hospitalId ? l.hospitalId.name : 'Platform System',
+        district: l.hospitalId ? l.hospitalId.district : 'N/A',
+      },
+      outcome: l.accessGranted ? 'Granted' : 'Denied',
+      justification: l.justification,
+      details: {
+        consentId: l.meta ? l.meta.consentId : undefined,
+        typesAccessed: l.meta ? (l.meta.allowedTypes || l.meta.requestedTypes || []) : [],
+        recordsReturned: l.meta ? l.meta.recordsReturned : undefined,
+      },
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
 module.exports = {

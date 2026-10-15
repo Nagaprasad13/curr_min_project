@@ -67,7 +67,7 @@ The CareBridge ML module enhances the referral platform by transforming raw pati
 - **Rationale:** 
   1. *Clinical Reality:* Patients rarely arrive with all lab tests completed. Separate models evaluate only the tests present, returning `"insufficient_data"` for unmeasured panels without failing the entire assessment.
   2. *Auditability & Interpretability:* Each disease model exposes clear feature contributions (e.g., serum creatinine, hemoglobin) and can be audited independently by medical sub-specialists.
-  3. *Independent Threshold Tuning:* Clinical risk tolerance varies per disease; separate models permit disease-specific threshold optimization.
+  3. *Simulation Referral-Error Sensitivity:* The relative cost of false-negative referral errors varies by condition in the benchmark; separate models permit condition-specific threshold optimization.
 
 ### 2.3 Deterministic Knowledge Base for Specialty Mapping
 - **Decision:** Specialty and equipment requirements are mapped via a transparent JSON knowledge base (`condition_specialty_map.json`) rather than end-to-end machine learning.

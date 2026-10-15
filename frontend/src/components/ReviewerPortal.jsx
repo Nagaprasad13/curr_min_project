@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch as fetch } from '../api';
+import { Modal, Skeleton } from '../design-system/components';
+import { safeSchemeText } from '../schemeCopy';
 
-export default function ReviewerPortal({ token, reviewerUser }) {
-  const [activeTab, setActiveTab] = useState('queue'); // 'queue' | 'schemes' | 'specialty_map' | 'practitioners'
+export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queue' }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // Schemes state
   const [schemes, setSchemes] = useState([]);
   // Hospitals verification queue state
   const [hospitals, setHospitals] = useState([]);
+  const [hospitalDirectory, setHospitalDirectory] = useState([]);
   const [selectedHospital, setSelectedHospital] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -20,18 +24,35 @@ export default function ReviewerPortal({ token, reviewerUser }) {
   // Practitioner verification state
   const [pracHospitalId, setPracHospitalId] = useState('');
   const [hospitalPractitioners, setHospitalPractitioners] = useState([]);
+  const [models, setModels] = useState([]);
+  const [modelAction, setModelAction] = useState(null);
+  const [modelReason, setModelReason] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
   useEffect(() => {
-    if (token) {
-      loadSchemes();
-      loadHospitalsQueue();
-      loadSpecialtyMap();
+    if (reviewerUser) {
+      const controller = new AbortController();
+      setInitialLoading(true);
+      Promise.all([
+        loadSchemes(controller.signal),
+        loadHospitalsQueue(controller.signal),
+        loadHospitalDirectory(controller.signal),
+        loadSpecialtyMap(controller.signal),
+        loadModels(controller.signal),
+      ]).finally(() => {
+        if (!controller.signal.aborted) setInitialLoading(false);
+      });
+      return () => controller.abort();
     }
-  }, [token]);
+  }, [reviewerUser]);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const loadPractitionersForHospital = async (hId) => {
     if (!hId) return;
@@ -46,6 +67,49 @@ export default function ReviewerPortal({ token, reviewerUser }) {
       } else {
         setErrorMsg(data.message || 'Failed to load practitioners');
       }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadModels = async (signal) => {
+    try {
+      const response = await fetch('/api/models', {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+        credentials: 'include',
+        signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to load the model registry.');
+      setModels(data.models || []);
+    } catch (err) {
+      if (!signal?.aborted) setErrorMsg(err.message);
+    }
+  };
+
+  const handleModelStatus = async (event) => {
+    event.preventDefault();
+    if (!modelAction || !modelReason.trim()) {
+      setErrorMsg('A reason is required to change a model status.');
+      return;
+    }
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const response = await fetch(`/api/models/${modelAction.modelId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+        credentials: 'include',
+        body: JSON.stringify({ status: modelAction.status, justification: modelReason.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Model status could not be changed.');
+      setSuccessMsg(data.message || 'Model registry status updated.');
+      setModelAction(null);
+      setModelReason('');
+      await loadModels();
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
@@ -81,46 +145,62 @@ export default function ReviewerPortal({ token, reviewerUser }) {
     }
   };
 
-  const loadSchemes = async () => {
+  const loadSchemes = async (signal) => {
     try {
       const res = await fetch('/api/schemes', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
+        signal,
       });
       const data = await res.json();
-      if (res.ok) setSchemes(data.schemes || []);
+      if (!res.ok) throw new Error(data.message || 'Scheme catalogue could not be loaded.');
+      setSchemes(data.schemes || []);
     } catch (err) {
-      console.warn('Failed to load schemes:', err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     }
   };
 
-  const loadHospitalsQueue = async () => {
+  const loadHospitalsQueue = async (signal) => {
     try {
       setLoading(true);
       const res = await fetch('/api/hospitals', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
+        signal,
       });
       const data = await res.json();
-      if (res.ok) {
-        setHospitals(data.hospitals || []);
-      }
+      if (!res.ok) throw new Error(data.message || 'Hospital queue could not be loaded.');
+      setHospitals(data.hospitals || []);
     } catch (err) {
-      console.warn('Failed to load hospitals queue:', err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
-  const loadSpecialtyMap = async () => {
+  const loadHospitalDirectory = async (signal) => {
+    try {
+      const res = await fetch('/api/hospitals/reviewer-directory', {
+        headers: token ? { Authorization: 'Bearer ' + token } : {},
+        signal,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to load the hospital directory.');
+      setHospitalDirectory(data.hospitals || []);
+    } catch (err) {
+      if (!signal?.aborted) setErrorMsg(err.message);
+    }
+  };
+
+  const loadSpecialtyMap = async (signal) => {
     try {
       const res = await fetch('/api/specialty-map', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
+        signal,
       });
       const data = await res.json();
-      if (res.ok) {
-        setSpecialtyMappings(data.mappings || []);
-      }
+      if (!res.ok) throw new Error(data.message || 'Condition-specialty mappings could not be loaded.');
+      setSpecialtyMappings(data.mappings || []);
     } catch (err) {
-      console.warn('Failed to load condition-specialty mappings:', err.message);
+      if (!signal?.aborted) setErrorMsg(err.message);
     }
   };
 
@@ -135,11 +215,11 @@ export default function ReviewerPortal({ token, reviewerUser }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ reason: 'Audit criteria satisfied; clinical capabilities confirmed.' }),
+        body: JSON.stringify({ reason: 'Research simulation review recorded; data are synthetic.' }),
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(`✓ ${data.message}`);
+        setSuccessMsg('Simulated verification recorded for this synthetic facility.');
         loadHospitalsQueue();
       } else {
         setErrorMsg(data.message || 'Verification failed');
@@ -199,7 +279,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
         body: JSON.stringify({
           status: mappingStatus,
           escalation_rules: mappingRules || undefined,
-          notes: 'Signed off by TNHSP Reviewer',
+          notes: 'Reviewed in the CareBridge research prototype',
         }),
       });
       const data = await res.json();
@@ -218,7 +298,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
   };
 
   const handleSweepOutdated = async () => {
-    if (!token) return;
+    if (!reviewerUser) return;
     try {
       setLoading(true);
       setErrorMsg(null);
@@ -245,7 +325,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
   };
 
   const handleVerifyScheme = async (schemeId) => {
-    if (!token) return;
+    if (!reviewerUser) return;
     try {
       setLoading(true);
       setErrorMsg(null);
@@ -269,7 +349,15 @@ export default function ReviewerPortal({ token, reviewerUser }) {
 
   return (
     <div id="reviewer-portal-view" className="portal-container">
-      {errorMsg && <div className="clinical-warning-banner" role="alert">⚠️ {errorMsg}</div>}
+      {initialLoading && <Skeleton lines={4} />}
+      {errorMsg && <div className="clinical-warning-banner" role="alert">⚠️ {errorMsg} <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+        setErrorMsg(null);
+        loadSchemes();
+        loadHospitalsQueue();
+        loadHospitalDirectory();
+        loadSpecialtyMap();
+        loadModels();
+      }}>Retry loading</button></div>}
       {successMsg && <div className="clinical-notice-box" role="status" style={{ marginBottom: 16 }}>{successMsg}</div>}
 
       {/* Sub-Navigation Tabs */}
@@ -279,6 +367,12 @@ export default function ReviewerPortal({ token, reviewerUser }) {
           onClick={() => setActiveTab('queue')}
         >
           📋 Hospital Verification Queue ({hospitals.filter((h) => h.verificationStatus !== 'verified').length} pending)
+        </button>
+        <button
+          className={`btn ${activeTab === 'directory' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          onClick={() => { setActiveTab('directory'); loadHospitalDirectory(); }}
+        >
+          Hospital directory ({hospitalDirectory.length})
         </button>
         <button
           className={`btn ${activeTab === 'schemes' ? 'btn-primary' : 'btn-outline'} btn-sm`}
@@ -304,7 +398,50 @@ export default function ReviewerPortal({ token, reviewerUser }) {
         >
           👨‍⚕️ Practitioner Verifications
         </button>
+        <button
+          className={`btn ${activeTab === 'models' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          onClick={() => setActiveTab('models')}
+        >
+          Model registry ({models.length})
+        </button>
       </div>
+
+      {activeTab === 'directory' && (
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Synthetic hospital directory</h2>
+              <p className="card-desc">Administrator assignments, practitioner status counts, and capacity report age.</p>
+            </div>
+            <button className="btn btn-outline btn-sm" onClick={loadHospitalDirectory}>Refresh directory</button>
+          </div>
+          {hospitalDirectory.length === 0 ? (
+            <p role="status">No hospital records are available. Refresh the directory or check the data connection.</p>
+          ) : (
+            <div className="ds-table-scroll" role="region" aria-label="Reviewer hospital directory table" tabIndex="0">
+              <table className="data-table">
+                <thead><tr><th>Hospital</th><th>Administrator accounts</th><th>Practitioner counts by status</th><th>Latest capacity report</th></tr></thead>
+                <tbody>{hospitalDirectory.map((hospital) => (
+                  <tr key={hospital.hospitalId}>
+                    <td><strong>{hospital.name}</strong><br />{hospital.code} · {hospital.district}</td>
+                    <td>{hospital.admins.length
+                      ? hospital.admins.map((admin) => <div key={admin.email}>{admin.name} · {admin.email}</div>)
+                      : 'No admin assigned'}</td>
+                    <td>{Object.entries(hospital.practitionerCounts).map(([verification, employment]) => (
+                      <div key={verification}>
+                        <strong>{verification.replaceAll('_', ' ')}</strong>: {Object.entries(employment).map(([status, count]) => `${status} ${count}`).join(', ')}
+                      </div>
+                    ))}</td>
+                    <td>{hospital.latestCapacity
+                      ? `${Math.floor(hospital.latestCapacity.ageMinutes / 60)}h ${hospital.latestCapacity.ageMinutes % 60}m old`
+                      : 'No capacity report'}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* TAB 1: Hospital Verification Queue */}
       {activeTab === 'queue' && (
@@ -313,13 +450,13 @@ export default function ReviewerPortal({ token, reviewerUser }) {
             <div>
               <h2 className="card-title">📋 Hospital Capability Verification & Tier Audit Queue</h2>
               <p className="card-desc">
-                Review proposed capability tiers, consistency warnings, and simulated establishment proof. Approving confirms the hospital's effective tier.
+                Review proposed test tiers, consistency warnings, and synthetic facility evidence. This simulated action sets the facility's effective test tier.
               </p>
             </div>
             <button className="btn btn-outline btn-sm" onClick={loadHospitalsQueue}>↻ Refresh Queue</button>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto' }} role="region" aria-label="Hospital verification queue table" tabIndex="0">
             <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
@@ -344,7 +481,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
                     <td style={{ padding: 8 }}>
                       <strong>{h.tier}</strong>{' '}
                       <span className={`badge ${h.tierStatus === 'confirmed' ? 'badge-success' : 'badge-warning'}`}>
-                        {h.tierStatus || 'unconfirmed'}
+                        {h.tierStatus === 'confirmed' ? 'Simulated verification' : h.tierStatus || 'Proposed'}
                       </span>
                     </td>
                     <td style={{ padding: 8 }}>
@@ -388,14 +525,54 @@ export default function ReviewerPortal({ token, reviewerUser }) {
         </div>
       )}
 
+      {activeTab === 'models' && (
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Model registry</h2>
+              <p className="card-desc">Research artifacts and dataset lineage. Promotion and retirement require a reviewer reason.</p>
+            </div>
+            <button type="button" className="btn btn-outline btn-sm" onClick={loadModels}>Refresh registry</button>
+          </div>
+          {models.length === 0 ? <p>No model versions are registered yet. Register a candidate from the existing training results first.</p> : (
+            <div className="ds-table-scroll">
+              <table className="data-table">
+                <thead><tr><th>Model</th><th>Version</th><th>Status</th><th>Dataset</th><th>Rows</th><th>Headline metric</th><th>Limitations</th><th>Action</th></tr></thead>
+                <tbody>{models.map((model) => (
+                  <tr key={model.modelId}>
+                    <td>{model.name}</td><td>{model.version}</td><td>{model.status}</td>
+                    <td>{model.datasetName} · {model.datasetSource}</td>
+                    <td>{model.datasetRowCount ?? '—'}</td>
+                    <td>{model.metrics?.AUROC?.value ?? model.metrics?.auroc?.value ?? '—'}</td>
+                    <td>{Array.isArray(model.limitations) ? model.limitations.join('; ') : model.limitations}</td>
+                    <td>{model.status !== 'active'
+                      ? <button type="button" className="btn btn-success btn-sm" onClick={() => setModelAction({ modelId: model.modelId, status: 'active' })}>Promote</button>
+                      : <button type="button" className="btn btn-outline btn-sm" onClick={() => setModelAction({ modelId: model.modelId, status: 'retired' })}>Retire</button>}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+          {models.map((model) => <details key={`${model.modelId}-metrics`} className="model-metrics"><summary>{model.name} {model.version} · reviewer metrics</summary><pre>{JSON.stringify(model.metrics || {}, null, 2)}</pre></details>)}
+          {modelAction && (
+            <form className="model-reason-form" onSubmit={handleModelStatus}>
+              <label htmlFor="model-status-reason">{modelAction.status === 'active' ? 'Promotion reason' : 'Retirement reason'}</label>
+              <textarea id="model-status-reason" required minLength={1} maxLength={500} value={modelReason} onChange={(event) => setModelReason(event.target.value)} />
+              <button className="btn btn-primary" type="submit" disabled={loading || !modelReason.trim()}>Confirm {modelAction.status}</button>
+              <button className="btn btn-outline" type="button" onClick={() => { setModelAction(null); setModelReason(''); }}>Cancel</button>
+            </form>
+          )}
+        </section>
+      )}
+
       {/* TAB 2: Scheme Catalogue Management */}
       {activeTab === 'schemes' && (
         <div className="card">
           <div className="card-header">
             <div>
-              <h2 className="card-title">🛡️ Government Healthcare Schemes Catalogue (Auditor Management)</h2>
+              <h2 className="card-title">🛡️ Scheme catalogue (research prototype)</h2>
               <p className="card-desc">
-                Stamped with verified dates, official source URLs, and confirmed vs draft criteria.
+                Catalogue review dates are internal research metadata and do not indicate endorsement by a programme administrator.
               </p>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -412,30 +589,30 @@ export default function ReviewerPortal({ token, reviewerUser }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                   <div>
                     <h3 style={{ fontSize: '1.05rem', margin: '0 0 4px 0', color: '#1e293b' }}>
-                      {s.name} ({s.schemeId})
+                      {safeSchemeText(s.name)} ({safeSchemeText(s.schemeId)})
                     </h3>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Authority: {s.authority}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Programme information source</div>
                   </div>
                   <span className={`badge ${s.status === 'verified' ? 'badge-success' : 'badge-warning'}`}>
-                    {s.status}
+                    {s.status === 'verified' ? 'Research review recorded' : 'Needs research review'}
                   </span>
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: '#334155', marginBottom: 12 }}>
-                  {s.shortDescription}
+                  {safeSchemeText(s.shortDescription) || 'Prototype catalogue entry. Check the current information with the programme.'}
                 </p>
 
                 <div style={{ fontSize: '0.8rem', marginBottom: 10 }}>
-                  <strong>Verified Date:</strong> {s.lastVerifiedDate ? new Date(s.lastVerifiedDate).toLocaleDateString() : 'Unverified'}
+                  <strong>Last checked in prototype:</strong> {s.lastVerifiedDate ? new Date(s.lastVerifiedDate).toLocaleDateString() : 'Not checked'}
                   {s.outdated && (
                     <span className="badge badge-danger" style={{ marginLeft: 8 }}>⚠️ OUTDATED (&gt;180d)</span>
                   )}
                 </div>
 
                 <div style={{ fontSize: '0.8rem', marginBottom: 12 }}>
-                  <strong>Official Portal:</strong>{' '}
+                  <strong>Programme source URL (not an endorsement):</strong>{' '}
                   <a href={s.officialPortalUrl} target="_blank" rel="noreferrer" style={{ color: '#0284c7' }}>
-                    {s.officialPortalUrl}
+                    Open programme information source in a new tab
                   </a>
                 </div>
 
@@ -444,7 +621,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
                   onClick={() => handleVerifyScheme(s.schemeId)}
                   disabled={loading}
                 >
-                  🛡️ Re-Verify Against Official Portal
+                  🛡️ Review published source
                 </button>
               </div>
             ))}
@@ -465,7 +642,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
             <button className="btn btn-outline btn-sm" onClick={loadSpecialtyMap}>↻ Refresh Mappings</button>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto' }} role="region" aria-label="Scheme catalogue table" tabIndex="0">
             <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
@@ -572,7 +749,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
             <div>
               <h2 className="card-title">👨‍⚕️ Practitioner Credentials Verification & Governance</h2>
               <p className="card-desc">
-                State platform reviewer gate. Only approved practitioners count toward hospital specialist capacity and dynamic capability tiering.
+                Platform reviewer workflow. Practitioners with simulated verification status contribute to the prototype capability tiering.
               </p>
             </div>
             {pracHospitalId && (
@@ -609,7 +786,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
           </div>
 
           {pracHospitalId ? (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto' }} role="region" aria-label="Practitioner verification table" tabIndex="0">
               <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
@@ -696,9 +873,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
 
       {/* Reject Modal */}
       {showRejectModal && selectedHospital && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 500 }}>
-            <h3 style={{ margin: '0 0 12px 0' }}>Reject Hospital Verification</h3>
+        <Modal open title="Reject simulated facility verification" onClose={() => setShowRejectModal(false)}>
             <p style={{ fontSize: '0.88rem', color: '#475569' }}>
               Hospital: <strong>{selectedHospital.name}</strong> ({selectedHospital.code})
             </p>
@@ -718,6 +893,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button
+                type="button"
                 className="btn btn-outline"
                 onClick={() => {
                   setShowRejectModal(false);
@@ -727,6 +903,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
                 Cancel
               </button>
               <button
+                type="button"
                 className="btn btn-danger"
                 onClick={handleRejectHospital}
                 disabled={loading || !rejectReason.trim()}
@@ -734,8 +911,7 @@ export default function ReviewerPortal({ token, reviewerUser }) {
                 Confirm Rejection
               </button>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

@@ -12,6 +12,7 @@ const { signToken } = require('../config/jwt');
 
 describe('CareBridge Automated Authorisation Matrix (Phase 7 Quality Gate)', () => {
   let testHospitalId;
+  let foreignHospitalId;
   let testSchemeId;
   let testSpecialtyMapId;
 
@@ -42,6 +43,18 @@ describe('CareBridge Automated Authorisation Matrix (Phase 7 Quality Gate)', () 
       isSynthetic: true,
     });
     testHospitalId = hospital._id.toString();
+    const foreignHospital = await Hospital.create({
+      name: 'Foreign Matrix Hospital',
+      code: 'HOSP-TEST-002',
+      registrationNumber: 'CEA-TN-2026-9998',
+      district: 'Erode',
+      tier: 'Tier 2',
+      verificationStatus: 'verified',
+      location: { latitude: 11.341, longitude: 77.7172 },
+      bedCounts: { general: 50, emergency: 10, icu: 10 },
+      isSynthetic: true,
+    });
+    foreignHospitalId = foreignHospital._id.toString();
 
     // Create test scheme
     const scheme = await Scheme.create({
@@ -132,6 +145,38 @@ describe('CareBridge Automated Authorisation Matrix (Phase 7 Quality Gate)', () 
       endpoint: '/api/auth/me',
       method: 'GET',
       expected: { public: false, patient: true, doctor: true, hospital_admin: true, platform_reviewer: true },
+    },
+    {
+      name: 'Cross-hospital profile access',
+      endpoint: () => `/api/hospitals/${foreignHospitalId}`,
+      method: 'GET',
+      expected: { public: true, patient: true, doctor: false, hospital_admin: false, platform_reviewer: true },
+    },
+    {
+      name: 'Cross-hospital practitioner roster access',
+      endpoint: () => `/api/hospitals/${foreignHospitalId}/practitioners`,
+      method: 'GET',
+      expected: { public: false, patient: false, doctor: false, hospital_admin: false, platform_reviewer: true },
+    },
+    {
+      name: 'Cross-hospital capacity read',
+      endpoint: () => `/api/hospitals/${foreignHospitalId}/capacity/latest`,
+      method: 'GET',
+      expected: { public: false, patient: false, doctor: false, hospital_admin: false, platform_reviewer: true },
+    },
+    {
+      name: 'Cross-hospital capacity write',
+      endpoint: () => `/api/hospitals/${foreignHospitalId}/capacity`,
+      method: 'PUT',
+      body: { reportedBy: 'Matrix test' },
+      expected: { public: false, patient: false, doctor: false, hospital_admin: false, platform_reviewer: false },
+    },
+    {
+      name: 'Cross-hospital profile update',
+      endpoint: () => `/api/hospitals/${foreignHospitalId}`,
+      method: 'PUT',
+      body: { address: 'Attempted cross-hospital edit' },
+      expected: { public: false, patient: false, doctor: false, hospital_admin: false, platform_reviewer: false },
     },
     {
       name: 'Register Hospital',

@@ -21,10 +21,10 @@ if hasattr(sys.stdout, 'reconfigure'):
 import json
 import hashlib
 import joblib
-import numpy as np
 import pandas as pd
-from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, status
+from pymongo import MongoClient
+from typing import List, Optional, Any
+from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
@@ -50,16 +50,26 @@ app.add_middleware(
 )
 
 MODELS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
+ML_ROOT = os.path.dirname(MODELS_DIR)
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config')
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+MODEL_FILES = {
+    'triage': ('triage_model.joblib', None),
+    'diabetes': ('diabetes_model.joblib', 'diabetes'),
+    'heart': ('heart_model.joblib', 'heart_disease'),
+    'liver': ('liver_model.joblib', 'liver_disease'),
+    'ckd': ('ckd_model.joblib', 'ckd'),
+    'thyroid': ('thyroid_model.joblib', 'thyroid'),
+}
 
-# Load models and knowledge bases on startup
+# Load only active, registry-verified models at startup.
 triage_model = None
 condition_models = {}
 triage_card = {}
 screening_summary = {}
 condition_specialty_map = []
 verified_model_hashes = {}
+active_model_records = {}
 
 
 def compute_file_sha256(filepath: str) -> str:
@@ -71,79 +81,106 @@ def compute_file_sha256(filepath: str) -> str:
     return hasher.hexdigest().lower()
 
 
-@app.on_event("startup")
-def load_all_artifacts():
-    global triage_model, condition_models, triage_card, screening_summary, condition_specialty_map, verified_model_hashes
+def fetch_active_registry_models():
+    mongo_uri = os.environ.get('MONGODB_URI', 'mongodb://127.0.0.1:27017/carebridge')
+    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+    try:
+        database = client.get_default_database(default='carebridge')
+        database.command('ping')
+        return list(database.modelregistries.find({'status': 'active'}))
+    except Exception as exc:
+        raise RuntimeError(f"FATAL: Cannot read active model registry from MongoDB: {exc}") from exc
+    finally:
+        client.close()
 
-    # Load cryptographic verification manifest
-    manifest_path = os.path.join(MODELS_DIR, 'model_manifest.json')
-    if not os.path.exists(manifest_path):
-        raise RuntimeError(
-            f"FATAL: Model manifest not found at {manifest_path}! "
-            "ML service refuses to start without cryptographic model registry manifest."
-        )
 
-    with open(manifest_path, 'r', encoding='utf-8') as f:
-        manifest = json.load(f)
-    manifest_models = manifest.get('models', {})
+def load_all_artifacts(registry_entries=None, models_root=ML_ROOT):
+    global triage_model, condition_models, triage_card, screening_summary
+    global condition_specialty_map, verified_model_hashes, active_model_records
 
-    # 1. Triage model verification and loading
-    t_path = os.path.join(MODELS_DIR, 'triage_model.joblib')
-    if not os.path.exists(t_path):
-        raise RuntimeError(f"FATAL: Triage model artifact missing at {t_path}")
+    triage_model = None
+    condition_models = {}
+    triage_card = {}
+    screening_summary = {}
+    condition_specialty_map = []
+    verified_model_hashes = {}
+    active_model_records = {}
 
-    actual_triage_hash = compute_file_sha256(t_path)
-    expected_triage_hash = manifest_models.get('triage', {}).get('sha256')
-    if not expected_triage_hash or actual_triage_hash != expected_triage_hash:
-        raise RuntimeError(
-            f"FATAL: Cryptographic integrity violation for triage model! "
-            f"Expected SHA-256: {expected_triage_hash}, Actual: {actual_triage_hash}. "
-            "Server refuses to serve tampered or corrupted artifacts."
-        )
+    records = fetch_active_registry_models() if registry_entries is None else list(registry_entries)
+    for record in records:
+        name = record.get('name')
+        if record.get('status') != 'active':
+            continue
+        if name not in MODEL_FILES:
+            raise RuntimeError(f"FATAL: Unsupported model name in active registry: {name!r}")
+        if not record.get('version'):
+            raise RuntimeError(f"FATAL: Active {name} model has no version.")
+        if name in active_model_records:
+            raise RuntimeError(f"FATAL: Multiple active versions found for model {name}.")
+        threshold = record.get('threshold')
+        if not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
+            raise RuntimeError(f"FATAL: Active {name} model has an invalid threshold.")
 
-    triage_model = joblib.load(t_path)
-    verified_model_hashes['triage'] = actual_triage_hash
+        artifact_path = record.get('artifactPath')
+        if not artifact_path:
+            raise RuntimeError(f"FATAL: Active {name} model has no artifact path.")
+        resolved_path = os.path.realpath(os.path.join(models_root, artifact_path))
+        if os.path.commonpath([os.path.realpath(models_root), resolved_path]) != os.path.realpath(models_root):
+            raise RuntimeError(f"FATAL: Unsafe artifact path for active model {name}.")
+        if not os.path.isfile(resolved_path):
+            raise RuntimeError(f"FATAL: Active {name} artifact is missing at {resolved_path}.")
 
-    card_path = os.path.join(MODELS_DIR, 'triage_model_card.json')
-    if os.path.exists(card_path):
-        with open(card_path, 'r', encoding='utf-8') as f:
-            triage_card = json.load(f)
-
-    # 2. Condition screening models verification and loading
-    screening_configs = [
-        ('diabetes', 'diabetes_model.joblib', 'diabetes'),
-        ('heart_disease', 'heart_model.joblib', 'heart'),
-        ('liver_disease', 'liver_model.joblib', 'liver'),
-        ('ckd', 'ckd_model.joblib', 'ckd'),
-        ('thyroid', 'thyroid_model.joblib', 'thyroid'),
-    ]
-
-    for cond_name, file_name, manifest_key in screening_configs:
-        m_path = os.path.join(MODELS_DIR, file_name)
-        if not os.path.exists(m_path):
-            raise RuntimeError(f"FATAL: Screening model artifact missing for {cond_name} at {m_path}")
-
-        actual_hash = compute_file_sha256(m_path)
-        expected_hash = manifest_models.get(manifest_key, {}).get('sha256')
-        if not expected_hash or actual_hash != expected_hash:
+        actual_hash = compute_file_sha256(resolved_path)
+        expected_hash = str(record.get('artifactSha256', '')).lower()
+        if len(expected_hash) != 64 or actual_hash != expected_hash:
             raise RuntimeError(
-                f"FATAL: Cryptographic integrity violation for {cond_name} model ({file_name})! "
-                f"Expected SHA-256: {expected_hash}, Actual: {actual_hash}. "
-                "Server refuses to serve tampered or corrupted artifacts."
+                f"FATAL: SHA-256 integrity mismatch for active model {name}@{record.get('version')}. "
+                f"Expected {expected_hash or '<missing>'}; actual {actual_hash}. Model will not be served."
             )
 
-        condition_models[cond_name] = joblib.load(m_path)
-        verified_model_hashes[cond_name] = actual_hash
+        model = joblib.load(resolved_path)
+        active_model_records[name] = record
+        verified_model_hashes[name] = actual_hash
+        if name == 'triage':
+            triage_model = model
+        else:
+            model_key = MODEL_FILES[name][1]
+            if not hasattr(model, 'predict_risk'):
+                raise RuntimeError(f"FATAL: Active {name} artifact has no screening predict_risk method.")
+            model.operating_threshold = threshold
+            condition_models[model_key] = model
 
-    summary_path = os.path.join(MODELS_DIR, 'screening_summary.json')
-    if os.path.exists(summary_path):
-        with open(summary_path, 'r', encoding='utf-8') as f:
+    triage_card_path = os.path.join(models_root, 'models', 'triage_model_card.json')
+    if os.path.exists(triage_card_path):
+        with open(triage_card_path, 'r', encoding='utf-8') as f:
+            triage_card = json.load(f)
+    screening_summary_path = os.path.join(models_root, 'models', 'screening_summary.json')
+    if os.path.exists(screening_summary_path):
+        with open(screening_summary_path, 'r', encoding='utf-8') as f:
             screening_summary = json.load(f)
-
-    map_path = os.path.join(DATA_DIR, 'condition_specialty_map.json')
+    map_path = os.path.join(models_root, 'data', 'condition_specialty_map.json')
     if os.path.exists(map_path):
         with open(map_path, 'r', encoding='utf-8') as f:
             condition_specialty_map = json.load(f)
+
+
+def require_active_model(name: str) -> dict:
+    record = active_model_records.get(name)
+    if record is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Model {name!r} is unregistered or has no active version; prediction refused.",
+        )
+    return record
+
+
+def model_response_metadata(name: str) -> dict:
+    record = require_active_model(name)
+    return {
+        'modelName': name,
+        'modelVersion': record['version'],
+        'artifactSha256Prefix': record['artifactSha256'][:12],
+    }
 
 
 
@@ -177,7 +214,9 @@ class TriageSeverityResponse(BaseModel):
     thresholdUsed: float
     topContributors: List[str]
     missingInputs: List[str]
+    modelName: str
     modelVersion: str
+    artifactSha256Prefix: str
     dataSource: str
     notice: str
 
@@ -256,12 +295,15 @@ class FullPatientAssessmentRequest(BaseModel):
 # ENDPOINT 1: PREDICT SEVERITY (TRIAGE ONLY)
 # =============================================================================
 @app.post("/predict-severity", response_model=TriageSeverityResponse)
-def predict_severity(payload: TriageSeverityRequest):
-    if triage_model is None:
+def predict_severity(payload: TriageSeverityRequest, model_name: str = Query('triage', alias='modelName')):
+    record = require_active_model(model_name)
+    if model_name != 'triage':
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Triage severity model not loaded on server."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The predict-severity endpoint does not support model {model_name!r}.",
         )
+    if triage_model is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Active triage artifact was not loaded.")
 
     patient_dict = payload.model_dump()
     missing_inputs = [k for k, v in patient_dict.items() if v is None and k in ['o2sat', 'sbp', 'heartrate', 'resprate']]
@@ -291,7 +333,7 @@ def predict_severity(payload: TriageSeverityRequest):
     input_df = pd.DataFrame([row])
     prob = float(triage_model.predict_proba(input_df)[0, 1])
 
-    threshold = triage_card.get('operatingThreshold', 0.510)
+    threshold = record['threshold']
     is_high_acuity = prob >= threshold
     category = "high_acuity" if is_high_acuity else "lower_acuity"
 
@@ -317,8 +359,10 @@ def predict_severity(payload: TriageSeverityRequest):
         thresholdUsed=round(threshold, 3),
         topContributors=contributors[:4],
         missingInputs=missing_inputs,
-        modelVersion=triage_card.get('version', '1.0.0'),
-        dataSource="MIMIC-IV-ED Demo v2.2 (Open Access Benchmark)",
+        modelName=model_name,
+        modelVersion=record['version'],
+        artifactSha256Prefix=record['artifactSha256'][:12],
+        dataSource=record['datasetName'],
         notice=MANDATORY_DISCLAIMER
     )
 
@@ -328,6 +372,14 @@ def predict_severity(payload: TriageSeverityRequest):
 # =============================================================================
 @app.post("/assess")
 def assess_patient(payload: FullPatientAssessmentRequest):
+    expected_models = list(MODEL_FILES)
+    missing_active = [name for name in expected_models if name not in active_model_records]
+    if missing_active:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Assessment refused; no active registered version for: {', '.join(missing_active)}.",
+        )
+
     p_dict = payload.model_dump()
     # Normalize sync fields
     if p_dict.get('trestbps') is None and p_dict.get('sbp') is not None:
@@ -341,14 +393,10 @@ def assess_patient(payload: FullPatientAssessmentRequest):
     # 2. Triage model prediction
     triage_urgency = "routine"
     triage_contributors = []
-    if triage_model is not None:
-        try:
-            triage_res = predict_severity(TriageSeverityRequest(**p_dict))
-            if triage_res.riskCategory == "high_acuity":
-                triage_urgency = "urgent"
-            triage_contributors = triage_res.topContributors
-        except Exception:
-            pass
+    triage_res = predict_severity(TriageSeverityRequest(**p_dict), model_name='triage')
+    if triage_res.riskCategory == "high_acuity":
+        triage_urgency = "urgent"
+    triage_contributors = triage_res.topContributors
 
     # 3. Screening models execution
     risks = []
@@ -371,7 +419,14 @@ def assess_patient(payload: FullPatientAssessmentRequest):
                 "risk_score": res['risk_score'],
                 "threshold": res['operating_threshold'],
                 "flagged": res['flagged'],
-                "top_contributors": res['top_contributors']
+                "top_contributors": res['top_contributors'],
+                **model_response_metadata({
+                    'diabetes': 'diabetes',
+                    'heart_disease': 'heart',
+                    'liver_disease': 'liver',
+                    'ckd': 'ckd',
+                    'thyroid': 'thyroid',
+                }[cond_key]),
             })
             if res['flagged']:
                 flagged_specialties.append(res['specialty'])
@@ -449,6 +504,7 @@ def assess_patient(payload: FullPatientAssessmentRequest):
     return {
         "status": "success",
         "urgency": final_urgency,
+        **model_response_metadata('triage'),
         "triage_urgency_suggestion": triage_urgency,
         "specialties": unique_specialties[:3],
         "required_facilities": sorted(list(required_facilities)),
@@ -457,10 +513,13 @@ def assess_patient(payload: FullPatientAssessmentRequest):
         "missing_tests": list(dict.fromkeys(missing_tests)),
         "explanations": list(dict.fromkeys(explanations + triage_contributors))[:5],
         "model_versions": {
-            "triage": triage_card.get('version', '1.0.0'),
+            "triage": active_model_records['triage']['version'],
             "screening_pipeline": "1.0.0",
             "red_flags_config": "1.0.0"
         },
+        "model_artifacts": [
+            model_response_metadata(name) for name in expected_models
+        ],
         "disclaimer": MANDATORY_DISCLAIMER
     }
 
@@ -486,5 +545,5 @@ def health_check():
         "triage_model_loaded": triage_model is not None,
         "condition_models_count": len(condition_models),
         "integrity_verified": True,
-        "verified_hashes": verified_model_hashes,
+        "active_models": sorted(active_model_records),
     }

@@ -97,11 +97,16 @@ router.get(
   authorizeRoles('patient'),
   async (req, res) => {
     try {
-      const history = await getPatientAccessHistory(req.user._id);
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+      const history = await getPatientAccessHistory(req.user._id, { page, limit });
       return res.json({
         patientId: req.user._id,
-        totalEvents: history.length,
-        accessReport: history,
+        totalEvents: history.total,
+        page: history.page,
+        limit: history.limit,
+        totalPages: history.totalPages,
+        accessReport: history.logs,
       });
     } catch (err) {
       console.error('[CONSENT ACCESS HISTORY ERROR]:', err);
@@ -134,14 +139,23 @@ router.get(
         };
       }
 
-      const consents = await Consent.find(query)
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+      const [consents, total] = await Promise.all([Consent.find(query)
         .populate('patientId', 'name email phone district')
         .populate('requestingHospitalId', 'name district code tier')
         .populate('requestingDoctorId', 'name email')
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Consent.countDocuments(query)]);
 
       return res.json({
         count: consents.length,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
         consents,
       });
     } catch (err) {

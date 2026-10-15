@@ -1,5 +1,4 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
 const app = require('../server');
 const { connectDB, disconnectDB } = require('../config/db');
 const User = require('../models/User');
@@ -9,6 +8,7 @@ const AuditLog = require('../models/AuditLog');
 const { signToken } = require('../config/jwt');
 const { deriveHospitalSpecialists, syncHospitalSpecialists } = require('../services/practitionerService');
 const { checkDataConsistency } = require('../scripts/checkDataConsistency');
+const { rankReferralHospitals } = require('../services/referralEngineService');
 
 describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
   let testHospital;
@@ -18,6 +18,7 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
   let reviewerToken;
   let doctorUser;
   let doctorToken;
+  let rosterChangeHospitalId;
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
@@ -55,8 +56,7 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
     adminToken = signToken({ id: adminUser._id, email: adminUser.email, role: adminUser.role, hospitalId: testHospital._id });
 
     // Link admin user to hospital
-    testHospital.adminUserId = adminUser._id;
-    await testHospital.save();
+    await Hospital.findByIdAndUpdate(testHospital._id, { adminUserId: adminUser._id });
 
     reviewerUser = await User.create({
       name: 'Auditor Reviewer',
@@ -76,11 +76,38 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
       isSynthetic: true,
     });
     doctorToken = signToken({ id: doctorUser._id, email: doctorUser.email, role: doctorUser.role });
+  }, 180000);
+
+  afterEach(async () => {
+    if (!testHospital) return;
+
+    await Hospital.findByIdAndUpdate(testHospital._id, { $pull: { specialties: 'Nephrology' } });
+    await Practitioner.deleteOne({ practitionerId: 'PRAC-2026-99099' });
+
+    const secondPractitioner = await Practitioner.findOne({ practitionerId: 'PRAC-2026-99002' });
+    if (secondPractitioner && secondPractitioner.employmentStatus !== 'active') {
+      await Practitioner.updateOne(
+        { _id: secondPractitioner._id },
+        { $set: { employmentStatus: 'active' } }
+      );
+      await syncHospitalSpecialists(testHospital._id);
+    }
+
+    if (rosterChangeHospitalId) {
+      await Practitioner.updateMany(
+        { hospitalId: rosterChangeHospitalId },
+        { $set: { employmentStatus: 'active' } }
+      );
+      await syncHospitalSpecialists(rosterChangeHospitalId);
+      await Practitioner.deleteMany({ hospitalId: rosterChangeHospitalId });
+      await Hospital.deleteOne({ _id: rosterChangeHospitalId });
+      rosterChangeHospitalId = null;
+    }
   });
 
   afterAll(async () => {
     await disconnectDB();
-  });
+  }, 180000);
 
   describe('1. Practitioner Addition and Verification Boundaries', () => {
     let createdPractitionerId;
@@ -182,6 +209,101 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
   });
 
   describe('3. Tier Re-evaluation and Audit Logging on Staff Roster Changes', () => {
+    it('lowers tier and removes a hospital from eligible referrals when its roster is deactivated', async () => {
+      const hospital = await Hospital.create({
+        name: 'Synthetic Roster Deactivation Hospital',
+        code: 'HOSP-PRAC-TIER',
+        registrationNumber: 'CEA-TN-2026-PRAC-TIER',
+        district: 'Salem',
+        tier: 'Tier 2',
+        verificationStatus: 'verified',
+        location: { latitude: 11.6643, longitude: 78.146 },
+        has24x7Emergency: true,
+        equipment: {
+          ventilators: { available: true, count: 5 },
+          lab: { available: true },
+          xray: { available: true, count: 2 },
+          ultrasound: { available: true, count: 2 },
+          operationTheatres: { available: true, count: 2 },
+        },
+        bedCounts: { general: 60, emergency: 10, icu: 10 },
+        specialties: ['Pulmonology', 'Cardiology', 'General Surgery'],
+        isSynthetic: true,
+      });
+      rosterChangeHospitalId = hospital._id;
+
+      const roster = await Practitioner.create([
+        {
+          practitionerId: 'PRAC-2026-TIER-001',
+          hospitalId: hospital._id,
+          fullName: 'Synthetic Pulmonologist',
+          qualification: 'MBBS, MD',
+          specialty: 'Pulmonology',
+          registrationNumber: 'SYN-TNC-9010',
+          employmentStatus: 'active',
+          verificationStatus: 'verified',
+          isSynthetic: true,
+        },
+        {
+          practitionerId: 'PRAC-2026-TIER-002',
+          hospitalId: hospital._id,
+          fullName: 'Synthetic Cardiologist',
+          qualification: 'MBBS, DM',
+          specialty: 'Cardiology',
+          registrationNumber: 'SYN-TNC-9011',
+          employmentStatus: 'active',
+          verificationStatus: 'verified',
+          isSynthetic: true,
+        },
+        {
+          practitionerId: 'PRAC-2026-TIER-003',
+          hospitalId: hospital._id,
+          fullName: 'Synthetic Surgeon',
+          qualification: 'MBBS, MS',
+          specialty: 'General Surgery',
+          registrationNumber: 'SYN-TNC-9012',
+          employmentStatus: 'active',
+          verificationStatus: 'verified',
+          isSynthetic: true,
+        },
+      ]);
+
+      const before = await syncHospitalSpecialists(hospital._id);
+      const beforeReferral = rankReferralHospitals({
+        requiredSpecialty: 'Pulmonology',
+        urgency: 'routine',
+        requiredEquipment: [],
+        patientLocation: { latitude: 11.6643, longitude: 78.146 },
+      }, [before.hospital], {});
+
+      expect(before.hospital.tier).toBe('Tier 2');
+      expect(beforeReferral.recommendations.map(recommendation => recommendation.hospitalId))
+        .toContain(hospital._id.toString());
+
+      for (const practitioner of roster) {
+        const response = await request(app)
+          .patch(`/api/hospitals/${hospital._id}/practitioners/${practitioner.practitionerId}/status`)
+          .set('Authorization', `Bearer ${reviewerToken}`)
+          .send({ employmentStatus: 'resigned' });
+        expect(response.status).toBe(200);
+      }
+
+      const after = await Hospital.findById(hospital._id);
+      const afterReferral = rankReferralHospitals({
+        requiredSpecialty: 'Pulmonology',
+        urgency: 'routine',
+        requiredEquipment: [],
+        patientLocation: { latitude: 11.6643, longitude: 78.146 },
+      }, [after], {});
+
+      console.log(
+        `Roster evaluation: tier ${before.hospital.tier} -> ${after.tier}; eligible referrals ` +
+        `${beforeReferral.recommendations.length} -> ${afterReferral.recommendations.length}`
+      );
+      expect(after.tier).toBe('Tier 3');
+      expect(afterReferral.recommendations).toHaveLength(0);
+    });
+
     it('triggers tier re-evaluation and records immutable audit log on practitioner update', async () => {
       const syncResult = await syncHospitalSpecialists(testHospital._id, reviewerUser);
       expect(syncResult.hospital.specialists).toBeDefined();
@@ -196,7 +318,7 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
   describe('4. Data Consistency Verification', () => {
     it('seeds full consistency and passes checkDataConsistency audit', async () => {
       // Create active verified practitioners for all claimed specialties
-      await Practitioner.create([
+      const verifiedPractitioners = await Practitioner.create([
         {
           practitionerId: 'PRAC-2026-99003',
           hospitalId: testHospital._id,
@@ -220,6 +342,22 @@ describe('Phase 8.2: Doctors, Staff and Specialist Data Tests', () => {
           isSynthetic: true,
         },
       ]);
+      await Practitioner.updateOne(
+        { _id: verifiedPractitioners[0]._id },
+        { $set: { userId: doctorUser._id } }
+      );
+      const linkedDoctor = await User.create({
+        name: 'Doctor Consistency Link',
+        email: 'doctor.consistency.link@carebridge.test',
+        password: 'ConsistencyPass123!',
+        role: 'doctor',
+        hospitalId: testHospital._id,
+        isSynthetic: true,
+      });
+      await Practitioner.updateOne(
+        { _id: verifiedPractitioners[1]._id },
+        { $set: { userId: linkedDoctor._id } }
+      );
 
       const auditResult = await checkDataConsistency();
       expect(auditResult.passed).toBe(true);

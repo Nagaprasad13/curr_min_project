@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const Practitioner = require('../models/Practitioner');
 const Hospital = require('../models/Hospital');
-const { authenticate, authorizeRoles, requireHospitalOwnership } = require('../middleware/auth');
+const { authenticate, authorizeRoles, requireHospitalOwnership, requireHospitalContext } = require('../middleware/auth');
 const { syncHospitalSpecialists } = require('../services/practitionerService');
 const { recordAuditLog } = require('../services/auditService');
 
@@ -10,15 +10,25 @@ const { recordAuditLog } = require('../services/auditService');
  * GET /api/hospitals/:id/practitioners
  * List all practitioners associated with a hospital.
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireHospitalContext, async (req, res) => {
   try {
     const hospitalId = req.params.id;
-    const practitioners = await Practitioner.find({ hospitalId })
-      .sort({ specialty: 1, fullName: 1 });
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+    const [practitioners, total] = await Promise.all([
+      Practitioner.find({ hospitalId })
+        .sort({ specialty: 1, fullName: 1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Practitioner.countDocuments({ hospitalId }),
+    ]);
 
     return res.json({
       hospitalId,
-      totalPractitioners: practitioners.length,
+      totalPractitioners: total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
       practitioners,
     });
   } catch (err) {

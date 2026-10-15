@@ -20,19 +20,21 @@ All experiments followed the preregistered research protocol defined in `ml/PRER
 ## 2. Triage Severity Classifier Results
 
 ### 2.1 Benchmark Comparison Table
-Evaluated on the held-out test split of the MIMIC-IV-ED Demo v2.2 dataset ($N_{\text{test}} = 41$ visits, 39 unique patients, 25 high-acuity true cases):
+Evaluated on the held-out test split of the MIMIC-IV-ED Demo v2.2 dataset ($N_{\text{test}} = 41$ visits, 14 unique patients, 25 high-acuity true cases):
 
 | Model / Approach | Algorithm / Baseline | AUROC | Sensitivity | Specificity | PPV | Brier Score | Missed Cases (%) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **CareBridge Primary** | **Calibrated HistGradientBoosting** | **0.702** | **0.840** | **0.500** | **0.724** | **0.2186** | **16.0% (4/25)** |
-| Comparator 1 | L2 Regularized Logistic Regression | 0.810 | 0.800 | 0.625 | 0.769 | 0.2014 | 20.0% (5/25) |
-| Comparator 2 | Random Forest Classifier (100 trees)| 0.728 | 0.760 | 0.688 | 0.792 | 0.2150 | 24.0% (6/25) |
-| Clinical Rule Baseline| Approximate NEWS2 Algorithm | 0.672 | 0.720 | 0.625 | 0.750 | N/A | 28.0% (7/25) |
-| Naive Baseline | Majority Class Baseline | 0.500 | 1.000 | 0.000 | 0.610 | 0.2378 | 0.0% |
+| Comparator 1 | L2 Regularized Logistic Regression | 0.810 | 0.760 | 0.688 | 0.792 | 0.1789 | 24.0% (6/25) |
+| Comparator 2 | Random Forest Classifier (100 trees)| 0.705 | 0.680 | 0.563 | 0.708 | 0.2130 | 32.0% (8/25) |
+| Clinical Rule Baseline| Approximate NEWS2 Algorithm | 0.672 | — | — | — | N/A | — |
+| Naive Baseline | Majority Class Baseline | 0.500 | 1.000 | 0.000 | 0.610 | 0.2425 | 0.0% |
+
+Classifier baseline metrics use a fixed probability cutoff of 0.50. The primary model uses its train-tuned 0.510 cutoff. NEWS2 is reported by AUROC from its continuous approximate score only; no classification cutoff was preregistered, so its class metrics are omitted.
 
 *Key Observations:*
 - The Calibrated HistGradientBoosting model attained a test AUROC of 0.702 [95% CI: 0.511 – 0.855] and an AUPRC of 0.803 [95% CI: 0.658 – 0.928].
-- Operating at threshold 0.510, it achieved **84.0% sensitivity** [95% CI: 68.0% – 96.2%], successfully outperforming the approximate NEWS2 clinical score (72.0% sensitivity) by detecting 3 additional emergent patients.
+- Operating at threshold 0.510, it achieved **84.0% sensitivity** [95% CI: 68.0% – 96.2%]. The approximate NEWS2 baseline attained AUROC 0.672; its sensitivity is not compared because no cutoff was specified in the registered training code.
 - Platt sigmoid calibration reduced the Brier score from 0.2391 (uncalibrated) to 0.2186 (calibrated), yielding an Expected Calibration Error (ECE) of 0.115.
 
 ### 2.2 Subgroup Performance Audit
@@ -57,7 +59,7 @@ All 5 condition screening models were evaluated across 50 iterations (5-fold cro
 
 | Disease / Condition | Cohort & Source | Sample Size ($N$) | Positives ($N / \%$) | Operating Threshold | Sensitivity / Recall (95% CI) | Specificity (95% CI) | AUROC (95% CI) | AUPRC (95% CI) | Brier Score | ECE |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Diabetes** | Pima Indians (NIDDK) | 768 | 268 (34.9%) | 0.24 | **90.3%** [86.8% – 94.0%] | 62.8% [58.4% – 67.2%] | **0.833** [0.806 – 0.862] | 0.702 [0.645 – 0.768] | 0.1580 | 0.042 |
+| **Diabetes** | Pima Indians (NIDDK) | 768 | 268 (34.9%) | 0.24 | **90.7%** [87.1% – 94.2%] | 62.8% [58.4% – 67.2%] | **0.833** [0.805 – 0.862] | 0.704 [0.646 – 0.769] | 0.1580 | 0.043 |
 | **Heart Disease** | Cleveland Clinic (UCI) | 303 | 139 (45.9%) | 0.28 | **90.6%** [85.7% – 95.3%] | 72.0% [64.6% – 78.7%] | **0.899** [0.863 – 0.931] | 0.890 [0.844 – 0.929] | 0.1286 | 0.053 |
 | **Liver Disease** | ILPD (Andhra Pradesh) | 583 | 416 (71.4%) | 0.56 | **90.4%** [87.4% – 92.9%] | 40.7% [33.5% – 48.5%] | **0.744** [0.704 – 0.780] | 0.890 [0.861 – 0.914] | 0.1749 | 0.057 |
 | **Kidney Disease (CKD)**| UCI ML Repository | 400 | 250 (62.5%) | 0.85 | **95.6%** [92.9% – 97.9%] | 100.0% [100% – 100%] | **1.000** [0.999 – 1.000] | 1.000 [0.999 – 1.000] | 0.0058 | 0.034 |
@@ -99,11 +101,31 @@ In accordance with international clinical practice standards, two conditions are
 
 ## 5. Clinician Review Cases Export
 
-To validate clinical plausibility without relying on automated evaluation alone, 35 diverse clinical test scenarios were generated and exported:
+To provide illustrative test inputs without relying on automated evaluation alone, 35 synthetic clinical scenarios were generated and exported:
 - **Artifacts:**
   - `ml/data/clinician_review_cases.json`
   - `ml/data/clinician_review_cases.csv`
+- These generated examples are synthetic placeholders, not observations from any of the benchmark datasets and not part of training or metric calculations.
 - **Case Distribution:**
   - 10 High Acuity Emergency Presentations (STEMI, Acute Stroke, Hypertensive Crisis, Severe Shock)
   - 15 Chronic Multi-Morbidity Cases (Diabetic Nephropathy, Hypertensive Cardiomyopathy, Cirrhosis)
   - 10 Ambiguous / Borderline Scenarios (Mild vitals derangement, isolated lab anomalies)
+
+---
+
+## 6. Local Dataset and Run Provenance Audit
+
+Both training scripts were rerun on 2026-10-14 using the local files in `ml/data/raw/`. The five screening rows in this document reproduce the values written to `ml/models/screening_summary.json`; the triage primary metrics reproduce `ml/models/triage_model_card.json`. Dataset row counts below are the rows consumed by the training loaders, except where the raw MIMIC counts are explicitly distinguished.
+
+| Dataset | Rows used | Source | Local input / verification |
+| :--- | ---: | :--- | :--- |
+| MIMIC-IV-ED Demo v2.2 | 207 labeled visits (56 subjects); 166 train / 41 test visits (42 / 14 subjects) | PhysioNet public demo, [v2.2](https://physionet.org/content/mimic-iv-ed-demo/2.2/) | `edstays.csv.gz` and `triage.csv.gz` each contain 222 data rows; the inner join and non-missing acuity filter produce the 207 rows used. |
+| Pima Indians Diabetes | 768 | UCI ML Repository, [dataset 34](https://archive.ics.uci.edu/dataset/34/pima+indians+diabetes) | `pima_diabetes.csv`; screening summary reproduces the same sample and positive count (268). |
+| Cleveland Heart Disease | 303 | UCI ML Repository, [dataset 45](https://archive.ics.uci.edu/dataset/45/heart+disease) | `heart_disease/processed.cleveland.data`; screening summary reproduces the same sample and positive count (139). |
+| Indian Liver Patient Dataset | 583 | UCI ML Repository, [dataset 225](https://archive.ics.uci.edu/dataset/225/ilpd+indian+liver+patient+dataset) | `ilpd/Indian Liver Patient Dataset (ILPD).csv`; screening summary reproduces the same sample and positive count (416). |
+| Chronic Kidney Disease | 400 | UCI ML Repository, [dataset 338](https://archive.ics.uci.edu/dataset/338/chronic+kidney+disease) | `ckd/Chronic_Kidney_Disease/chronic_kidney_disease.arff`; screening summary reproduces the same sample and positive count (250). |
+| Thyroid Hypothyroid | 3,163 | UCI ML Repository, [dataset 102](https://archive.ics.uci.edu/dataset/102/thyroid+disease) | `thyroid/hypothyroid.data`; screening summary reproduces the same sample and positive count (151). |
+
+**Download / artifact status:** All input paths used by the training scripts were present and loaded during the reruns. An extra `ed2021.zip` file in the raw directory fails ZIP central-directory validation and is not referenced by either training loader; its intended source and download history are not recorded, so it is flagged as a corrupt/failed archive rather than a dataset input. `ckd.zip` is a valid ZIP containing a `.rar` archive; the extracted ARFF file used above is present. No failed download of a required training input was observed.
+
+**Synthetic and stale artifacts:** The SpO2-masking robustness check is a synthetic perturbation of the held-out MIMIC test rows. The clinician-review cases listed above are generated synthetic examples. Neither contributes to fitted-model metrics. `ml/models/model_manifest.json` is not a source of metric truth: its CKD and thyroid thresholds (0.50 and 0.10) disagree with the rerun screening summary (0.85 and 0.53), and its artifact hashes predate the rerun.

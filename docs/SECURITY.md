@@ -69,6 +69,8 @@ See the complete automatically generated matrix in [docs/AUTH_MATRIX.md](file://
 | `PUT /api/hospitals/:id/capacity` | Deny (401) | Deny (403) | Deny (403) | **Allow (Owner)** | Deny (403) |
 | `POST /api/referrals/assess` | Deny (401) | Deny (403) | **Allow** | Deny (403) | Deny (403) |
 | `POST /api/referrals/recommend` | Deny (401) | Deny (403) | **Allow** | Deny (403) | Deny (403) |
+| `GET /api/models` and `/api/models/:id` | Deny (401) | Deny (403) | **Allow (limited)** | **Allow (limited)** | **Allow (full metrics)** |
+| `PATCH /api/models/:id/status` | Deny (401) | Deny (403) | Deny (403) | **Allow (reason + audit)** | **Allow (reason + audit)** |
 | `POST /api/consents/request` | Deny (401) | Deny (403) | **Allow** | Deny (403) | Deny (403) |
 | `POST /api/consents/:id/grant` | Deny (401) | **Allow (Owner)** | Deny (403) | Deny (403) | Deny (403) |
 | `GET /api/patients/:id/records` | Deny (401) | **Allow (Self)** | **Allow (Consented)**| Deny (403) | Deny (403) |
@@ -76,7 +78,19 @@ See the complete automatically generated matrix in [docs/AUTH_MATRIX.md](file://
 
 ---
 
-## 5. Insecure Direct Object Reference (IDOR) Mitigation
+## 5. ML Model Registry and Artifact Integrity
+
+1. Model records contain provenance, metrics/95% confidence intervals, a SHA-256 digest, and an artifact path; binaries are not persisted in MongoDB.
+2. MongoDB enforces unique `(name, version)` records and a partial unique index limiting each model name to one `active` version.
+3. Registration creates only `candidate` rows, uses `$setOnInsert` for idempotency, skips entries with missing result/model-card data or binaries, and never auto-promotes.
+4. Only `platform_reviewer` and `hospital_admin` may promote or retire; a non-empty reason is mandatory. Lifecycle actions are recorded as immutable `UPDATE_MODEL_STATUS` audit entries.
+5. The ML service queries MongoDB for active entries and verifies artifact hashes before loading. It does not trust a static manifest or load candidate/retired files; missing active entries or hash mismatches fail closed.
+6. Doctors/admins receive only name, version, dataset, and limitations; full metric and artifact details are reviewer-only. Predictions and stored assessment audit metadata carry model versions and hash prefixes.
+7. The ML service URI must point to the same protected database as the backend. Backend Jest tests force MongoDB Memory Server irrespective of inherited `MONGODB_URI`; Python tests inject local registry fixtures and do not connect to Atlas or another external database.
+
+---
+
+## 6. Insecure Direct Object Reference (IDOR) Mitigation
 
 To prevent enumeration of patient IDs, referral codes, or hospital IDs:
 - Whenever an authenticated caller queries an ID belonging to another user, the API returns the **identical generic 404 response**:
@@ -87,7 +101,7 @@ To prevent enumeration of patient IDs, referral codes, or hospital IDs:
 
 ---
 
-## 6. Input Validation, Output Encoding & Sanitization
+## 7. Input Validation, Output Encoding & Sanitization
 
 1. **Strict Payload Limits**: Request bodies are capped at `100kb` (`express.json({ limit: '100kb' })`) to prevent memory exhaustion and Denial-of-Service.
 2. **NoSQL Injection Sanitization**: All query parameters (`req.query`) and body parameters (`req.body`) are recursively scanned to strip MongoDB query operators (`$ne`, `$where`, `$regex`, `$gt`) and dot notations before hitting database models.
@@ -96,7 +110,7 @@ To prevent enumeration of patient IDs, referral codes, or hospital IDs:
 
 ---
 
-## 7. Logging & Privacy Hygiene
+## 8. Logging & Privacy Hygiene
 
 1. **Zero PHI in Logs**: Express `morgan` and application logs omit clinical payloads, diagnostic details, and tokens.
 2. **Password & Token Exclusion**: Audit logs record actor ID, role, action, and resource references, but **never** record passwords, JWT tokens, or raw medical text.
@@ -104,7 +118,7 @@ To prevent enumeration of patient IDs, referral codes, or hospital IDs:
 
 ---
 
-## 8. Consolidated Threat Model Across Phases
+## 9. Consolidated Threat Model Across Phases
 
 | Threat ID | Threat Description | Attacker Persona | Mitigation in CareBridge | Residual Risk |
 | :--- | :--- | :--- | :--- | :--- |
@@ -114,10 +128,11 @@ To prevent enumeration of patient IDs, referral codes, or hospital IDs:
 | **TH-04** | **IDOR Enumeration**: Script crawling `/api/patients/:id/records` to enumerate registered patients. | Malicious client | Generic 404 response for both unauthorized and non-existent IDs. Rate limiting (60 req/min). | Brute force timing attacks over millions of attempts. |
 | **TH-05** | **Misleading Financial Guarantees**: Patient assuming scheme prediction guarantees free care. | Misinformed patient | **Forbidden-phrase scanner**: Rejects outputs containing "eligible", "covered", or "free". Enforces mandatory disclaimer. | External human misunderstandings outside software UI. |
 | **TH-06** | **Emergency Transfer Failure (Break-Glass)**: System lockouts preventing records access during cardiac arrest. | Emergency physician | Time-limited Break-Glass access (default OFF, prominent audit logging, notification dispatch). | Potential clinician overuse of emergency bypass. |
+| **TH-07** | **Model Artifact Tampering or Unreviewed Deployment**: A modified or unregistered binary influences a prediction. | Compromised filesystem or operator | Manual promotion, role-restricted audit trail, database-enforced active-version uniqueness, and SHA-256 verification before loading; mismatch fails closed. | Hash verification does not prove the artifact was trained correctly; secure host and database administration remain required. |
 
 ---
 
-## 9. Explicit Declaration: What Is NOT Done
+## 10. Explicit Declaration: What Is NOT Done
 
 CareBridge is a university health-informatics research prototype:
 - **No Penetration Testing**: No offensive red-teaming, fuzzing, or formal penetration testing has been conducted.

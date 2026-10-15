@@ -21,7 +21,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { generateSyntheticHospitals } = require('../scripts/syntheticDataGenerator');
+const mongoose = require('mongoose');
+const { connectDB, disconnectDB } = require('../config/db');
+const Practitioner = require('../models/Practitioner');
+const {
+  generateSyntheticHospitals,
+  generateSyntheticPractitioners,
+} = require('../scripts/syntheticDataGenerator');
 const { generateEvaluationScenarios } = require('./scenarioGenerator');
 const { rankReferralHospitals } = require('../services/referralEngineService');
 const { rankNearestVerified } = require('./baselines/nearestVerified');
@@ -158,15 +164,43 @@ function evaluateMethod(name, runFn, scenarios, hospitals) {
 /**
  * Runs complete benchmark evaluation across all models.
  */
-function runEvaluationBenchmark() {
+async function runEvaluationBenchmark() {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'test';
+
+  try {
+    await connectDB();
+    const hospitals = generateSyntheticHospitals();
+    hospitals.forEach(hospital => {
+      hospital._id = new mongoose.Types.ObjectId();
+    });
+
+    await Practitioner.deleteMany({});
+    await Practitioner.insertMany(generateSyntheticPractitioners(hospitals));
+    const practitioners = await Practitioner.find({
+      employmentStatus: 'active',
+      verificationStatus: 'verified',
+    }).select('hospitalId specialty employmentStatus verificationStatus').lean();
+
+    return runBenchmark(hospitals, practitioners);
+  } finally {
+    await disconnectDB();
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  }
+}
+
+function runBenchmark(hospitals, practitioners) {
   console.log('========================================================================');
   console.log(' CareBridge Referral Engine: Benchmark Evaluation (0% Staleness)');
   console.log(' Datasets: 40 Tamil Nadu Hospitals, 500 Evaluation Scenarios');
   console.log(' Disclaimer: Decision support only. Clinician review required.');
   console.log('========================================================================\n');
 
-  const hospitals = generateSyntheticHospitals();
-  const scenarios = generateEvaluationScenarios(hospitals, 42);
+  const scenarios = generateEvaluationScenarios(hospitals, 42, practitioners);
 
   // Method 1: CareBridge Engine (unknown_aware)
   const carebridgeRunner = (scn, hosps) => {
@@ -221,7 +255,7 @@ function runEvaluationBenchmark() {
   ];
 
   // Output ASCII report table
-  console.log('\n--- RESEARCH EVALUATION RESULTS TABLE (0% Staleness, Synthetic Practitioner-Derived Counts) ---');
+  console.log('\n--- RESEARCH EVALUATION RESULTS TABLE (0% Staleness, Practitioner-Collection Ground Truth) ---');
   console.log('| Model / Method     | Cap Match (%) | Top-1 Suit (%) | Top-3 Hit (%) |   MRR   | False Avail (%) | Dist (straight-line km) | Latency (ms) |');
   console.log('| :----------------- | ------------: | -------------: | ------------: | ------: | --------------: | ----------------------: | -----------: |');
   results.forEach(r => {
@@ -232,7 +266,8 @@ function runEvaluationBenchmark() {
     console.log(`| ${pad(r.method, 18)} | ${pad(r.top1CapabilityMatchRate + '%', 13, true)} | ${pad(r.top1SuitableRate + '%', 14, true)} | ${pad(r.top3HitRate + '%', 13, true)} | ${pad(r.mrr.toFixed(3), 7, true)} | ${pad(r.falseAvailableRate + '%', 15, true)} | ${pad(r.meanTop1DistanceKm + ' km', 23, true)} | ${pad(r.medianRuntimeMs + ' ms', 12, true)} |`);
   });
   console.log('------------------------------------------------------------------------------------------------\n');
-  console.log('Evaluation Note: Under synthetic practitioner-derived counts, 100% capability match and MRR 1.000');
+  console.log('Evaluation Note: Synthetic active/verified practitioner documents in the practitioners collection supply ground truth.');
+  console.log('A 100% capability match and MRR 1.000');
   console.log('at 0% staleness is expected by construction because fresh observed snapshots perfectly mirror true network');
   console.log('ground truth. Algorithmic divergence and degradation manifest under non-zero staleness levels (Phases 4 & 7).\n');
 
@@ -259,7 +294,10 @@ function runEvaluationBenchmark() {
 }
 
 if (require.main === module) {
-  runEvaluationBenchmark();
+  runEvaluationBenchmark().catch(err => {
+    console.error('Phase 3 evaluation failed:', err);
+    process.exitCode = 1;
+  });
 }
 
 module.exports = {

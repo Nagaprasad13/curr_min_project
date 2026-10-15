@@ -219,7 +219,11 @@ All 27 unit and integration tests validate:
 cd backend
 npm run seed
 ```
-Creates 40 synthetic hospitals classified through `classifyHospitalTier()` and seeds 5 demo accounts.
+Creates 40 synthetic hospitals, per-hospital administrator accounts, and at least two
+practitioner-linked doctor accounts per hospital. Each account receives a unique random
+password saved locally in the git-ignored `backend/seed-credentials.json` file. The seed
+command refuses to run when `NODE_ENV=production`; seeded synthetic accounts are also
+refused by production login.
 
 ### Start the Backend Server
 ```bash
@@ -230,12 +234,9 @@ npm start
 
 ### Example API Requests (curl)
 
-#### 1. Login as Platform Reviewer
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"reviewer@carebridge.tn.gov.in","password":"ReviewerPassword123!"}'
-```
+#### 1. Find local seeded login credentials
+After seeding, open `backend/seed-credentials.json` locally and select the account
+matching the desired role and hospital. Do not commit or share this file.
 
 #### 2. Register a Hospital (`hospital_admin`)
 ```bash
@@ -789,15 +790,15 @@ npm run dev
 #### Step 4: Example cURL Commands for Complete Flow
 
 ```bash
-# 1. Login as Doctor at Hospital B
+# 1. Login as a seeded Doctor
 DOCTOR_TOKEN=$(curl -s -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"doctor.b@carebridge.synthetic","password":"DoctorPassword123!"}' | jq -r '.token')
+  -d '{"email":"<doctor email from backend/seed-credentials.json>","password":"<matching unique password>"}' | jq -r '.token')
 
-# 2. Login as Patient 1
+# 2. Login as a seeded Patient
 PATIENT_TOKEN=$(curl -s -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"patient.kavitha@carebridge.synthetic","password":"PatientPassword123!"}' | jq -r '.token')
+  -d '{"email":"<patient email from backend/seed-credentials.json>","password":"<matching unique password>"}' | jq -r '.token')
 
 # 3. Doctor requests records consent from Patient 1
 CONSENT_ID=$(curl -s -X POST http://localhost:5000/api/consents/request \
@@ -833,6 +834,85 @@ curl -s -X POST http://localhost:5000/api/schemes/match \
 ```
 
 ---
+
+### 13.11 Phase 8.4 UI
+
+Run the backend and frontend in separate terminals from the repository root:
+
+```bash
+# Terminal 1: API
+cd backend
+npm install
+npm run dev
+
+# Terminal 2: UI
+cd frontend
+npm install
+npm run dev
+```
+
+The UI uses the same-origin cookie-backed API session; a running backend is required to
+sign in and load account data. Seeded synthetic accounts are available only after
+running the non-production seed process; their unique passwords are written to the
+git-ignored `backend/seed-credentials.json` file. Never seed production data.
+
+The development-only component gallery is available at `http://localhost:3000/design-system`.
+The production build runs the WCAG AA design-token contrast gate before Vite builds:
+
+```bash
+npm test
+npm run check:contrast
+npm run build
+```
+
+The UI is a research prototype using synthetic data only. Keep API access same-origin
+through the cookie-backed session; do not put authentication tokens in browser storage.
+
+Role screenshots are in [`docs/screenshots/`](./docs/screenshots/), including light and
+dark views for each role and doctor referral results at desktop and 360px widths.
+
+### Phase 8.4b database-backed portal data
+
+Role portals use the authenticated API as their source of truth rather than embedded
+hospital, practitioner, patient, or referral examples. `GET /api/patients` is scoped to
+patients linked to the signed-in doctor through the doctor's hospital's referrals or
+consents; `GET /api/referrals` returns only the signed-in user's authorized referrals.
+Hospital, practitioner, record, consent, and audit-history list routes accept bounded
+`page`/`limit` parameters. Unreported capacity is represented as an empty/unknown
+snapshot instead of an error. The frontend's shared `apiFetch` client includes cookies,
+initializes CSRF for unsafe cookie-authenticated requests, retries one unauthorized
+request after session refresh, supports abort signals/timeouts, and redirects an
+unrecoverable session to sign-in. Development demo accounts, when explicitly enabled,
+are listed from the synthetic-user collection by `GET /api/auth/demo-accounts`; no
+persona email list is embedded in the login page.
+
+Validate these behaviors with `npm test -- --runInBand` from `backend` and `npm test`
+from `frontend`. Tests use the Jest in-memory database configuration; do not point test
+runs at Atlas.
+
+### Phase 8.5 demo data
+
+Run the complete demo seed, checker, and guarded reset against a dedicated local
+MongoDB database (PowerShell, from `backend`):
+
+```powershell
+$env:CAREBRIDGE_DEMO_DATABASE = 'true'
+$env:DEMO_DATABASE_NAME = 'carebridge_demo'
+$env:MONGODB_URI = 'mongodb://127.0.0.1:27017/carebridge_demo'
+npm run seed-demo
+npm run demo-check
+npm run demo
+# Restore the known synthetic state:
+npm run reset-demo
+```
+
+The demo scripts fail closed: no implicit in-memory fallback, production use, or
+non-demo database is allowed. Reset/check also require a marker in the target database.
+The fixed synthetic fixtures do not write `backend/data`, evaluation results, or
+`ml/RESULTS.md`. Unique passwords are generated into the ignored
+`backend/seed-credentials.json`; see [`docs/DEMO_SCRIPT.md`](./docs/DEMO_SCRIPT.md) for
+role account names and the seven-step walkthrough. Static assessment examples are
+explicitly marked as fixtures and do not claim that ML inference was executed.
 
 ## 14. Phase 6 Done Checklist
 
@@ -888,8 +968,8 @@ Phase 7 consolidates, hardens, documents, and packages all project phases (1 thr
 cd backend
 npm run check:reproduce
 
-# 2. Run the complete backend test regression suite (8 suites, 122 tests):
-npm test -- --runInBand --forceExit
+# 2. Run the complete backend test regression suite:
+npm --prefix backend test -- --runInBand
 
 # 3. Run the automated guided demo scenario (Path A + Path B):
 npm run demo
@@ -904,7 +984,19 @@ npm run build
 
 ---
 
-## 16. Final Project Done Checklist (Phases 1–7 Complete)
+### 15.3 Phase 8.3: ML Model Registry and Artifact Integrity
+
+- Run `npm --prefix backend run register-models` to register candidate entries for artifacts with complete existing results and model-card files. Registration is idempotent and never promotes a model.
+- `modelRegistry` stores dataset provenance, dataset size, training date, thresholds, the complete metrics object (including 95% confidence intervals), feature names, limitations, and the artifact SHA-256. Binary artifacts are never stored in MongoDB.
+- MongoDB enforces unique `(name, version)` records and at most one active version per model name through a partial unique index.
+- Only a platform reviewer or hospital admin can promote/retire a model at `PATCH /api/models/:id/status`; every lifecycle change requires a reason and audit entry. Reviewers can read full metrics; doctors receive only name, version, dataset, and limitations.
+- At startup the ML service reads active registry entries, verifies each artifact's SHA-256 before loading, and fails closed for missing, inactive, unregistered, or tampered models. Prediction and stored assessment metadata include model versions and artifact-hash prefixes.
+- Registration creates each complete model as a **candidate**; a reviewer/admin must manually activate desired versions before serving predictions. The composite `/assess` endpoint requires all six active versions.
+- Dataset provenance, failed/corrupt unused downloads, and synthetic test material are documented in [`ml/RESULTS.md`](ml/RESULTS.md).
+
+---
+
+## 16. Final Project Done Checklist (Phases 1–8.3)
 
 | Component | Acceptance Criterion | Status | Evidence Reference |
 | :--- | :--- | :---: | :--- |
@@ -921,9 +1013,5 @@ npm run build
 | **11. Results Traceability** | Claims table and figures index linking every metric to source files | **DONE** | [`docs/report/RESULTS_TRACEABILITY.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/report/RESULTS_TRACEABILITY.md) |
 | **12. Architecture & ADRs** | Mermaid diagrams + consolidated ADRs 001–011 | **DONE** | [`docs/ARCHITECTURE.md`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/ARCHITECTURE.md) |
 | **13. Presentation Package** | 12-slide deck with notes, 3–5 min demo script, 8 examiner Q&As | **DONE** | [`docs/presentation/`](file:///c:/Users/Nagaprasad%20M/OneDrive/Desktop/mini/docs/presentation) |
-| **14. Full Regression Suite** | 8 test suites, 122 tests passing with zero regressions across Phases 1–7 | **DONE** | `npm test` (All 8 suites passed) |
-
-
-
-
-
+| **14. Full Regression Suite** | Backend suite passes with `--runInBand` | **DONE** | `npm --prefix backend test -- --runInBand` |
+| **15. Model Registry & Integrity** | Idempotent candidate registration, database-enforced single-active lifecycle, manual audited promotion, and SHA-256 verified service loading | **DONE** | `backend/src/tests/modelRegistry.test.js`, `ml/tests/test_service_endpoints.py` |

@@ -1,30 +1,29 @@
-/**
- * CareBridge Demo Reset Utility
- * Restores database collections to pristine seeded state for reproducible demonstrations.
- * 
- * Usage: npm run demo:reset
- */
-
-const runSeed = require('./seed');
+const mongoose = require('mongoose');
+const {
+  connectStrictDemoDatabase,
+  seedDemoData,
+  runDemoCheck,
+} = require('./demoData');
 
 async function resetDemo() {
-  console.log('================================================================');
-  console.log(' CareBridge: Resetting Demo Environment');
-  console.log(' Restoring 40 synthetic hospitals, capacities, 10 patients,');
-  console.log(' 83 clinical records, and verified healthcare schemes...');
-  console.log('================================================================\n');
-
   try {
-    await runSeed();
-    console.log('\n✓ DEMO RESET COMPLETE: Database restored to pristine seeded state.');
-  } catch (err) {
-    console.error('Demo reset failed:', err);
-    process.exit(1);
+    await connectStrictDemoDatabase({ requireMarker: true });
+    console.log('Restoring deterministic synthetic demo fixtures...');
+    const result = await seedDemoData({ force: true });
+    console.log(`Demo reset complete: restored ${result.hospitals} hospitals, ${result.patients} patients, ${result.referrals} referrals, and ${result.consents} consents.`);
+    await runDemoCheck();
+    return result;
+  } catch (error) {
+    console.error('Demo reset failed:', error.message);
+    process.exitCode = 1;
+    throw error;
+  } finally {
+    if (mongoose.connection.readyState !== 0) await mongoose.disconnect();
   }
 }
 
 if (require.main === module) {
-  resetDemo();
+  resetDemo().catch(() => {});
 }
 
 module.exports = resetDemo;

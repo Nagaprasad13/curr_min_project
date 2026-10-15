@@ -4,12 +4,14 @@ const app = require('../server');
 const { connectDB, disconnectDB } = require('../config/db');
 const Hospital = require('../models/Hospital');
 const HospitalCapacity = require('../models/HospitalCapacity');
+const Practitioner = require('../models/Practitioner');
 const Referral = require('../models/Referral');
 const User = require('../models/User');
 const { signToken } = require('../config/jwt');
 const { calculateHaversineDistance, STRAIGHT_LINE_NOTICE } = require('../services/haversineService');
 const { evaluateResourceFreshness } = require('../services/freshnessService');
 const { rankReferralHospitals } = require('../services/referralEngineService');
+const { generateEvaluationScenarios } = require('../evaluation/scenarioGenerator');
 
 jest.setTimeout(30000);
 
@@ -22,6 +24,7 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
     await connectDB();
     await Hospital.deleteMany({});
     await HospitalCapacity.deleteMany({});
+    await Practitioner.deleteMany({});
     await Referral.deleteMany({});
     await User.deleteMany({});
 
@@ -93,6 +96,7 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
       isSynthetic: true,
     }).save();
     await User.findByIdAndUpdate(adminUser1._id, { hospitalId: hospTier1._id });
+    await User.findByIdAndUpdate(doctorUser1._id, { hospitalId: hospTier1._id });
 
     hospTier2 = await new Hospital({
       name: 'Synthetic Salem Pulmonology Specialty Hospital',
@@ -118,6 +122,7 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
       isSynthetic: true,
     }).save();
     await User.findByIdAndUpdate(adminUser2._id, { hospitalId: hospTier2._id });
+    await User.findByIdAndUpdate(doctorUser2._id, { hospitalId: hospTier2._id });
 
     hospBasic = await new Hospital({
       name: 'Synthetic Erode Basic Taluk Clinic',
@@ -138,6 +143,62 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
 
   afterAll(async () => {
     await disconnectDB();
+  });
+
+  it('uses active verified practitioner collection rows as independent evaluation ground truth', async () => {
+    const hospitalId = new mongoose.Types.ObjectId();
+    const hospital = {
+      _id: hospitalId,
+      code: 'HOSP-P3-GT',
+      name: 'Synthetic ground-truth hospital',
+      verificationStatus: 'verified',
+      has24x7Emergency: true,
+      specialties: ['Pulmonology'],
+      specialists: [],
+      equipment: { ventilators: { available: true, count: 2 } },
+      location: { latitude: 11.6643, longitude: 78.146 },
+    };
+    const practitioner = await Practitioner.create({
+      practitionerId: 'PRAC-P3-GT-001',
+      hospitalId,
+      fullName: 'Synthetic Ground Truth Pulmonologist',
+      qualification: 'MBBS, MD',
+      specialty: 'Pulmonology',
+      registrationNumber: 'SYN-TNC-9001',
+      employmentStatus: 'active',
+      verificationStatus: 'verified',
+      isSynthetic: true,
+    });
+
+    try {
+      const activeVerifiedRows = await Practitioner.find({
+        employmentStatus: 'active',
+        verificationStatus: 'verified',
+      }).select('hospitalId specialty employmentStatus verificationStatus').lean();
+      const scenariosBefore = generateEvaluationScenarios([hospital], 42, activeVerifiedRows);
+      const suitableScenario = scenariosBefore.find(scenario =>
+        scenario.requiredSpecialty === 'Pulmonology' &&
+        scenario.trueNetworkState[hospitalId.toString()].hasBedCapacity
+      );
+
+      expect(suitableScenario).toBeDefined();
+      expect(suitableScenario.groundTruthSuitableHospitalIds).toContain(hospitalId.toString());
+
+      await Practitioner.updateOne(
+        { _id: practitioner._id },
+        { $set: { employmentStatus: 'resigned' } }
+      );
+      const activeRowsAfterDeactivation = await Practitioner.find({
+        employmentStatus: 'active',
+        verificationStatus: 'verified',
+      }).select('hospitalId specialty employmentStatus verificationStatus').lean();
+      const scenariosAfter = generateEvaluationScenarios([hospital], 42, activeRowsAfterDeactivation);
+      const correspondingScenario = scenariosAfter[suitableScenario.scenarioIndex - 1];
+
+      expect(correspondingScenario.groundTruthSuitableHospitalIds).not.toContain(hospitalId.toString());
+    } finally {
+      await Practitioner.deleteOne({ _id: practitioner._id });
+    }
   });
 
   describe('1. Haversine Distance Service', () => {
@@ -398,7 +459,7 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
         .set('Authorization', `Bearer ${doctorToken1}`)
         .send({
           patientName: 'Test Referral Patient',
-          requiredSpecialty: 'Cardiology',
+          requiredSpecialty: 'Pulmonology',
           urgency: 'emergency',
           requiredEquipment: ['ventilators'],
           requiredBedType: 'icu',
@@ -437,7 +498,7 @@ describe('Phase 3: Capacity Data, Referral Engine & Baselines', () => {
         .patch(`/api/referrals/${createdReferralId}/review`)
         .set('Authorization', `Bearer ${doctorToken1}`)
         .send({
-          selectedHospitalId: hospTier1._id,
+          selectedHospitalId: hospTier2._id,
           notes: 'Clinician confirmed ICU ventilator capacity by phone.',
           newStatus: 'reviewed',
         });

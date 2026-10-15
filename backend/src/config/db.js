@@ -14,8 +14,8 @@ async function connectDB(uri = process.env.MONGODB_URI) {
     return mongoose.connection;
   }
 
-  // In test mode, use MongoMemoryServer to keep tests fast, isolated, and avoid altering Atlas data
-  if (process.env.NODE_ENV === 'test') {
+  // Jest always uses MongoMemoryServer, regardless of inherited environment variables or URI.
+  if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) {
     const { MongoMemoryServer } = require('mongodb-memory-server');
     if (!mongoMemoryServerInstance) {
       mongoMemoryServerInstance = await MongoMemoryServer.create();
