@@ -15,7 +15,7 @@ const AuditLogSchema = new mongoose.Schema({
   },
   actorRole: {
     type: String,
-    enum: ['patient', 'doctor', 'hospital_admin', 'platform_reviewer', 'system'],
+    enum: ['patient', 'doctor', 'hospital_admin', 'triage_nurse', 'platform_reviewer', 'system'],
     required: true,
   },
   action: {
@@ -50,14 +50,30 @@ const AuditLogSchema = new mongoose.Schema({
       'CREATE_SCHEME',
       'UPDATE_SCHEME',
       'FLAG_OUTDATED_SCHEME',
-      'REVIEW_SPECIALTY_MAP'
+      'REVIEW_SPECIALTY_MAP',
+      'CREATE_TRIAGE_RECORD',
+      'EDIT_TRIAGE_RECORD',
+      'SUBMIT_TRIAGE_RECORD',
+      'AMEND_TRIAGE_RECORD',
+      'VIEW_TRIAGE_RECORD',
+      'OVERRIDE_TRIAGE_URGENCY',
+      'CONFIRM_TRIAGE_URGENCY',
+      'REQUEST_REMEASURE',
+      'CREATE_TRIAGE_ALERT',
+      'ACK_TRIAGE_ALERT',
+      'LIST_TRIAGE_RECORDS',
+      'LIST_TRIAGE_INTAKE_PATIENTS',
+      'VIEW_TRIAGE_ALERTS',
+      'LIST_HOSPITAL_NURSES',
+      'INVITE_TRIAGE_NURSE',
+      'UPDATE_TRIAGE_NURSE'
     ],
     required: true,
     index: true,
   },
   resourceType: {
     type: String,
-    enum: ['Hospital', 'HospitalCapacity', 'Referral', 'Consent', 'PatientRecord', 'Scheme', 'ClinicalDecisionSupport', 'ConditionSpecialtyMap', 'ModelRegistry', 'User'],
+    enum: ['Hospital', 'HospitalCapacity', 'Referral', 'Consent', 'PatientRecord', 'Scheme', 'ClinicalDecisionSupport', 'ConditionSpecialtyMap', 'ModelRegistry', 'User', 'TriageRecord', 'TriageAlert'],
     required: true,
   },
   resourceId: {

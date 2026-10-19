@@ -348,7 +348,50 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
   };
 
   return (
-    <div id="reviewer-portal-view" className="portal-container">
+    <div id="reviewer-portal-view" className="portal-container" style={{ background: '#F0F7FF', minHeight: '100vh', paddingBottom: 40 }}>
+      {/* Reviewer Blue Clinical Header */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%)',
+          padding: '22px 28px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 14,
+          borderRadius: 14,
+          boxShadow: '0 4px 16px rgba(29, 78, 216, 0.2)',
+          marginBottom: 20,
+          color: '#FFFFFF',
+        }}
+      >
+        <div>
+          <div style={{ color: '#BFDBFE', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            State Health Platform Review & Verification
+          </div>
+          <div style={{ color: '#FFFFFF', fontSize: '1.4rem', fontWeight: 800, marginTop: 2 }}>
+            🛡️ Platform Reviewer Workspace
+          </div>
+          <div style={{ color: '#E0F2FE', fontSize: '0.82rem', marginTop: 4 }}>
+            Reviewer: <strong>{reviewerUser?.name || 'Authorized Reviewer'}</strong> · State Quality Governance Portal
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{hospitals.filter((h) => h.verificationStatus !== 'verified').length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Pending Review</div>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{hospitalDirectory.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Facilities</div>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{models.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>ML Models</div>
+          </div>
+        </div>
+      </div>
+
       {initialLoading && <Skeleton lines={4} />}
       {errorMsg && <div className="clinical-warning-banner" role="alert">⚠️ {errorMsg} <button type="button" className="btn btn-outline btn-sm" onClick={() => {
         setErrorMsg(null);
@@ -361,49 +404,42 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
       {successMsg && <div className="clinical-notice-box" role="status" style={{ marginBottom: 16 }}>{successMsg}</div>}
 
       {/* Sub-Navigation Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '2px solid #e2e8f0', paddingBottom: 8 }}>
-        <button
-          className={`btn ${activeTab === 'queue' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('queue')}
-        >
-          📋 Hospital Verification Queue ({hospitals.filter((h) => h.verificationStatus !== 'verified').length} pending)
-        </button>
-        <button
-          className={`btn ${activeTab === 'directory' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => { setActiveTab('directory'); loadHospitalDirectory(); }}
-        >
-          Hospital directory ({hospitalDirectory.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'schemes' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('schemes')}
-        >
-          🛡️ Health Schemes Catalogue ({schemes.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'specialty_map' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('specialty_map')}
-        >
-          🩺 Condition-Specialty Review Sheet ({specialtyMappings.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'practitioners' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => {
-            setActiveTab('practitioners');
-            if (!pracHospitalId && hospitals.length > 0) {
-              setPracHospitalId(hospitals[0]._id);
-              loadPractitionersForHospital(hospitals[0]._id);
-            }
-          }}
-        >
-          👨‍⚕️ Practitioner Verifications
-        </button>
-        <button
-          className={`btn ${activeTab === 'models' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('models')}
-        >
-          Model registry ({models.length})
-        </button>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', background: '#DBEAFE', padding: 6, borderRadius: 12, border: '1px solid #BFDBFE' }}>
+        {[
+          { id: 'queue', label: `📋 Verification Queue (${hospitals.filter((h) => h.verificationStatus !== 'verified').length} pending)` },
+          { id: 'directory', label: `Hospital Directory (${hospitalDirectory.length})` },
+          { id: 'schemes', label: `🛡️ Health Schemes (${schemes.length})` },
+          { id: 'specialty_map', label: `🩺 Specialty Map (${specialtyMappings.length})` },
+          { id: 'practitioners', label: '👨‍⚕️ Practitioner Verifications' },
+          { id: 'models', label: `Model Registry (${models.length})` },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`btn ${activeTab === tab.id ? 'btn-primary' : 'btn-outline'} btn-sm`}
+            style={{
+              padding: '9px 16px',
+              borderRadius: 8,
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              background: activeTab === tab.id ? '#1D4ED8' : '#EFF6FF',
+              color: activeTab === tab.id ? '#FFFFFF' : '#1D4ED8',
+              boxShadow: activeTab === tab.id ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+            }}
+            onClick={() => {
+              setActiveTab(tab.id);
+              if (tab.id === 'directory') loadHospitalDirectory();
+              if (tab.id === 'practitioners' && !pracHospitalId && hospitals.length > 0) {
+                setPracHospitalId(hospitals[0]._id);
+                loadPractitionersForHospital(hospitals[0]._id);
+              }
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {activeTab === 'directory' && (

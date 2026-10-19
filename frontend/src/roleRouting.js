@@ -2,8 +2,10 @@ export const ROLE_VIEWS = {
   doctor: [
     { id: 'assessment', label: 'New assessment', title: 'Referral workspace' },
     { id: 'referrals', label: 'Ranked facilities', title: 'Ranked facilities' },
+    { id: 'triage_queue', label: 'Triage queue', title: 'Patient triage queue' },
     { id: 'records', label: 'Consented records', title: 'Patient records' },
     { id: 'schemes', label: 'Scheme information', title: 'Scheme information' },
+    { id: 'nurses', label: 'My nurses', title: 'Supervising nurses' },
   ],
   patient: [
     { id: 'consents', label: 'Consent requests', title: 'Consent and sharing' },
@@ -15,6 +17,14 @@ export const ROLE_VIEWS = {
   hospital_admin: [
     { id: 'telemetry', label: 'Facility profile and capacity', title: 'Facility overview' },
     { id: 'practitioners', label: 'Practitioner roster', title: 'Practitioner roster' },
+    { id: 'nurses', label: 'Nurse roster', title: 'Nurse roster' },
+  ],
+  triage_nurse: [
+    { id: 'overview', label: 'Overview', title: 'Triage overview' },
+    { id: 'intake', label: 'Intake queue', title: 'Intake queue' },
+    { id: 'new_triage', label: 'New triage', title: 'New triage intake' },
+    { id: 'recent', label: 'Recent entries', title: 'Recent triage entries' },
+    { id: 'patients', label: 'Patients', title: 'Patient summaries' },
   ],
   platform_reviewer: [
     { id: 'queue', label: 'Verification queue', title: 'Facility verification queue' },

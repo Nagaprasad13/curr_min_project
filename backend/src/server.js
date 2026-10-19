@@ -17,6 +17,7 @@ const schemeRoutes = require('./routes/schemeRoutes');
 const specialtyMapRoutes = require('./routes/specialtyMapRoutes');
 const practitionerRoutes = require('./routes/practitionerRoutes');
 const modelRoutes = require('./routes/modelRoutes');
+const triageRoutes = require('./routes/triageRoutes');
 const ModelRegistry = require('./models/ModelRegistry');
 
 const cookieParser = require('cookie-parser');
@@ -127,6 +128,7 @@ app.use('/api/schemes', schemeRoutes);
 app.use('/api/specialty-map', specialtyMapRoutes);
 app.use('/api/hospitals/:id/practitioners', practitionerRoutes);
 app.use('/api/models', modelRoutes);
+app.use('/api/triage', triageRoutes);
 
 // Serve static frontend in production/prototype if built
 const frontendDistPath = path.join(__dirname, '..', '..', 'frontend', 'dist');

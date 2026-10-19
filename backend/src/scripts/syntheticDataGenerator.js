@@ -764,6 +764,18 @@ function generateSyntheticUsers(hospitals) {
       phone: '+91 97890 45678',
       district: 'Erode',
       isSynthetic: true,
+    },
+    {
+      name: 'Nurse V. Priya (Triage Nurse)',
+      email: 'nurse@carebridge.invalid',
+      role: 'triage_nurse',
+      hospitalCode: salemHosp.code,
+      phone: '+91 94432 87654',
+      district: 'Salem',
+      qualification: 'B.Sc Nursing (Registered Nurse)',
+      registrationNumber: 'SYN-NUR-1001',
+      status: 'active',
+      isSynthetic: true,
     }
   ];
 }

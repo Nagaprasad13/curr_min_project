@@ -10,6 +10,7 @@ vi.mock('../components/DoctorPortal', () => ({ default: () => <section><h1>Docto
 vi.mock('../components/PatientPortal', () => ({ default: () => <section><h1>Patient workspace test page</h1></section> }));
 vi.mock('../components/HospitalAdminPortal', () => ({ default: () => <section><h1>Hospital admin test page</h1></section> }));
 vi.mock('../components/ReviewerPortal', () => ({ default: () => <section><h1>Reviewer workspace test page</h1></section> }));
+vi.mock('../components/TriageNursePortal', () => ({ default: () => <section><h1>Triage nurse workspace test page</h1></section> }));
 vi.mock('../components/LoginPage', () => ({ default: () => <main><h1>Sign in test page</h1></main> }));
 
 afterEach(cleanup);
@@ -25,6 +26,7 @@ describe('verified role routing', () => {
       patient: 'Patient workspace test page',
       hospital_admin: 'Hospital admin test page',
       platform_reviewer: 'Reviewer workspace test page',
+      triage_nurse: 'Triage nurse workspace test page',
     };
     for (const view of ROLE_VIEWS[role]) {
       window.history.replaceState({}, '', routeForRole(role, view.id));

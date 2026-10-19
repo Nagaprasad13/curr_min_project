@@ -323,8 +323,8 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
             </div>
 
             {requires2FA && (
-              <div className="form-group" style={{ background: '#ecfdf5', padding: 14, borderRadius: 8, border: '1px solid #a7f3d0', marginBottom: 14 }}>
-                <label htmlFor="login-2fa" style={{ color: '#047857', fontWeight: 600 }}>6-Digit 2FA Code (TOTP)</label>
+              <div className="form-group" style={{ background: '#EFF6FF', padding: 14, borderRadius: 8, border: '1px solid #BFDBFE', marginBottom: 14 }}>
+                <label htmlFor="login-2fa" style={{ color: '#1E40AF', fontWeight: 600 }}>6-Digit 2FA Code (TOTP)</label>
                 <input
                   id="login-2fa"
                   type="text"

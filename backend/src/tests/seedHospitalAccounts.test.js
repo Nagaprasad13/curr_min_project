@@ -39,9 +39,11 @@ describe('Phase 8.4a synthetic hospital accounts', () => {
       verificationStatus: 'verified',
     })).toBe(4);
 
+    expect(await User.countDocuments({ role: 'triage_nurse' })).toBe(2);
+
     const savedCredentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8')).accounts;
-    expect(savedCredentials).toHaveLength(6);
-    expect(new Set(savedCredentials.map(account => account.password)).size).toBe(6);
+    expect(savedCredentials).toHaveLength(8);
+    expect(new Set(savedCredentials.map(account => account.password)).size).toBe(8);
     expect(savedCredentials.every(account => account.email.endsWith('@carebridge.invalid'))).toBe(true);
 
     const secondRun = await seedHospitalAccounts(hospitals, credentials, credentialsPath);

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const Hospital = require('../models/Hospital');
 const User = require('../models/User');
 const Practitioner = require('../models/Practitioner');
+const InviteCode = require('../models/InviteCode');
 const HospitalCapacity = require('../models/HospitalCapacity');
 const { authenticate, authorizeRoles, requireHospitalOwnership } = require('../middleware/auth');
 const { validateBody, hospitalValidationSchema, hospitalUpdateValidationSchema } = require('../middleware/validate');
@@ -381,7 +383,7 @@ router.get('/:id', optionalAuthenticate, async (req, res) => {
     const isOwner = currentUser?.hospitalId?.toString() === hospital._id.toString();
     const isReviewer = currentUser && currentUser.role === 'platform_reviewer';
 
-    if (currentUser && ['hospital_admin', 'doctor'].includes(currentUser.role) && !isOwner) {
+    if (currentUser && ['hospital_admin', 'doctor', 'triage_nurse'].includes(currentUser.role) && !isOwner) {
       return res.status(403).json({
         error: 'Forbidden',
         message: 'Access is limited to the hospital assigned to your account.',
@@ -602,6 +604,159 @@ router.post(
         message: 'Hospital verification rejected.',
         status: hospital.verificationStatus,
         rejectionReason: hospital.rejectionReason,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
+
+/**
+ * GET /api/hospitals/:id/nurses
+ * List triage nurses at the hospital (Hospital Admin only).
+ * Non-clinical management endpoint: strictly returns profile fields, never triage clinical vitals.
+ */
+router.get(
+  '/:id/nurses',
+  authenticate,
+  authorizeRoles('hospital_admin'),
+  requireHospitalOwnership,
+  async (req, res) => {
+    try {
+      const nurses = await User.find({
+        role: 'triage_nurse',
+        hospitalId: req.params.id,
+      })
+        .select('name email qualification registrationNumber supervisingDoctorIds status createdAt phone district')
+        .populate('supervisingDoctorIds', 'name email');
+
+      await recordAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role,
+        action: 'LIST_HOSPITAL_NURSES',
+        resourceType: 'Hospital',
+        resourceId: req.params.id,
+        hospitalId: req.params.id,
+        accessGranted: true,
+        meta: { count: nurses.length },
+      });
+
+      return res.json({ nurses });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
+
+/**
+ * POST /api/hospitals/:id/nurses/invite
+ * Generate a triage nurse invite code (Hospital Admin only).
+ */
+router.post(
+  '/:id/nurses/invite',
+  authenticate,
+  authorizeRoles('hospital_admin'),
+  requireHospitalOwnership,
+  async (req, res) => {
+    try {
+      const { durationDays = 7, supervisingDoctorIds = [] } = req.body;
+      const codeSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const code = `INV-NUR-${codeSuffix}`;
+      const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+      const invite = await InviteCode.create({
+        code,
+        role: 'triage_nurse',
+        hospitalId: req.params.id,
+        supervisingDoctorIds,
+        createdBy: req.user._id,
+        expiresAt,
+      });
+
+      await recordAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role,
+        action: 'INVITE_TRIAGE_NURSE',
+        resourceType: 'Hospital',
+        resourceId: req.params.id,
+        hospitalId: req.params.id,
+        accessGranted: true,
+        meta: { code: invite.code, expiresAt },
+      });
+
+      return res.status(201).json({
+        message: 'Triage Nurse invite code generated successfully',
+        invite: {
+          code: invite.code,
+          role: invite.role,
+          hospitalId: invite.hospitalId,
+          expiresAt: invite.expiresAt,
+          supervisingDoctorIds: invite.supervisingDoctorIds,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
+
+/**
+ * PATCH /api/hospitals/:id/nurses/:nurseId
+ * Update triage nurse account status or supervising doctors (Hospital Admin only).
+ */
+router.patch(
+  '/:id/nurses/:nurseId',
+  authenticate,
+  authorizeRoles('hospital_admin'),
+  requireHospitalOwnership,
+  async (req, res) => {
+    try {
+      const nurse = await User.findOne({
+        _id: req.params.nurseId,
+        role: 'triage_nurse',
+        hospitalId: req.params.id,
+      });
+
+      if (!nurse) {
+        return res.status(404).json({ error: 'Not Found', message: 'Triage Nurse not found at this hospital.' });
+      }
+
+      const { status, supervisingDoctorIds, qualification } = req.body;
+
+      if (status && ['active', 'inactive'].includes(status)) {
+        nurse.status = status;
+      }
+      if (Array.isArray(supervisingDoctorIds)) {
+        nurse.supervisingDoctorIds = supervisingDoctorIds;
+      }
+      if (qualification) {
+        nurse.qualification = qualification.trim();
+      }
+
+      await nurse.save();
+
+      await recordAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role,
+        action: 'UPDATE_NURSE_STATUS',
+        resourceType: 'User',
+        resourceId: nurse._id.toString(),
+        hospitalId: req.params.id,
+        accessGranted: true,
+        meta: { status: nurse.status },
+      });
+
+      return res.json({
+        message: 'Triage Nurse profile updated successfully',
+        nurse: {
+          id: nurse._id,
+          name: nurse.name,
+          email: nurse.email,
+          qualification: nurse.qualification,
+          registrationNumber: nurse.registrationNumber,
+          supervisingDoctorIds: nurse.supervisingDoctorIds,
+          status: nurse.status,
+        },
       });
     } catch (err) {
       return res.status(500).json({ error: 'Server Error', message: err.message });

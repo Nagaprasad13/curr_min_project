@@ -21,14 +21,35 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['patient', 'doctor', 'hospital_admin', 'platform_reviewer'],
+    enum: ['patient', 'doctor', 'hospital_admin', 'platform_reviewer', 'triage_nurse'],
     required: [true, 'Role is required'],
     index: true,
   },
-  // If role is doctor or hospital_admin, associate with a hospital
+  // If role is doctor, hospital_admin, or triage_nurse, associate with a hospital
   hospitalId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Hospital',
+  },
+  // Triage Nurse profile fields (Phase 8.4c)
+  qualification: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  registrationNumber: {
+    type: String,
+    trim: true,
+    default: null,
+    index: true,
+  },
+  supervisingDoctorIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active',
   },
   phone: {
     type: String,

@@ -114,10 +114,32 @@ async function checkDataConsistency() {
     }
   }
 
+  // Phase 8.4c: Nurse hospitalId must match all supervising doctors' hospitalId
+  const mismatchedNurseDoctorLinks = [];
+  const nurses = await User.find({ role: 'triage_nurse' }).lean();
+  for (const nurse of nurses) {
+    if (nurse.supervisingDoctorIds && nurse.supervisingDoctorIds.length > 0) {
+      for (const docId of nurse.supervisingDoctorIds) {
+        const doctor = await User.findById(docId).select('role hospitalId').lean();
+        if (!doctor || doctor.role !== 'doctor' || doctor.hospitalId?.toString() !== nurse.hospitalId?.toString()) {
+          mismatchedNurseDoctorLinks.push({
+            nurseId: nurse._id.toString(),
+            nurseName: nurse.name,
+            nurseHospitalId: nurse.hospitalId?.toString() || null,
+            doctorId: docId.toString(),
+            doctorHospitalId: doctor?.hospitalId?.toString() || null,
+            doctorRole: doctor?.role || null,
+          });
+        }
+      }
+    }
+  }
+
   const hasErrors = inconsistencies.length > 0 || unlistedPractitioners.length > 0;
   const hasAccountErrors = hospitalsWithoutAdmins.length > 0 ||
     hospitalsWithoutTwoLinkedDoctors.length > 0 ||
-    mismatchedDoctorLinks.length > 0;
+    mismatchedDoctorLinks.length > 0 ||
+    mismatchedNurseDoctorLinks.length > 0;
 
   if (hasErrors || hasAccountErrors) {
     if (inconsistencies.length > 0) {
@@ -140,6 +162,10 @@ async function checkDataConsistency() {
       console.error(`\n❌ ACCOUNT CHECK FAILED: ${mismatchedDoctorLinks.length} linked doctor accounts do not match their practitioners.\n`);
       console.table(mismatchedDoctorLinks);
     }
+    if (mismatchedNurseDoctorLinks.length > 0) {
+      console.error(`\n❌ ACCOUNT CHECK FAILED: ${mismatchedNurseDoctorLinks.length} triage nurses have supervising doctors at different hospitals.\n`);
+      console.table(mismatchedNurseDoctorLinks);
+    }
     return {
       passed: false,
       inconsistencies,
@@ -147,6 +173,7 @@ async function checkDataConsistency() {
       hospitalsWithoutAdmins,
       hospitalsWithoutTwoLinkedDoctors,
       mismatchedDoctorLinks,
+      mismatchedNurseDoctorLinks,
       totalClaimsChecked,
     };
   }
@@ -156,6 +183,7 @@ async function checkDataConsistency() {
   console.log(`✓ PASS: All ${hospitals.length} hospitals have at least one hospital administrator.`);
   console.log('✓ PASS: Every hospital has at least two active verified practitioners linked to doctor users.');
   console.log('✓ PASS: Every linked doctor user has role=doctor and the same hospitalId as their practitioner.');
+  console.log('✓ PASS: Every triage nurse hospitalId strictly matches all supervising doctors.');
   console.log('✓ Zero specialty/account consistency violations detected.\n');
   return {
     passed: true,
@@ -164,6 +192,7 @@ async function checkDataConsistency() {
     hospitalsWithoutAdmins: [],
     hospitalsWithoutTwoLinkedDoctors: [],
     mismatchedDoctorLinks: [],
+    mismatchedNurseDoctorLinks: [],
     totalClaimsChecked,
   };
 }

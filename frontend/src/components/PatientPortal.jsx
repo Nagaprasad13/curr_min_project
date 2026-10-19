@@ -196,7 +196,7 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ reason: 'Patient revoked permission.' }),
+        body: JSON.stringify({ reason: 'Patient revoked consent.' }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -259,396 +259,527 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
     }
   };
 
+  // ── Blue & White Theme Styles ──────────────────────────────────────────────
+  const cardStyle = {
+    background: '#FFFFFF',
+    border: '1px solid #BFDBFE',
+    borderRadius: 14,
+    padding: 24,
+    marginBottom: 20,
+    boxShadow: '0 2px 12px rgba(29, 78, 216, 0.06)',
+  };
+  const tabStyle = (id) => ({
+    padding: '9px 18px',
+    borderRadius: 8,
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: 700,
+    fontSize: '0.82rem',
+    transition: 'all 0.18s',
+    background: activeTab === id ? '#1D4ED8' : '#EFF6FF',
+    color: activeTab === id ? '#FFFFFF' : '#1D4ED8',
+    boxShadow: activeTab === id ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+  });
+  const inputStyle = {
+    width: '100%',
+    minHeight: 40,
+    padding: '8px 12px',
+    border: '1px solid #BFDBFE',
+    borderRadius: 8,
+    fontSize: '0.875rem',
+    outline: 'none',
+    background: '#F8FBFF',
+    color: '#0F172A',
+    boxSizing: 'border-box',
+  };
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.82rem',
+    fontWeight: 700,
+    color: '#1E3A8A',
+    marginBottom: 5,
+  };
+  const btnPrimary = {
+    background: 'linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%)',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: 8,
+    padding: '9px 18px',
+    fontWeight: 700,
+    fontSize: '0.85rem',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(29, 78, 216, 0.25)',
+  };
+  const btnOutline = {
+    background: '#EFF6FF',
+    color: '#1D4ED8',
+    border: '1px solid #BFDBFE',
+    borderRadius: 8,
+    padding: '7px 14px',
+    fontWeight: 600,
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+  };
+  const btnSuccess = {
+    background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: 8,
+    padding: '7px 14px',
+    fontWeight: 700,
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+  };
+  const btnDanger = {
+    background: '#FEE2E2',
+    color: '#B91C1C',
+    border: '1px solid #FECACA',
+    borderRadius: 8,
+    padding: '7px 14px',
+    fontWeight: 700,
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+  };
+
   return (
-    <div id="patient-portal-view" className="portal-container">
-      {error && <div className="clinical-warning-banner" role="alert">⚠️ {error} <button type="button" className="btn btn-outline btn-sm" onClick={() => {
-        setError(null);
-        loadConsents();
-        loadAccessHistory();
-        loadMyRecords();
-        loadMyReferrals();
-      }}>Retry loading</button></div>}
-      {successMsg && <div className="clinical-notice-box" role="status" style={{ marginBottom: 16 }}>{successMsg}</div>}
-      {initialLoading && <Skeleton lines={3} />}
-
-      {/* Patient Profile Bar */}
-      <div className="card" style={{ padding: 12, marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <div>
-            <h3 style={{ margin: 0, color: '#1e293b' }}>
-              👤 {patientUser?.name || 'Patient'}
-            </h3>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
-              {patientUser?.district && <>District: <strong>{patientUser.district}</strong> · </>}
-              {patientUser?.id && <>CareBridge ID: {patientUser.id}</>}
-            </span>
+    <div id="patient-portal-view" style={{ background: '#F0F7FF', minHeight: '100vh', paddingBottom: 40 }}>
+      {/* Patient Clinical Blue Header */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%)',
+          padding: '22px 28px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 14,
+          boxShadow: '0 4px 16px rgba(29, 78, 216, 0.2)',
+          marginBottom: 24,
+        }}
+      >
+        <div>
+          <div style={{ color: '#BFDBFE', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            Patient Health Records & Consent Portal
           </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--color-primary)' }}>
-            🔒 Zero Client Trust Architecture (You control record access)
+          <div style={{ color: '#FFFFFF', fontSize: '1.4rem', fontWeight: 800, marginTop: 2 }}>
+            👤 {patientUser?.name || 'Patient'}
+          </div>
+          <div style={{ color: '#E0F2FE', fontSize: '0.82rem', marginTop: 4 }}>
+            {patientUser?.district && <>District: <strong>{patientUser.district}</strong> · </>}
+            {patientUser?.id && <>CareBridge ID: <span style={{ fontFamily: 'monospace' }}>{patientUser.id}</span></>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', color: '#FFFFFF', fontSize: '0.8rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{consents.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Consents</div>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', color: '#FFFFFF', fontSize: '0.8rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{myRecords.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Records</div>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', color: '#FFFFFF', fontSize: '0.8rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{myReferrals.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Transfers</div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '2px solid #e2e8f0', paddingBottom: 8, flexWrap: 'wrap' }}>
-        <button
-          className={`btn ${activeTab === 'consents' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('consents')}
-        >
-          🔐 Sharing Consents ({consents.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'records' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('records')}
-        >
-          📁 My Health Records ({myRecords.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'referrals' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('referrals')}
-        >
-          🚑 My Referral Status ({myReferrals.length})
-        </button>
-        <button
-          className={`btn ${activeTab === 'schemes' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('schemes')}
-        >
-          🛡️ Health Schemes Explorer
-        </button>
-        <button
-          className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => setActiveTab('history')}
-        >
-          📜 Access Audit Log ({accessHistory.length})
-        </button>
-      </div>
-
-      {/* TAB 1: Consents */}
-      {activeTab === 'consents' && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">🔐 My Record Sharing Consents</h2>
-              <p className="card-desc">
-                Explicit patient control. Doctors can only view records if you grant permission. You can narrow scope or revoke anytime.
-              </p>
-            </div>
-            <button className="btn btn-outline btn-sm" onClick={loadConsents}>↻ Refresh</button>
+      <div style={{ maxWidth: 1250, margin: '0 auto', padding: '0 20px' }}>
+        {error && (
+          <div style={{ background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px', marginBottom: 16, color: '#B91C1C', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} role="alert">
+            <span>⚠️ {error}</span>
+            <button type="button" style={btnOutline} onClick={() => {
+              setError(null);
+              loadConsents();
+              loadAccessHistory();
+              loadMyRecords();
+              loadMyReferrals();
+            }}>Retry</button>
           </div>
+        )}
+        {successMsg && (
+          <div style={{ background: '#DBEAFE', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 16px', marginBottom: 16, color: '#1E3A8A', fontWeight: 600 }} role="status">
+            {successMsg}
+          </div>
+        )}
+        {initialLoading && <Skeleton lines={3} />}
 
-          {consents.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '0.88rem' }}>No consent requests are waiting. Your care team can send a request when record sharing is needed.</p>
-          ) : (
-            <div style={{ overflowX: 'auto' }} role="region" aria-label="Consent requests table" tabIndex="0">
-              <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
-                    <th style={{ padding: 8 }}>Consent ID</th>
-                    <th style={{ padding: 8 }}>Requesting Facility</th>
-                    <th style={{ padding: 8 }}>Purpose</th>
-                    <th style={{ padding: 8 }}>Allowed Scope</th>
-                    <th style={{ padding: 8 }}>Status</th>
-                    <th style={{ padding: 8 }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {consents.map((c) => (
-                    <tr key={c.consentId} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: 8, fontFamily: 'monospace' }}>{c.consentId}</td>
-                      <td style={{ padding: 8 }}>
-                        <strong>{c.requestingHospitalId?.name || 'Simulated Hospital'}</strong>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                          {c.requestingHospitalId?.district}
-                        </div>
-                      </td>
-                      <td style={{ padding: 8 }}>{c.purpose}</td>
-                      <td style={{ padding: 8 }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                          {c.recordTypes?.map((t) => (
-                            <span key={t} className="badge badge-secondary" style={{ fontSize: '0.72rem' }}>{t}</span>
-                          ))}
-                          {c.includeSensitiveRecords && (
-                            <span className="badge badge-warning" style={{ fontSize: '0.72rem' }}>Sensitive Included</span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ padding: 8 }}>
-                        <span className={`badge ${c.status === 'granted' ? 'badge-success' : c.status === 'requested' ? 'badge-warning' : 'badge-danger'}`}>
-                          {c.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: 8 }}>
-                        {c.status === 'requested' && (
-                          <div style={{ display: 'flex', gap: 6 }}>
-                            <button
-                              id={`grant-btn-${c.consentId}`}
-                              className="btn btn-success btn-sm"
-                              onClick={() => openGrantModal(c)}
-                            >
-                              Grant...
-                            </button>
-                            <button
-                              id={`deny-btn-${c.consentId}`}
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDeny(c.consentId)}
-                            >
-                              Deny
-                            </button>
-                          </div>
-                        )}
-                        {c.status === 'granted' && (
-                          <button
-                            id={`revoke-btn-${c.consentId}`}
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleRevoke(c.consentId)}
-                          >
-                            Revoke Now
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        {/* Tab Navigation in Blue Bar */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', background: '#DBEAFE', padding: 6, borderRadius: 12, border: '1px solid #BFDBFE' }}>
+          {[
+            { id: 'consents', label: `🔐 Sharing Consents (${consents.length})` },
+            { id: 'records', label: `📁 My Health Records (${myRecords.length})` },
+            { id: 'referrals', label: `🚑 My Referral Status (${myReferrals.length})` },
+            { id: 'schemes', label: '🛡️ Health Schemes Explorer' },
+            { id: 'history', label: `📜 Access Audit Log (${accessHistory.length})` },
+          ].map((tab) => (
+            <button key={tab.id} style={tabStyle(tab.id)} onClick={() => setActiveTab(tab.id)}>
+              {tab.label}
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* TAB 2: My Clinical Records */}
-      {activeTab === 'records' && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">📁 My Clinical Records & Diagnostic Reports</h2>
-              <p className="card-desc">Your personal medical documents in protected storage.</p>
-            </div>
-            <button className="btn btn-outline btn-sm" onClick={loadMyRecords}>↻ Refresh</button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
-            {myRecords.map((r) => (
-              <div key={r.recordId} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span className="badge badge-secondary">{r.type}</span>
-                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    {new Date(r.recordDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <h4 style={{ margin: '0 0 4px 0' }}>{r.title || r.type}</h4>
-                <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: 8 }}>
-                  Origin: {r.provenance?.submittingDoctor || 'Synthetic Health Center'}
-                </div>
-                <div style={{ fontSize: '0.82rem', background: '#fff', padding: 8, borderRadius: 4, border: '1px solid #e2e8f0' }}>
-                  {r.summary || 'Clinical investigation record and laboratory results.'}
-                </div>
+        {/* TAB 1: Consents */}
+        {activeTab === 'consents' && (
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+              <div>
+                <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>🔐 My Record Sharing Consents</h2>
+                <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                  Explicit patient control. Doctors can only view records if you grant permission. You can narrow scope or revoke anytime.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <button style={btnOutline} onClick={loadConsents}>↻ Refresh</button>
+            </div>
 
-      {/* TAB 3: My Referral Status (Plain language, zero risk percentages) */}
-      {activeTab === 'referrals' && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">🚑 My Hospital Referral Status</h2>
-              <p className="card-desc">
+            {consents.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: '#64748B' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>🔒</div>
+                <div style={{ fontWeight: 700, color: '#1E3A8A' }}>No consent requests waiting</div>
+                <div style={{ fontSize: '0.82rem', marginTop: 4 }}>Your care team will request consent when record sharing is required.</div>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }} role="region" aria-label="Consent requests table" tabIndex="0">
+                <table style={{ width: '100%', fontSize: '0.88rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                      <th style={{ padding: '10px 12px' }}>Consent ID</th>
+                      <th style={{ padding: '10px 12px' }}>Requesting Facility</th>
+                      <th style={{ padding: '10px 12px' }}>Purpose</th>
+                      <th style={{ padding: '10px 12px' }}>Allowed Scope</th>
+                      <th style={{ padding: '10px 12px' }}>Status</th>
+                      <th style={{ padding: '10px 12px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {consents.map((c) => (
+                      <tr key={c.consentId} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                        <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8' }}>{c.consentId}</td>
+                        <td style={{ padding: '12px' }}>
+                          <strong style={{ color: '#1E293B' }}>{c.requestingHospitalId?.name || 'Simulated Hospital'}</strong>
+                          <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                            {c.requestingHospitalId?.district}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px', color: '#334155' }}>{c.purpose}</td>
+                        <td style={{ padding: '12px' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                            {c.recordTypes?.map((t) => (
+                              <span key={t} style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 600 }}>{t}</span>
+                            ))}
+                            {c.includeSensitiveRecords && (
+                              <span style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700 }}>Sensitive Included</span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span style={{
+                            borderRadius: 999,
+                            padding: '3px 10px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            background: c.status === 'granted' ? '#DCFCE7' : c.status === 'requested' ? '#FEF3C7' : '#FEE2E2',
+                            color: c.status === 'granted' ? '#166534' : c.status === 'requested' ? '#92400E' : '#B91C1C',
+                            border: `1px solid ${c.status === 'granted' ? '#86EFAC' : c.status === 'requested' ? '#FDE68A' : '#FECACA'}`,
+                          }}>
+                            {c.status?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {c.status === 'requested' && (
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button
+                                id={`grant-btn-${c.consentId}`}
+                                style={btnSuccess}
+                                onClick={() => openGrantModal(c)}
+                              >
+                                Grant...
+                              </button>
+                              <button
+                                id={`deny-btn-${c.consentId}`}
+                                style={btnDanger}
+                                onClick={() => handleDeny(c.consentId)}
+                              >
+                                Deny
+                              </button>
+                            </div>
+                          )}
+                          {c.status === 'granted' && (
+                            <button
+                              id={`revoke-btn-${c.consentId}`}
+                              style={btnDanger}
+                              onClick={() => handleRevoke(c.consentId)}
+                            >
+                              Revoke Now
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 2: My Clinical Records */}
+        {activeTab === 'records' && (
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+              <div>
+                <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>📁 My Clinical Records & Diagnostic Reports</h2>
+                <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>Your personal medical documents in protected storage.</p>
+              </div>
+              <button style={btnOutline} onClick={loadMyRecords}>↻ Refresh</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+              {myRecords.map((r) => (
+                <div key={r.recordId} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ background: '#DBEAFE', color: '#1D4ED8', padding: '2px 8px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700 }}>{r.type}</span>
+                    <span style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                      {new Date(r.recordDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h4 style={{ margin: '4px 0', color: '#1E3A8A', fontSize: '0.95rem' }}>{r.title || r.type}</h4>
+                  <div style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: 8 }}>
+                    Origin: {r.provenance?.submittingDoctor || 'Synthetic Health Center'}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', background: '#FFFFFF', padding: 10, borderRadius: 8, border: '1px solid #BFDBFE', color: '#334155' }}>
+                    {r.summary || 'Clinical investigation record and laboratory results.'}
+                  </div>
+                </div>
+              ))}
+              {myRecords.length === 0 && (
+                <div style={{ color: '#64748B', fontSize: '0.88rem' }}>No clinical records recorded on file.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: My Referral Status */}
+        {activeTab === 'referrals' && (
+          <div style={cardStyle}>
+            <div style={{ marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+              <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>🚑 My Hospital Referral Status</h2>
+              <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>
                 Current status of your medical transfer request. Simple, non-technical updates.
               </p>
             </div>
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {myReferrals.length === 0 && <p>No referrals are linked to this account yet.</p>}
-            {myReferrals.map((ref) => (
-              <div key={ref.referralId} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 4px 0' }}>Referral #{ref.referralId}</h3>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      Target Facility: <strong>{ref.selectedHospital?.name || 'Selected Referral Hospital'}</strong> ({ref.selectedHospital?.district})
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {myReferrals.length === 0 && <p style={{ color: '#64748B' }}>No referrals are linked to this account yet.</p>}
+              {myReferrals.map((ref) => (
+                <div key={ref.referralId} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 4px', color: '#1E3A8A' }}>Referral #{ref.referralId}</h3>
+                      <div style={{ fontSize: '0.85rem', color: '#64748B' }}>
+                        Target Facility: <strong>{ref.selectedHospital?.name || 'Selected Referral Hospital'}</strong> ({ref.selectedHospital?.district})
+                      </div>
                     </div>
-                  </div>
-                  <span className="badge badge-success">
-                    {ref.status?.toUpperCase() || 'SUBMITTED'}
-                  </span>
-                </div>
-
-                <div style={{ fontSize: '0.85rem', color: '#334155', background: '#fff', padding: 10, borderRadius: 6, border: '1px solid #e2e8f0' }}>
-                  <strong>Transfer Update:</strong> Your referral has been dispatched by your attending physician. Medical records sharing is currently <strong>{ref.recordsConsentStatus || 'Active'}</strong>.
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: Schemes Explorer */}
-      {activeTab === 'schemes' && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">🛡️ Possible programme matches</h2>
-              <p className="card-desc">
-                Compare your details with public programme descriptions for CMCHIS and PM-JAY. Possible match only. Not confirmed eligibility.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleMatchSchemes} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
-            <div>
-              <label className="form-label" htmlFor="sc-resident">Tamil Nadu resident?</label>
-              <select id="sc-resident" className="form-input" value={schemeInputs.stateResident}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, stateResident: e.target.value })}>
-                <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
-              </select>
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-income">Annual Family Income (INR)</label>
-              <input
-                id="sc-income"
-                className="form-input"
-                type="number"
-                value={schemeInputs.annualFamilyIncome}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, annualFamilyIncome: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-ration">Ration Card Category</label>
-              <select
-                id="sc-ration"
-                className="form-input"
-                value={schemeInputs.rationCardType}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, rationCardType: e.target.value })}
-              >
-                <option value="">Not provided</option>
-                <option value="PHH">PHH (Priority Household)</option>
-                <option value="AAY">AAY (Antyodaya Anna Yojana)</option>
-                <option value="BPL">BPL (Below Poverty Line)</option>
-                <option value="NPHH">NPHH (Non-Priority Household)</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-age">Beneficiary Age</label>
-              <input
-                id="sc-age"
-                className="form-input"
-                type="number"
-                value={schemeInputs.age}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, age: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-category">Treatment category</label>
-              <input id="sc-category" className="form-input" value={schemeInputs.treatmentCategory}
-                onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentCategory: e.target.value })} />
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-lifethreatening">Life-threatening illness?
-                <select id="sc-lifethreatening" className="form-input" value={schemeInputs.hasLifeThreateningIllness}
-                  onChange={(e) => setSchemeInputs({ ...schemeInputs, hasLifeThreateningIllness: e.target.value })}>
-                  <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
-                </select>
-              </label>
-            </div>
-            <div>
-              <label className="form-label" htmlFor="sc-hospital-type">Treatment hospital type
-                <select id="sc-hospital-type" className="form-input" value={schemeInputs.treatmentHospitalType}
-                  onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentHospitalType: e.target.value })}>
-                  <option value="">Not provided</option><option value="government">Government</option><option value="private">Private</option>
-                </select>
-              </label>
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <button
-                id="check-schemes-btn"
-                type="submit"
-                className="btn btn-primary"
-                disabled={matchLoading}
-              >
-                {matchLoading ? 'Evaluating...' : '🔍 Check Potential Matches'}
-              </button>
-            </div>
-          </form>
-
-          {matchResults && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
-              {matchResults.map((m) => (
-                <div key={m.schemeId} className="card" style={{ background: '#f8fafc', marginBottom: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <h4 style={{ margin: 0 }}>{safeSchemeText(m.schemeName)}</h4>
-                    <span className={`badge ${m.matchStatus === 'potential match' ? 'badge-success' : 'badge-warning'}`}>
-                      {m.matchStatus === 'potential match' ? 'Possible match' : 'No match identified'}
+                    <span style={{ background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC', borderRadius: 999, padding: '3px 10px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      {ref.status?.toUpperCase() || 'SUBMITTED'}
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 8px 0' }}>Programme information source: {safeSchemeText(m.authority)}</p>
-                  <div className="clinical-notice-box" style={{ fontSize: '0.78rem', marginTop: 8 }}>
-                    Possible match only. Not confirmed eligibility. Contact the programme directly for current information.
+
+                  <div style={{ fontSize: '0.85rem', color: '#334155', background: '#FFFFFF', padding: 10, borderRadius: 8, border: '1px solid #BFDBFE' }}>
+                    <strong>Transfer Update:</strong> Your referral has been dispatched by your attending physician. Medical records sharing is currently <strong>{ref.recordsConsentStatus || 'Active'}</strong>.
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* TAB 5: Access Audit Log */}
-      {activeTab === 'history' && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">📜 Transparent Record Access Audit Log</h2>
-              <p className="card-desc">Immutable history of who requested, viewed, or interacted with your health data.</p>
+        {/* TAB 4: Schemes Explorer */}
+        {activeTab === 'schemes' && (
+          <div style={cardStyle}>
+            <div style={{ marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+              <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>🛡️ Possible programme matches</h2>
+              <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                Compare your details with public programme descriptions for CMCHIS and PM-JAY. Possible match only. Not confirmed eligibility.
+              </p>
             </div>
-            <button className="btn btn-outline btn-sm" onClick={loadAccessHistory}>↻ Refresh</button>
-          </div>
 
-          <div style={{ overflowX: 'auto' }} role="region" aria-label="Record access history table" tabIndex="0">
-            <table className="data-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
-                  <th style={{ padding: 8 }}>Timestamp</th>
-                  <th style={{ padding: 8 }}>Doctor / Actor</th>
-                  <th style={{ padding: 8 }}>Action</th>
-                  <th style={{ padding: 8 }}>Record Types Accessed</th>
-                  <th style={{ padding: 8 }}>Consent Reference</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accessHistory.map((h, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: 8 }}>{new Date(h.timestamp).toLocaleString()}</td>
-                    <td style={{ padding: 8 }}><strong>{h.doctorName || 'Attending Clinician'}</strong></td>
-                    <td style={{ padding: 8 }}><span className="badge badge-secondary">{h.action}</span></td>
-                    <td style={{ padding: 8 }}>{(h.recordTypesViewed || []).join(', ') || 'N/A'}</td>
-                    <td style={{ padding: 8, fontFamily: 'monospace' }}>{h.consentId || 'Direct'}</td>
-                  </tr>
+            <form onSubmit={handleMatchSchemes} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 18 }}>
+              <div>
+                <label className="form-label" htmlFor="sc-resident" style={labelStyle}>Tamil Nadu resident?</label>
+                <select id="sc-resident" style={inputStyle} value={schemeInputs.stateResident}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, stateResident: e.target.value })}>
+                  <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-income" style={labelStyle}>Annual Family Income (INR)</label>
+                <input
+                  id="sc-income"
+                  style={inputStyle}
+                  type="number"
+                  value={schemeInputs.annualFamilyIncome}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, annualFamilyIncome: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-ration" style={labelStyle}>Ration Card Category</label>
+                <select
+                  id="sc-ration"
+                  style={inputStyle}
+                  value={schemeInputs.rationCardType}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, rationCardType: e.target.value })}
+                >
+                  <option value="">Not provided</option>
+                  <option value="PHH">PHH (Priority Household)</option>
+                  <option value="AAY">AAY (Antyodaya Anna Yojana)</option>
+                  <option value="BPL">BPL (Below Poverty Line)</option>
+                  <option value="NPHH">NPHH (Non-Priority Household)</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-age" style={labelStyle}>Beneficiary Age</label>
+                <input
+                  id="sc-age"
+                  style={inputStyle}
+                  type="number"
+                  value={schemeInputs.age}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, age: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-category" style={labelStyle}>Treatment category</label>
+                <input id="sc-category" style={inputStyle} value={schemeInputs.treatmentCategory}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentCategory: e.target.value })} />
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-lifethreatening" style={labelStyle}>Life-threatening illness?</label>
+                <select id="sc-lifethreatening" style={inputStyle} value={schemeInputs.hasLifeThreateningIllness}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, hasLifeThreateningIllness: e.target.value })}>
+                  <option value="">Not provided</option><option value="true">Yes</option><option value="false">No</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-label" htmlFor="sc-hospital-type" style={labelStyle}>Treatment hospital type</label>
+                <select id="sc-hospital-type" style={inputStyle} value={schemeInputs.treatmentHospitalType}
+                  onChange={(e) => setSchemeInputs({ ...schemeInputs, treatmentHospitalType: e.target.value })}>
+                  <option value="">Not provided</option><option value="government">Government</option><option value="private">Private</option>
+                </select>
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <button
+                  id="check-schemes-btn"
+                  type="submit"
+                  style={btnPrimary}
+                  disabled={matchLoading}
+                >
+                  {matchLoading ? 'Evaluating…' : '🔍 Check Potential Matches'}
+                </button>
+              </div>
+            </form>
+
+            {matchResults && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+                {matchResults.map((m) => (
+                  <div key={m.schemeId} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <h4 style={{ margin: 0, color: '#1E3A8A' }}>{safeSchemeText(m.schemeName)}</h4>
+                      <span style={{
+                        borderRadius: 999,
+                        padding: '2px 8px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        background: m.matchStatus === 'potential match' ? '#DCFCE7' : '#FEF3C7',
+                        color: m.matchStatus === 'potential match' ? '#166534' : '#92400E',
+                        border: `1px solid ${m.matchStatus === 'potential match' ? '#86EFAC' : '#FDE68A'}`,
+                      }}>
+                        {m.matchStatus === 'potential match' ? 'Possible match' : 'No match identified'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 8px' }}>Programme information source: {safeSchemeText(m.authority)}</p>
+                    <div style={{ background: '#FFFFFF', border: '1px solid #BFDBFE', borderRadius: 8, padding: 8, fontSize: '0.78rem', color: '#1E3A8A' }}>
+                      Possible match only. Not confirmed eligibility. Contact the programme directly for current information.
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Grant Scope Modal */}
-      {selectedConsent && (
-        <Modal open title={`Review record sharing: ${selectedConsent.consentId}`} onClose={() => setSelectedConsent(null)}>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 12 }}>
+        {/* TAB 5: Access Audit Log */}
+        {activeTab === 'history' && (
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+              <div>
+                <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>📜 Transparent Record Access Audit Log</h2>
+                <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>Immutable history of who requested, viewed, or interacted with your health data.</p>
+              </div>
+              <button style={btnOutline} onClick={loadAccessHistory}>↻ Refresh</button>
+            </div>
+
+            <div style={{ overflowX: 'auto' }} role="region" aria-label="Record access history table" tabIndex="0">
+              <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                    <th style={{ padding: '10px 12px' }}>Timestamp</th>
+                    <th style={{ padding: '10px 12px' }}>Doctor / Actor</th>
+                    <th style={{ padding: '10px 12px' }}>Action</th>
+                    <th style={{ padding: '10px 12px' }}>Record Types Accessed</th>
+                    <th style={{ padding: '10px 12px' }}>Consent Reference</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accessHistory.map((h, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                      <td style={{ padding: '10px 12px' }}>{new Date(h.timestamp).toLocaleString()}</td>
+                      <td style={{ padding: '10px 12px' }}><strong>{h.doctorName || 'Attending Clinician'}</strong></td>
+                      <td style={{ padding: '10px 12px' }}><span style={{ background: '#DBEAFE', color: '#1D4ED8', padding: '2px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700 }}>{h.action}</span></td>
+                      <td style={{ padding: '10px 12px' }}>{(h.recordTypesViewed || []).join(', ') || 'N/A'}</td>
+                      <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: '#1D4ED8' }}>{h.consentId || 'Direct'}</td>
+                    </tr>
+                  ))}
+                  {accessHistory.length === 0 && (
+                    <tr>
+                      <td colSpan="5" style={{ padding: 16, textAlign: 'center', color: '#64748B' }}>
+                        No access events recorded yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Grant Scope Modal */}
+        {selectedConsent && (
+          <Modal open title={`Review record sharing: ${selectedConsent.consentId}`} onClose={() => setSelectedConsent(null)}>
+            <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: 12 }}>
               Facility: <strong>{selectedConsent.requestingHospitalId?.name}</strong>
             </p>
 
             <div style={{ marginBottom: 14 }}>
-              <label className="form-label">Permitted Categories (Uncheck to narrow):</label>
+              <label style={labelStyle}>Permitted Categories (Uncheck to narrow):</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {selectedConsent.recordTypes?.map((t) => (
                   <button
                     key={t}
                     type="button"
-                    className={`btn btn-sm ${narrowedTypes.includes(t) ? 'btn-primary' : 'btn-outline'}`}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 8,
+                      border: '1px solid #BFDBFE',
+                      background: narrowedTypes.includes(t) ? '#1D4ED8' : '#EFF6FF',
+                      color: narrowedTypes.includes(t) ? '#FFFFFF' : '#1D4ED8',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                    }}
                     onClick={() => toggleRecordType(t)}
                   >
                     {narrowedTypes.includes(t) ? '✓ ' : '+ '} {t}
@@ -658,10 +789,10 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <label className="form-label" htmlFor="shorten-days">Consent Duration (Days):</label>
+              <label style={labelStyle} htmlFor="shorten-days">Consent Duration (Days):</label>
               <select
                 id="shorten-days"
-                className="form-input"
+                style={inputStyle}
                 value={shortenedDays}
                 onChange={(e) => setShortenedDays(Number(e.target.value))}
               >
@@ -672,24 +803,25 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', color: '#1E3A8A', fontWeight: 600, cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={allowSensitive}
                   onChange={(e) => setAllowSensitive(e.target.checked)}
                 />
-                <span>Include Sensitive Records (Mental health, HIV, reproductive health)</span>
+                <span>Include Sensitive Records (Mental health, reproductive health)</span>
               </label>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button type="button" className="btn btn-outline" onClick={() => setSelectedConsent(null)}>Cancel</button>
-              <button type="button" id="confirm-grant-btn" className="btn btn-success" onClick={handleGrant}>
+              <button type="button" style={btnOutline} onClick={() => setSelectedConsent(null)}>Cancel</button>
+              <button type="button" id="confirm-grant-btn" style={btnSuccess} onClick={handleGrant}>
                 Confirm Grant
               </button>
             </div>
-        </Modal>
-      )}
+          </Modal>
+        )}
+      </div>
     </div>
   );
 }

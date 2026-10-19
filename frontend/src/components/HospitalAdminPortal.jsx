@@ -313,7 +313,46 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
   };
 
   return (
-    <div id="hospital-admin-portal-view" className="portal-container">
+    <div id="hospital-admin-portal-view" className="portal-container" style={{ background: '#F0F7FF', minHeight: '100vh', paddingBottom: 40 }}>
+      {/* Hospital Admin Blue Clinical Header */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%)',
+          padding: '22px 28px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 14,
+          borderRadius: 14,
+          boxShadow: '0 4px 16px rgba(29, 78, 216, 0.2)',
+          marginBottom: 20,
+          color: '#FFFFFF',
+        }}
+      >
+        <div>
+          <div style={{ color: '#BFDBFE', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            Hospital Administration & Telemetry
+          </div>
+          <div style={{ color: '#FFFFFF', fontSize: '1.4rem', fontWeight: 800, marginTop: 2 }}>
+            🏥 {hospital?.name || 'Facility Dashboard'}
+          </div>
+          <div style={{ color: '#E0F2FE', fontSize: '0.82rem', marginTop: 4 }}>
+            Code: <strong>{hospital?.code || '—'}</strong> · District: <strong>{hospital?.district || '—'}</strong> · Tier: <strong>{hospital?.tier || '—'}</strong>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{practitioners.length}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Medical Staff</div>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.15)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{hospital?.verificationStatus?.toUpperCase() || 'VERIFIED'}</div>
+            <div style={{ color: '#BFDBFE', fontSize: '0.72rem', textTransform: 'uppercase' }}>Audit Status</div>
+          </div>
+        </div>
+      </div>
+
       {initialContextLoading && <Skeleton lines={4} />}
       {errorMsg && (
         <div className="clinical-warning-banner" role="alert">
@@ -356,10 +395,21 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
       )}
 
       {/* Portal Tab Navigation */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, borderBottom: '2px solid #e2e8f0', paddingBottom: 8 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', background: '#DBEAFE', padding: 6, borderRadius: 12, border: '1px solid #BFDBFE' }}>
         <button
           type="button"
           className={`btn ${activeTab === 'telemetry' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          style={{
+            padding: '9px 18px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            background: activeTab === 'telemetry' ? '#1D4ED8' : '#EFF6FF',
+            color: activeTab === 'telemetry' ? '#FFFFFF' : '#1D4ED8',
+            boxShadow: activeTab === 'telemetry' ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+          }}
           onClick={() => setActiveTab('telemetry')}
         >
           📊 Facility Profile & Live Telemetry
@@ -367,6 +417,17 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
         <button
           type="button"
           className={`btn ${activeTab === 'practitioners' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          style={{
+            padding: '9px 18px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            background: activeTab === 'practitioners' ? '#1D4ED8' : '#EFF6FF',
+            color: activeTab === 'practitioners' ? '#FFFFFF' : '#1D4ED8',
+            boxShadow: activeTab === 'practitioners' ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+          }}
           onClick={() => setActiveTab('practitioners')}
         >
           👨‍⚕️ Medical Staff & Specialist Roster ({practitioners.length})

@@ -148,6 +148,34 @@ async function seedHospitalAccounts(hospitals, credentials, credentialsPath = CR
         linkedDoctors++;
       }
     }
+
+    // Phase 8.4c: Ensure at least 1 triage nurse per hospital linked to hospital doctors
+    let hospitalDoctors = await User.find({ role: 'doctor', hospitalId: hospital._id }).select('_id');
+    const doctorIds = hospitalDoctors.map(d => d._id);
+
+    let nurse = await User.findOne({ role: 'triage_nurse', hospitalId: hospital._id });
+    if (!nurse) {
+      const email = `nurse.${accountCode(hospital.code)}@carebridge.invalid`;
+      const codeDigits = hospital.code.replace(/\D/g, '').slice(-4) || '1001';
+      const nurseAccount = {
+        name: `Nurse ${hospital.district} Staff (RN)`,
+        email,
+        role: 'triage_nurse',
+        hospitalId: hospital._id,
+        district: hospital.district,
+        qualification: 'B.Sc Nursing (Registered Nurse)',
+        registrationNumber: `SYN-NUR-${codeDigits.padStart(4, '0')}`,
+        supervisingDoctorIds: doctorIds,
+        status: 'active',
+        isSynthetic: true,
+      };
+      const password = ensureCredential(credentials, nurseAccount);
+      nurse = await User.create({ ...nurseAccount, password });
+      writeSeedCredentials(credentials, credentialsPath);
+    } else if (nurse.supervisingDoctorIds?.length === 0 && doctorIds.length > 0) {
+      nurse.supervisingDoctorIds = doctorIds;
+      await nurse.save();
+    }
   }
 
   return { createdAdmins, linkedDoctors };

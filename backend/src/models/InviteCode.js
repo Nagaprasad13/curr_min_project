@@ -11,7 +11,7 @@ const InviteCodeSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['doctor', 'hospital_admin'],
+    enum: ['doctor', 'hospital_admin', 'triage_nurse'],
     required: true,
   },
   hospitalId: {
@@ -19,6 +19,10 @@ const InviteCodeSchema = new mongoose.Schema({
     ref: 'Hospital',
     required: true,
   },
+  supervisingDoctorIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -5,6 +5,7 @@ import PatientPortal from './components/PatientPortal';
 import DoctorPortal from './components/DoctorPortal';
 import ReviewerPortal from './components/ReviewerPortal';
 import HospitalAdminPortal from './components/HospitalAdminPortal';
+import TriageNursePortal from './components/TriageNursePortal';
 import DesignSystemPage from './design-system/DesignSystemPage';
 import { Button, useDesignTheme } from './design-system/components';
 import { defaultViewForRole, resolveRoleRoute, routeForRole, ROLE_VIEWS } from './roleRouting';
@@ -13,6 +14,7 @@ const ROLE_LABELS = {
   patient: 'Patient',
   doctor: 'Doctor',
   hospital_admin: 'Hospital admin',
+  triage_nurse: 'Triage Nurse',
   platform_reviewer: 'Platform reviewer',
 };
 
@@ -242,6 +244,7 @@ export default function App() {
               {role === 'platform_reviewer' && <ReviewerPortal token={token} reviewerUser={currentUser} initialTab={currentView} />}
               {role === 'doctor' && <DoctorPortal token={token} doctorUser={currentUser} initialTab={currentView} />}
               {role === 'patient' && <PatientPortal token={token} patientUser={currentUser} initialTab={currentView} />}
+              {role === 'triage_nurse' && <TriageNursePortal token={token} nurseUser={currentUser} initialTab={currentView} />}
             </RouteErrorBoundary>
           </main>
         )}

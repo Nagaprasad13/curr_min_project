@@ -422,6 +422,10 @@ router.post('/register-invited', async (req, res) => {
       phone,
       district,
       isSynthetic: true,
+      qualification: invite.role === 'triage_nurse' ? (req.body.qualification || 'B.Sc Nursing (Registered Nurse)') : undefined,
+      registrationNumber: invite.role === 'triage_nurse' ? (req.body.registrationNumber || `SYN-NUR-${Math.floor(1000 + Math.random() * 9000)}`) : undefined,
+      supervisingDoctorIds: invite.role === 'triage_nurse' ? (invite.supervisingDoctorIds || req.body.supervisingDoctorIds || []) : undefined,
+      status: 'active',
     });
 
     await user.save();
@@ -439,8 +443,9 @@ router.post('/register-invited', async (req, res) => {
 
     const { accessToken } = await issueSessionCookies(user, req, res);
 
+    const roleDisplay = invite.role === 'doctor' ? 'Doctor' : invite.role === 'triage_nurse' ? 'Triage Nurse' : 'Hospital Admin';
     return res.status(201).json({
-      message: `${invite.role === 'doctor' ? 'Doctor' : 'Hospital Admin'} registered successfully via invite`,
+      message: `${roleDisplay} registered successfully via invite`,
       token: accessToken,
       user: {
         id: user._id,
@@ -449,6 +454,10 @@ router.post('/register-invited', async (req, res) => {
         role: user.role,
         hospitalId: user.hospitalId,
         district: user.district,
+        qualification: user.qualification,
+        registrationNumber: user.registrationNumber,
+        supervisingDoctorIds: user.supervisingDoctorIds,
+        status: user.status,
       },
     });
   } catch (err) {
@@ -458,7 +467,7 @@ router.post('/register-invited', async (req, res) => {
 
 /**
  * POST /api/auth/invite
- * Create an invite code for doctors or hospital administrators.
+ * Create an invite code for doctors, hospital administrators, or triage nurses.
  * Restricted to hospital_admin (for their own hospital) and platform_reviewer.
  */
 router.post(
@@ -467,12 +476,12 @@ router.post(
   authorizeRoles('hospital_admin', 'platform_reviewer'),
   async (req, res) => {
     try {
-      const { role, hospitalId, durationDays = 7 } = req.body;
+      const { role, hospitalId, durationDays = 7, supervisingDoctorIds } = req.body;
 
-      if (!role || !['doctor', 'hospital_admin'].includes(role)) {
+      if (!role || !['doctor', 'hospital_admin', 'triage_nurse'].includes(role)) {
         return res.status(400).json({
           error: 'Bad Request',
-          message: 'role must be either "doctor" or "hospital_admin".',
+          message: 'role must be "doctor", "hospital_admin", or "triage_nurse".',
         });
       }
 
@@ -491,11 +500,11 @@ router.post(
       if (!targetHospitalId) {
         return res.status(400).json({
           error: 'Bad Request',
-          message: 'Valid hospitalId is required for practitioner invitation.',
+          message: 'Valid hospitalId is required for staff invitation.',
         });
       }
 
-      const codePrefix = role === 'doctor' ? 'INV-DOC' : 'INV-ADM';
+      const codePrefix = role === 'doctor' ? 'INV-DOC' : role === 'triage_nurse' ? 'INV-NUR' : 'INV-ADM';
       const randomSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
       const code = `${codePrefix}-${randomSuffix}`;
       const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
@@ -504,6 +513,7 @@ router.post(
         code,
         role,
         hospitalId: targetHospitalId,
+        supervisingDoctorIds: role === 'triage_nurse' ? (supervisingDoctorIds || []) : [],
         createdBy: req.user._id,
         expiresAt,
       });
@@ -515,6 +525,7 @@ router.post(
           role: invite.role,
           hospitalId: invite.hospitalId,
           expiresAt: invite.expiresAt,
+          supervisingDoctorIds: invite.supervisingDoctorIds,
         },
       });
     } catch (err) {
@@ -814,6 +825,10 @@ router.get('/me', authenticate, async (req, res) => {
       hospitalId: req.user.hospitalId,
       district: req.user.district,
       isTwoFactorEnabled: req.user.isTwoFactorEnabled || false,
+      qualification: req.user.qualification,
+      registrationNumber: req.user.registrationNumber,
+      supervisingDoctorIds: req.user.supervisingDoctorIds,
+      status: req.user.status,
     },
   });
 });
