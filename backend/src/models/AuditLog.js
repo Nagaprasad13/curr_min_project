@@ -31,6 +31,8 @@ const AuditLogSchema = new mongoose.Schema({
       'DENIED_RECORD_ACCESS',
       'BREAK_GLASS_ACCESS',
       'CREATE_REFERRAL',
+      'CONFIRM_REFERRAL',
+      'OVERRIDE_REFERRAL',
       'UPDATE_CAPACITY',
       'UPDATE_MODEL_STATUS',
       'QUERY_REFERRAL_ENGINE',
@@ -66,7 +68,10 @@ const AuditLogSchema = new mongoose.Schema({
       'VIEW_TRIAGE_ALERTS',
       'LIST_HOSPITAL_NURSES',
       'INVITE_TRIAGE_NURSE',
-      'UPDATE_TRIAGE_NURSE'
+      'UPDATE_TRIAGE_NURSE',
+      'VERIFY_NURSE',
+      'REJECT_NURSE',
+      'DEACTIVATE_NURSE'
     ],
     required: true,
     index: true,

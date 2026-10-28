@@ -718,14 +718,39 @@ router.patch(
       });
 
       if (!nurse) {
+        // Generic 404 – do not reveal whether the nurse exists at another hospital
         return res.status(404).json({ error: 'Not Found', message: 'Triage Nurse not found at this hospital.' });
       }
 
-      const { status, supervisingDoctorIds, qualification } = req.body;
+      const { action, reason, supervisingDoctorIds, qualification } = req.body;
 
-      if (status && ['active', 'inactive'].includes(status)) {
-        nurse.status = status;
+      const VALID_ACTIONS = ['verify', 'reject', 'deactivate'];
+      if (!action || !VALID_ACTIONS.includes(action)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: `"action" must be one of: ${VALID_ACTIONS.join(', ')}.`,
+        });
       }
+
+      // reject requires a written reason
+      if (action === 'reject') {
+        if (!reason || typeof reason !== 'string' || reason.trim().length < 5) {
+          return res.status(400).json({
+            error: 'Bad Request',
+            message: 'A reason of at least 5 characters is required to reject a nurse.',
+          });
+        }
+      }
+
+      // Status transition: pending -> verified | rejected -> deactivated (active -> inactive alias)
+      let nextStatus;
+      if (action === 'verify') nextStatus = 'verified';
+      else if (action === 'reject') nextStatus = 'rejected';
+      else if (action === 'deactivate') nextStatus = 'inactive';
+
+      const prevStatus = nurse.status;
+      nurse.status = nextStatus;
+
       if (Array.isArray(supervisingDoctorIds)) {
         nurse.supervisingDoctorIds = supervisingDoctorIds;
       }
@@ -735,19 +760,37 @@ router.patch(
 
       await nurse.save();
 
+      // Map action to distinct audit event
+      const auditActionMap = {
+        verify: 'VERIFY_NURSE',
+        reject: 'REJECT_NURSE',
+        deactivate: 'DEACTIVATE_NURSE',
+      };
+
       await recordAuditLog({
         actorId: req.user._id,
         actorRole: req.user.role,
-        action: 'UPDATE_NURSE_STATUS',
+        action: auditActionMap[action],
         resourceType: 'User',
         resourceId: nurse._id.toString(),
         hospitalId: req.params.id,
         accessGranted: true,
-        meta: { status: nurse.status },
+        justification: action === 'reject'
+          ? `Admin ${req.user._id} rejected nurse ${nurse._id}. Reason: ${reason.trim()}`
+          : `Admin ${req.user._id} performed action "${action}" on nurse ${nurse._id}.`,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        meta: {
+          action,
+          prevStatus,
+          nextStatus,
+          reason: reason ? reason.trim() : null,
+          adminId: req.user._id.toString(),
+        },
       });
 
       return res.json({
-        message: 'Triage Nurse profile updated successfully',
+        message: `Triage Nurse ${action}d successfully.`,
         nurse: {
           id: nurse._id,
           name: nurse.name,
@@ -757,6 +800,8 @@ router.patch(
           supervisingDoctorIds: nurse.supervisingDoctorIds,
           status: nurse.status,
         },
+        action,
+        prevStatus,
       });
     } catch (err) {
       return res.status(500).json({ error: 'Server Error', message: err.message });

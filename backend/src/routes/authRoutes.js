@@ -123,6 +123,16 @@ router.post('/login', loginLimiter.check, async (req, res) => {
       });
     }
 
+    // Block triage nurses who are not verified or active
+    if (user.role === 'triage_nurse' && !['active', 'verified'].includes(user.status)) {
+      await loginLimiter.recordFailure(req);
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Your nurse account is not yet verified by the hospital administrator, or has been deactivated. Please contact your hospital admin.',
+        nurseStatus: user.status,
+      });
+    }
+
     // Check 2FA (TOTP)
     if (user.isTwoFactorEnabled && user.twoFactorSecret) {
       if (!twoFactorCode) {

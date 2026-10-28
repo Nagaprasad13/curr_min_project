@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ['active', 'inactive'],
+    enum: ['active', 'inactive', 'pending', 'verified', 'rejected'],
     default: 'active',
   },
   phone: {

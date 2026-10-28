@@ -34,6 +34,12 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [practitioners, setPractitioners] = useState([]);
+  const [nurses, setNurses] = useState([]);
+  const [nursesLoading, setNursesLoading] = useState(false);
+  const [nursesError, setNursesError] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedNurseId, setSelectedNurseId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [pracForm, setPracForm] = useState({
     fullName: '',
@@ -55,6 +61,7 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
         loadHospitalDetails(controller.signal),
         loadLatestCapacity(controller.signal),
         loadPractitioners(controller.signal),
+        loadNurses(controller.signal),
       ]).finally(() => {
         if (!controller.signal.aborted) setInitialContextLoading(false);
       });
@@ -82,6 +89,23 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
       }
     } catch (err) {
       if (!signal?.aborted) setErrorMsg(err.message);
+    }
+  };
+
+  const loadNurses = async (signal) => {
+    try {
+      const res = await fetch(`/api/hospitals/${hospitalId}/nurses`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNurses(data.nurses || []);
+      } else {
+        setNursesError(data.message || 'Nurse roster could not be loaded.');
+      }
+    } catch (err) {
+      if (!signal?.aborted) setNursesError(err.message);
     }
   };
 
@@ -431,6 +455,24 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
           onClick={() => setActiveTab('practitioners')}
         >
           👨‍⚕️ Medical Staff & Specialist Roster ({practitioners.length})
+        </button>
+        <button
+          type="button"
+          className={`btn ${activeTab === 'nurses' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          style={{
+            padding: '9px 18px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            background: activeTab === 'nurses' ? '#1D4ED8' : '#EFF6FF',
+            color: activeTab === 'nurses' ? '#FFFFFF' : '#1D4ED8',
+            boxShadow: activeTab === 'nurses' ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+          }}
+          onClick={() => setActiveTab('nurses')}
+        >
+          🩺 Nurse Roster ({nurses.length})
         </button>
       </div>
 

@@ -119,7 +119,13 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   const [excludedHospitals, setExcludedHospitals] = useState([]);
   const [referralLoading, setReferralLoading] = useState(false);
   const [currentReferralId, setCurrentReferralId] = useState(null);
+  const [currentReferralDbId, setCurrentReferralDbId] = useState(null);
   const [referralTimeLeft, setReferralTimeLeft] = useState(null);
+  const [confirmedReferralId, setConfirmedReferralId] = useState(null);
+  const [confirmedHospitalId, setConfirmedHospitalId] = useState(null);
+  const [overrideHospitalId, setOverrideHospitalId] = useState(null);
+  const [overrideReasonText, setOverrideReasonText] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   // Records State
   const [records, setRecords] = useState(null);
@@ -439,7 +445,12 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     setRecommendations([]);
     setExcludedHospitals([]);
     setCurrentReferralId(null);
+    setCurrentReferralDbId(null);
     setReferralTimeLeft(null);
+    setConfirmedReferralId(null);
+    setConfirmedHospitalId(null);
+    setOverrideHospitalId(null);
+    setOverrideReasonText('');
 
     try {
       const res = await fetch('/api/referrals/recommend', {
@@ -463,6 +474,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
         const ranked = data.recommendations || [];
         if (data.referralId && ranked.length > 0) {
           setCurrentReferralId(data.referralId);
+          setCurrentReferralDbId(data.referralDbId || data.referralId);
           setReferralTimeLeft(30);
           setFeedbackMsg(`Referral draft ${data.referralId} created.`);
         } else {
@@ -477,6 +489,62 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
       setErrorMsg(err.message);
     } finally {
       setReferralLoading(false);
+    }
+  };
+
+  const handleReviewReferral = async (targetHospital, isOverrideChoice) => {
+    const targetHospitalId = targetHospital.hospitalId || targetHospital._id;
+    const hospitalDisplayName = targetHospital.hospitalName || targetHospital.name || 'Selected Facility';
+    const targetRefId = currentReferralDbId || currentReferralId;
+    if (!targetRefId) {
+      setErrorMsg('No active referral draft found.');
+      return;
+    }
+
+    if (isOverrideChoice) {
+      if (!overrideReasonText || overrideReasonText.trim().length < 10) {
+        setErrorMsg('Override requires a clinical reason of at least 10 characters.');
+        return;
+      }
+    }
+
+    setReviewSubmitting(true);
+    setErrorMsg(null);
+    setFeedbackMsg(null);
+
+    try {
+      const res = await fetch(`/api/referrals/${targetRefId}/review`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          selectedHospitalId: targetHospitalId,
+          overrideReason: isOverrideChoice ? overrideReasonText.trim() : undefined,
+          newStatus: 'reviewed',
+          requestRecordsConsent: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setReferralTimeLeft(null); // Stop draft countdown once confirmed
+        setConfirmedReferralId(data.referralId || currentReferralId);
+        setConfirmedHospitalId(targetHospitalId);
+        setOverrideHospitalId(null);
+        setOverrideReasonText('');
+        const successNotice = isOverrideChoice
+          ? `Referral ${data.referralId || currentReferralId} overridden and confirmed for ${hospitalDisplayName}. Status: Reviewed.`
+          : `Referral ${data.referralId || currentReferralId} confirmed for top-ranked facility (${hospitalDisplayName}). Status: Reviewed.`;
+        setFeedbackMsg(successNotice);
+      } else {
+        setErrorMsg(data.message || 'Failed to review referral.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Error occurred while reviewing referral.');
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -1098,8 +1166,8 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
             {currentReferralId && (
               <div
                 style={{
-                  background: referralTimeLeft === 0 ? '#FEF2F2' : '#EFF6FF',
-                  border: referralTimeLeft === 0 ? '1px solid #FECACA' : '1px solid #BFDBFE',
+                  background: confirmedReferralId ? '#F0FDF4' : referralTimeLeft === 0 ? '#FEF2F2' : '#EFF6FF',
+                  border: confirmedReferralId ? '1px solid #BBF7D0' : referralTimeLeft === 0 ? '1px solid #FECACA' : '1px solid #BFDBFE',
                   borderRadius: 10,
                   padding: '14px 18px',
                   marginBottom: 16,
@@ -1112,22 +1180,24 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.82rem', color: referralTimeLeft === 0 ? '#991B1B' : '#1D4ED8', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.82rem', color: confirmedReferralId ? '#166534' : referralTimeLeft === 0 ? '#991B1B' : '#1D4ED8', fontWeight: 700 }}>
                       REFERRAL CODE:
                     </span>
-                    <span style={{ fontSize: '1.25rem', fontFamily: 'monospace', fontWeight: 800, color: referralTimeLeft === 0 ? '#B91C1C' : '#1E3A8A' }}>
+                    <span style={{ fontSize: '1.25rem', fontFamily: 'monospace', fontWeight: 800, color: confirmedReferralId ? '#15803D' : referralTimeLeft === 0 ? '#B91C1C' : '#1E3A8A' }}>
                       {currentReferralId}
                     </span>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: referralTimeLeft === 0 ? '#B91C1C' : '#3B82F6' }}>
-                      {referralTimeLeft === 0 ? 'Draft window expired' : `Expires in ${referralTimeLeft}s`}
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: confirmedReferralId ? '#166534' : referralTimeLeft === 0 ? '#B91C1C' : '#3B82F6' }}>
+                      {confirmedReferralId ? '✓ Confirmed (Reviewed)' : referralTimeLeft === 0 ? 'Draft window expired' : `Expires in ${referralTimeLeft}s`}
                     </span>
                   </div>
                   <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#64748B' }}>
-                    This is a draft reference only. It is not hospital acceptance or a bed reservation.
+                    {confirmedReferralId
+                      ? 'Referral reviewed and confirmed by clinician. Records consent requested.'
+                      : 'This is a draft reference only. It is not hospital acceptance or a bed reservation.'}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {referralTimeLeft > 0 && (
+                  {referralTimeLeft > 0 && !confirmedReferralId && (
                     <button
                       style={btnOutline}
                       onClick={() => {
@@ -1150,47 +1220,159 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
                 <div className="doctor-results-list">
                   <h3 style={{ color: '#1E3A8A', marginBottom: 12 }}>Ranked referral options:</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {recommendations.map((h, idx) => (
-                      <div
-                        key={h.hospitalId || idx}
-                        style={{
-                          background: idx === 0 ? '#EFF6FF' : '#FAFCFF',
-                          border: `1px solid ${idx === 0 ? '#BFDBFE' : '#E2E8F0'}`,
-                          borderLeft: `6px solid ${idx === 0 ? '#1D4ED8' : '#94A3B8'}`,
-                          borderRadius: 12,
-                          padding: '16px 20px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                          <div>
-                            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1E3A8A' }}>
-                              #{h.rank || idx + 1} {h.hospitalName || h.name}
+                    {recommendations.map((h, idx) => {
+                      const isTopRanked = idx === 0;
+                      const hId = h.hospitalId || h._id;
+                      const isSelectedAndConfirmed = confirmedHospitalId && (confirmedHospitalId === hId);
+                      const isOverrideDrawerOpen = overrideHospitalId === hId;
+
+                      return (
+                        <div
+                          key={hId || idx}
+                          style={{
+                            background: isSelectedAndConfirmed ? '#F0FDF4' : isTopRanked ? '#EFF6FF' : '#FAFCFF',
+                            border: `1px solid ${isSelectedAndConfirmed ? '#86EFAC' : isTopRanked ? '#BFDBFE' : '#E2E8F0'}`,
+                            borderLeft: `6px solid ${isSelectedAndConfirmed ? '#16A34A' : isTopRanked ? '#1D4ED8' : '#94A3B8'}`,
+                            borderRadius: 12,
+                            padding: '16px 20px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: isSelectedAndConfirmed ? '#166534' : '#1E3A8A' }}>
+                                #{h.rank || idx + 1} {h.hospitalName || h.name}
+                              </div>
+                              <div style={{ fontSize: '0.82rem', color: '#64748B', marginTop: 4 }}>
+                                District: <strong>{h.district}</strong> · Distance: <strong>{h.distanceKm == null ? 'Not reported' : `${h.distanceKm.toFixed(1)} km`}</strong>
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.82rem', color: '#64748B', marginTop: 4 }}>
-                              District: <strong>{h.district}</strong> · Distance: <strong>{h.distanceKm == null ? 'Not reported' : `${h.distanceKm.toFixed(1)} km`}</strong>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: 800, color: '#1D4ED8', fontSize: '1.1rem' }}>
+                                Score: {h.score?.toFixed(3)}
+                              </div>
+                              {isTopRanked && (
+                                <span style={{ background: '#DBEAFE', color: '#1E3A8A', fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: 999 }}>
+                                  Top-ranked
+                                </span>
+                              )}
+                              {isSelectedAndConfirmed && (
+                                <span style={{ background: '#DCFCE7', color: '#166534', fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: 999, marginLeft: 6 }}>
+                                  ✓ Selected & Reviewed
+                                </span>
+                              )}
                             </div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 800, color: '#1D4ED8', fontSize: '1.1rem' }}>
-                              Score: {h.score?.toFixed(3)}
-                            </div>
-                            {idx === 0 && (
-                              <span style={{ background: '#DBEAFE', color: '#1E3A8A', fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: 999 }}>
-                                Top-ranked
+                          <div style={{ marginTop: 10, fontSize: '0.82rem', color: '#334155' }}>
+                            <strong>Matched capabilities:</strong> {Array.isArray(h.matchedCapabilities) && h.matchedCapabilities.length ? h.matchedCapabilities.join(', ') : 'Review facility profile'}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                            {confirmedReferralId ? (
+                              isSelectedAndConfirmed ? (
+                                <span style={{ color: '#166534', fontWeight: 700, fontSize: '0.85rem' }}>
+                                  ✓ Confirmed referral for this facility
+                                </span>
+                              ) : null
+                            ) : referralTimeLeft === 0 ? (
+                              <span style={{ color: '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>
+                                Draft expired. Regenerate code to confirm.
                               </span>
+                            ) : isTopRanked ? (
+                              <button
+                                style={btnPrimary}
+                                onClick={() => handleReviewReferral(h, false)}
+                                disabled={reviewSubmitting || referralTimeLeft === 0}
+                              >
+                                {reviewSubmitting ? 'Confirming...' : '✓ Confirm referral'}
+                              </button>
+                            ) : (
+                              <>
+                                {!isOverrideDrawerOpen ? (
+                                  <button
+                                    style={{
+                                      ...btnOutline,
+                                      borderColor: '#D97706',
+                                      color: '#B45309',
+                                      background: '#FFFBEB',
+                                      fontWeight: 700,
+                                    }}
+                                    onClick={() => {
+                                      setOverrideHospitalId(hId);
+                                      setOverrideReasonText('');
+                                    }}
+                                    disabled={reviewSubmitting || referralTimeLeft === 0}
+                                  >
+                                    ⚠️ Override
+                                  </button>
+                                ) : null}
+                              </>
                             )}
                           </div>
+
+                          {/* Override Input Drawer */}
+                          {!confirmedReferralId && isOverrideDrawerOpen && !isTopRanked && (
+                            <div
+                              style={{
+                                marginTop: 12,
+                                padding: 12,
+                                background: '#FFFBEB',
+                                border: '1px solid #FCD34D',
+                                borderRadius: 8,
+                              }}
+                            >
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#92400E', marginBottom: 6 }}>
+                                Clinical Reason for Overriding Top-Ranked Facility (minimum 10 characters):
+                              </label>
+                              <textarea
+                                rows={2}
+                                value={overrideReasonText}
+                                onChange={(e) => setOverrideReasonText(e.target.value)}
+                                placeholder="State clinical justification for selecting this facility instead of top-ranked..."
+                                style={{
+                                  width: '100%',
+                                  padding: 8,
+                                  borderRadius: 6,
+                                  border: '1px solid #F59E0B',
+                                  fontSize: '0.85rem',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                                <span style={{ fontSize: '0.75rem', color: overrideReasonText.trim().length >= 10 ? '#166534' : '#B45309', fontWeight: 600 }}>
+                                  {overrideReasonText.trim().length}/10 characters minimum
+                                </span>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                  <button
+                                    style={{ ...btnOutline, padding: '4px 10px', fontSize: '0.78rem' }}
+                                    onClick={() => {
+                                      setOverrideHospitalId(null);
+                                      setOverrideReasonText('');
+                                    }}
+                                    disabled={reviewSubmitting}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    style={{
+                                      ...btnPrimary,
+                                      background: '#D97706',
+                                      borderColor: '#B45309',
+                                      padding: '4px 12px',
+                                      fontSize: '0.78rem',
+                                    }}
+                                    onClick={() => handleReviewReferral(h, true)}
+                                    disabled={reviewSubmitting || overrideReasonText.trim().length < 10}
+                                  >
+                                    {reviewSubmitting ? 'Submitting Override...' : 'Submit Override'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div style={{ marginTop: 10, fontSize: '0.82rem', color: '#334155' }}>
-                          <strong>Matched capabilities:</strong> {Array.isArray(h.matchedCapabilities) && h.matchedCapabilities.length ? h.matchedCapabilities.join(', ') : 'Review facility profile'}
-                        </div>
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-                          <button style={btnPrimary} onClick={() => handleRequestConsent(h.hospitalId)}>
-                            Select & Request Consent
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 <ReferralResultsMap recommendations={recommendations} />

@@ -433,7 +433,11 @@ router.patch(
   authorizeRoles('doctor'),
   async (req, res) => {
     try {
-      const referral = await Referral.findById(req.params.id);
+      const mongoose = require('mongoose');
+      const query = mongoose.Types.ObjectId.isValid(req.params.id)
+        ? { $or: [{ _id: req.params.id }, { referralId: req.params.id }] }
+        : { referralId: req.params.id };
+      const referral = await Referral.findOne(query);
       if (!referral) {
         return res.status(404).json({ error: 'Not Found', message: 'Referral document not found.' });
       }
@@ -474,6 +478,29 @@ router.patch(
         });
       }
 
+      const effectiveHospitalId = (selectedHospitalId || referral.selectedHospitalId)?.toString();
+      if (!effectiveHospitalId) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'selectedHospitalId is required to review a referral.',
+        });
+      }
+
+      // Top-ranked hospital determination
+      const topRecommendation = referral.rankedRecommendations && referral.rankedRecommendations[0];
+      const topHospitalId = topRecommendation?.hospitalId?.toString();
+      const isOverride = Boolean(topHospitalId && effectiveHospitalId !== topHospitalId);
+
+      // Validate override reason (minimum 10 characters)
+      if (isOverride) {
+        if (!overrideReason || typeof overrideReason !== 'string' || overrideReason.trim().length < 10) {
+          return res.status(400).json({
+            error: 'Bad Request',
+            message: 'Override reason must be at least 10 characters long when selecting a hospital other than the top-ranked recommendation.',
+          });
+        }
+      }
+
       const prevStatus = referral.status;
       referral.status = newStatus;
 
@@ -506,27 +533,33 @@ router.patch(
         clinicianName: req.user.name,
         selectedHospitalId: selectedHospitalId || referral.selectedHospitalId,
         notes: notes || referral.clinicianReview?.notes,
-        overrideReason: overrideReason || referral.clinicianReview?.overrideReason,
+        overrideReason: isOverride ? overrideReason.trim() : (overrideReason || referral.clinicianReview?.overrideReason),
         reviewedAt: new Date(),
       };
 
       const saved = await referral.save();
 
+      const auditAction = isOverride ? 'OVERRIDE_REFERRAL' : 'CONFIRM_REFERRAL';
       await recordAuditLog({
         actorId: req.user._id,
         actorRole: req.user.role,
-        action: 'CREATE_REFERRAL',
+        action: auditAction,
         resourceType: 'Referral',
         resourceId: saved._id.toString(),
         hospitalId: referral.selectedHospitalId,
         accessGranted: true,
-        justification: `Clinician reviewed referral ${saved.referralId}. Status moved from ${prevStatus} to ${newStatus}. Override: ${overrideReason || 'None'}`,
+        justification: isOverride
+          ? `Clinician overrode top recommendation for referral ${saved.referralId}. Selected ${referral.selectedHospitalId}. Reason: ${overrideReason.trim()}`
+          : `Clinician confirmed top recommendation for referral ${saved.referralId}. Selected ${referral.selectedHospitalId}.`,
         ipAddress: req.ip,
         userAgent: req.headers['user-agent'],
         meta: {
           prevStatus,
           newStatus,
-          selectedHospitalId,
+          selectedHospitalId: referral.selectedHospitalId,
+          isOverride,
+          overrideReason: overrideReason ? overrideReason.trim() : null,
+          topRankedHospitalId: topHospitalId || null,
           recordsConsentStatus: saved.recordsConsentStatus,
         },
       });
@@ -539,6 +572,7 @@ router.patch(
         recordsConsentId: saved.recordsConsentId,
         clinicianReview: saved.clinicianReview,
         consentRequest: createdConsent,
+        isOverride,
       });
     } catch (err) {
       return res.status(500).json({ error: 'Server Error', message: err.message });
