@@ -327,6 +327,9 @@ async function verifyActiveConsent({
  */
 async function expireOldConsents() {
   const now = new Date();
+
+  // Step 1: Mark any still-requested or still-granted consents as expired
+  // if their expiresAt window has passed.
   const expired = await Consent.updateMany(
     {
       status: { $in: ['requested', 'granted'] },
@@ -344,7 +347,18 @@ async function expireOldConsents() {
       },
     }
   );
-  return expired;
+
+  // Step 2: Delete expired consent requests that were NEVER granted (i.e. only
+  // ever reached 'expired' from 'requested'). These are stale pending requests
+  // that the patient never responded to — remove them to keep the list clean.
+  // Consents that were 'granted' and then expired are preserved for audit history.
+  const deleted = await Consent.deleteMany({
+    status: 'expired',
+    grantedAt: { $exists: false }, // Was never granted — pure unanswered requests
+    expiresAt: { $lte: now },
+  });
+
+  return { expired: expired.modifiedCount, deleted: deleted.deletedCount };
 }
 
 /**

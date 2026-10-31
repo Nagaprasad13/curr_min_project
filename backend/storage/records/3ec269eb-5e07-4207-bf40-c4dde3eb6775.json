@@ -1,0 +1,23 @@
+{
+  "recordId": "3ec269eb-5e07-4207-bf40-c4dde3eb6775",
+  "patientId": "6ace67b8327e419bb728af34",
+  "patientName": "Ganesan B.",
+  "sourceHospital": "Synthetic - Salem Government Mohan Kumaramangalam Medical College Hospital",
+  "sourceHospitalCode": "HOSP-TN-001",
+  "recordType": "lab_report",
+  "title": "Complete Blood Count (CBC) with Differential",
+  "recordDate": "2026-10-26T17:25:53.100Z",
+  "sensitivityLevel": "normal",
+  "summary": "Hemoglobin: 12.4 g/dL, WBC: 6,800/mcL, Platelets: 220,000/mcL. Normocytic, normochromic profile.",
+  "clinicalData": {
+    "investigation": "Complete Blood Count (CBC)",
+    "parameters": {
+      "hemoglobin": "12.4 g/dL",
+      "wbc": "6,800 /mcL",
+      "platelets": "220,000 /mcL",
+      "rbc": "4.2 M/uL"
+    },
+    "interpretation": "Normal hematological profile within physiological reference limits."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Salem Government Mohan Kumaramangalam Medical College Hospital EMR telemetry. Research Prototype."
+}

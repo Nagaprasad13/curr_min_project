@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/scripts/seed.js",
+    "seed:patient-records": "node src/scripts/seedPatientRecords.js",
     "check:consistency": "node src/scripts/checkDataConsistency.js",
     "evaluate": "node src/evaluation/evaluate.js",
     "evaluate:phase6": "node src/evaluation/evaluatePhase6.js",

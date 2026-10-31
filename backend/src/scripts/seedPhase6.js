@@ -431,7 +431,15 @@ async function seedPhase6(
     writeSeedCredentials(seedCredentials, credentialsPath);
     createdPatients.push(patientDoc);
   }
-  console.log(`✓ Seeded ${createdPatients.length} synthetic patient accounts.`);
+  // Include any existing primary demo patients (like M. Anandhi: patient@carebridge.invalid)
+  const existingPatients = await User.find({ role: 'patient' });
+  for (const ep of existingPatients) {
+    if (!createdPatients.some(cp => cp._id.toString() === ep._id.toString())) {
+      createdPatients.push(ep);
+    }
+  }
+
+  console.log(`✓ Seeded/verified ${createdPatients.length} synthetic patient accounts.`);
 
   // 3. Seed 5-15 clinical records per patient
   await PatientRecord.deleteMany({ isSynthetic: true });

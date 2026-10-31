@@ -75,17 +75,18 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
   };
 
   const loadModels = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const response = await fetch('/api/models', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
         credentials: 'include',
-        signal,
+        signal: abortSignal,
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to load the model registry.');
       setModels(data.models || []);
     } catch (err) {
-      if (!signal?.aborted) setErrorMsg(err.message);
+      if (!abortSignal?.aborted) setErrorMsg(err.message);
     }
   };
 
@@ -146,61 +147,65 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
   };
 
   const loadSchemes = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const res = await fetch('/api/schemes', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Scheme catalogue could not be loaded.');
       setSchemes(data.schemes || []);
     } catch (err) {
-      if (!signal?.aborted) setErrorMsg(err.message);
+      if (!abortSignal?.aborted) setErrorMsg(err.message);
     }
   };
 
   const loadHospitalsQueue = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       setLoading(true);
       const res = await fetch('/api/hospitals', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Hospital queue could not be loaded.');
       setHospitals(data.hospitals || []);
     } catch (err) {
-      if (!signal?.aborted) setErrorMsg(err.message);
+      if (!abortSignal?.aborted) setErrorMsg(err.message);
     } finally {
-      if (!signal?.aborted) setLoading(false);
+      if (!abortSignal?.aborted) setLoading(false);
     }
   };
 
   const loadHospitalDirectory = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const res = await fetch('/api/hospitals/reviewer-directory', {
         headers: token ? { Authorization: 'Bearer ' + token } : {},
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to load the hospital directory.');
       setHospitalDirectory(data.hospitals || []);
     } catch (err) {
-      if (!signal?.aborted) setErrorMsg(err.message);
+      if (!abortSignal?.aborted) setErrorMsg(err.message);
     }
   };
 
   const loadSpecialtyMap = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const res = await fetch('/api/specialty-map', {
         headers: { Authorization: token ? `Bearer ${token}` : '' },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Condition-specialty mappings could not be loaded.');
       setSpecialtyMappings(data.mappings || []);
     } catch (err) {
-      if (!signal?.aborted) setErrorMsg(err.message);
+      if (!abortSignal?.aborted) setErrorMsg(err.message);
     }
   };
 
@@ -449,7 +454,7 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
               <h2 className="card-title">Synthetic hospital directory</h2>
               <p className="card-desc">Administrator assignments, practitioner status counts, and capacity report age.</p>
             </div>
-            <button className="btn btn-outline btn-sm" onClick={loadHospitalDirectory}>Refresh directory</button>
+            <button className="btn btn-outline btn-sm" onClick={() => loadHospitalDirectory()}>Refresh directory</button>
           </div>
           {hospitalDirectory.length === 0 ? (
             <p role="status">No hospital records are available. Refresh the directory or check the data connection.</p>
@@ -489,7 +494,7 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
                 Review proposed test tiers, consistency warnings, and synthetic facility evidence. This simulated action sets the facility's effective test tier.
               </p>
             </div>
-            <button className="btn btn-outline btn-sm" onClick={loadHospitalsQueue}>↻ Refresh Queue</button>
+            <button className="btn btn-outline btn-sm" onClick={() => loadHospitalsQueue()}>↻ Refresh Queue</button>
           </div>
 
           <div style={{ overflowX: 'auto' }} role="region" aria-label="Hospital verification queue table" tabIndex="0">
@@ -568,7 +573,7 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
               <h2 className="card-title">Model registry</h2>
               <p className="card-desc">Research artifacts and dataset lineage. Promotion and retirement require a reviewer reason.</p>
             </div>
-            <button type="button" className="btn btn-outline btn-sm" onClick={loadModels}>Refresh registry</button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => loadModels()}>Refresh registry</button>
           </div>
           {models.length === 0 ? <p>No model versions are registered yet. Register a candidate from the existing training results first.</p> : (
             <div className="ds-table-scroll">
@@ -615,7 +620,7 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
               <button id="sweep-outdated-btn" className="btn btn-warning btn-sm" onClick={handleSweepOutdated}>
                 ⏱ Sweep Outdated Schemes (&gt;180d)
               </button>
-              <button className="btn btn-outline btn-sm" onClick={loadSchemes}>↻ Refresh</button>
+              <button className="btn btn-outline btn-sm" onClick={() => loadSchemes()}>↻ Refresh</button>
             </div>
           </div>
 
@@ -675,7 +680,7 @@ export default function ReviewerPortal({ token, reviewerUser, initialTab = 'queu
                 Reviewer sign-off on conditionSpecialtyMap protocol rules used by automated clinical triage routing.
               </p>
             </div>
-            <button className="btn btn-outline btn-sm" onClick={loadSpecialtyMap}>↻ Refresh Mappings</button>
+            <button className="btn btn-outline btn-sm" onClick={() => loadSpecialtyMap()}>↻ Refresh Mappings</button>
           </div>
 
           <div style={{ overflowX: 'auto' }} role="region" aria-label="Scheme catalogue table" tabIndex="0">

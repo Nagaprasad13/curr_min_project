@@ -1,0 +1,19 @@
+{
+  "recordId": "3efb2f23-28d3-441f-9c64-56dbfb42da11",
+  "patientId": "6ae60972315d297c83257d63",
+  "patientName": "Nagaprasad",
+  "sourceHospital": "Synthetic - Erode Cauvery Specialty Medical Institute",
+  "sourceHospitalCode": "HOSP-TN-005",
+  "recordType": "imaging_report",
+  "title": "Chest Radiograph (PA & Lateral Views)",
+  "recordDate": "2026-09-16T17:25:55.618Z",
+  "sensitivityLevel": "normal",
+  "summary": "Clear lung fields bilaterally. Normal cardiothoracic ratio. No focal consolidation, pneumothorax, or effusion.",
+  "clinicalData": {
+    "modality": "Digital Radiography (X-Ray)",
+    "region": "Chest PA & Lateral",
+    "findings": "Lungs are clear with no focal consolidation, pleural effusion, or pneumothorax. Cardiothoracic silhouette is normal. Bony thorax intact.",
+    "impression": "No acute cardiopulmonary disease."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Erode Cauvery Specialty Medical Institute EMR telemetry. Research Prototype."
+}

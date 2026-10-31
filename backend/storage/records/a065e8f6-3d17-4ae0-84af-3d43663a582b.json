@@ -1,0 +1,37 @@
+{
+  "recordId": "a065e8f6-3d17-4ae0-84af-3d43663a582b",
+  "patientId": "6ace67b8327e419bb728af2e",
+  "patientName": "Senthil N.",
+  "sourceHospital": "Synthetic - Salem Kongu Community Medical Center",
+  "sourceHospitalCode": "HOSP-TN-003",
+  "recordType": "prescription",
+  "title": "Outpatient Medication Prescription - Acute Bronchitis",
+  "recordDate": "2026-10-13T17:25:51.779Z",
+  "sensitivityLevel": "normal",
+  "summary": "Amoxicillin-Clavulanate 625mg TID x 5 days, Levocetirizine 5mg OD x 7 days, Paracetamol 650mg SOS.",
+  "clinicalData": {
+    "specialty": "Pulmonology / Internal Medicine",
+    "medications": [
+      {
+        "name": "Amoxicillin-Clavulanate",
+        "dose": "625mg",
+        "frequency": "TID",
+        "duration": "5 days"
+      },
+      {
+        "name": "Levocetirizine",
+        "dose": "5mg",
+        "frequency": "OD",
+        "duration": "7 days"
+      },
+      {
+        "name": "Paracetamol",
+        "dose": "650mg",
+        "frequency": "PRN/SOS",
+        "duration": "3 days"
+      }
+    ],
+    "instructions": "Complete full course of antibiotics. Hydrate adequately. Follow up if fever persists beyond 48 hours."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Salem Kongu Community Medical Center EMR telemetry. Research Prototype."
+}

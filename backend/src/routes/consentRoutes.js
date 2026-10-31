@@ -9,6 +9,7 @@ const {
   grantConsent,
   denyConsent,
   revokeConsent,
+  expireOldConsents,
   getPatientAccessHistory,
 } = require('../services/consentService');
 
@@ -127,6 +128,10 @@ router.get(
   authorizeRoles('patient', 'doctor'),
   async (req, res) => {
     try {
+      // Proactively expire + delete stale pending requests before building the list.
+      // This ensures the patient never sees a "Grant" button on an already-expired request.
+      await expireOldConsents();
+
       let query = {};
       if (req.user.role === 'patient') {
         query = { patientId: req.user._id };

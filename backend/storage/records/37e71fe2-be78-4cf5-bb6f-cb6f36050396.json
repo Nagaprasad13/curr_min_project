@@ -1,0 +1,25 @@
+{
+  "recordId": "37e71fe2-be78-4cf5-bb6f-cb6f36050396",
+  "patientId": "6ace67b8327e419bb728af34",
+  "patientName": "Ganesan B.",
+  "sourceHospital": "Synthetic - Salem Apex Heart & Critical Care Institute",
+  "sourceHospitalCode": "HOSP-TN-002",
+  "recordType": "lab_report",
+  "title": "Comprehensive Metabolic Panel (CMP) & Renal Function",
+  "recordDate": "2026-10-19T17:25:53.187Z",
+  "sensitivityLevel": "normal",
+  "summary": "Serum Creatinine: 0.9 mg/dL, BUN: 14 mg/dL, eGFR: >90 mL/min, Fasting Glucose: 98 mg/dL.",
+  "clinicalData": {
+    "investigation": "Comprehensive Metabolic Panel",
+    "parameters": {
+      "creatinine": "0.9 mg/dL",
+      "bun": "14 mg/dL",
+      "egfr": ">90 mL/min",
+      "fastingGlucose": "98 mg/dL",
+      "sodium": "140 mEq/L",
+      "potassium": "4.2 mEq/L"
+    },
+    "interpretation": "Adequate renal filtration and normal electrolyte balance."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Salem Apex Heart & Critical Care Institute EMR telemetry. Research Prototype."
+}

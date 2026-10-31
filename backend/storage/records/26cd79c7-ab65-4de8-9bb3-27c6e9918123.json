@@ -1,0 +1,20 @@
+{
+  "recordId": "26cd79c7-ab65-4de8-9bb3-27c6e9918123",
+  "patientId": "6ae60972315d297c83257d63",
+  "patientName": "Nagaprasad",
+  "sourceHospital": "Synthetic - Omalur Taluk Secondary Care Hospital",
+  "sourceHospitalCode": "HOSP-TN-004",
+  "recordType": "discharge_summary",
+  "title": "Inpatient Discharge Summary - Observation Unit",
+  "recordDate": "2026-09-26T17:25:55.503Z",
+  "sensitivityLevel": "normal",
+  "summary": "Admitted for acute bronchospasm and viral fever. Stabilized with bronchodilators. Discharged in stable condition.",
+  "clinicalData": {
+    "admissionDate": "2026-09-24T17:25:43.940Z",
+    "dischargeDate": "2026-09-26T17:25:43.941Z",
+    "principalDiagnosis": "Acute Asthmatic Exacerbation / Viral Bronchitis",
+    "dischargeCondition": "Hemodynamically stable, ambulating, room air SpO2 98%",
+    "followUpPlan": "Review in Chest Clinic after 2 weeks with fresh spirometry."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Omalur Taluk Secondary Care Hospital EMR telemetry. Research Prototype."
+}

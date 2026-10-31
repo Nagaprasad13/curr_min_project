@@ -21,6 +21,11 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
   const [shortenedDays, setShortenedDays] = useState(7);
   const [allowSensitive, setAllowSensitive] = useState(false);
 
+  // Consent records viewer state
+  const [viewingConsentRecords, setViewingConsentRecords] = useState(null); // consentId being viewed
+  const [consentRecords, setConsentRecords] = useState([]);
+  const [consentRecordsLoading, setConsentRecordsLoading] = useState(false);
+
   // Scheme matching state
   const [schemeInputs, setSchemeInputs] = useState({
     stateResident: '',
@@ -55,67 +60,101 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
   }, [initialTab]);
 
   const loadConsents = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       setLoading(true);
       setError(null);
       const res = await fetch('/api/consents', {
         headers: { Authorization: `Bearer ${token}` },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (res.ok) {
         setConsents(data.consents || []);
       } else throw new Error(data.message || 'Consent requests could not be loaded.');
     } catch (err) {
-      if (!signal?.aborted) setError(err.message);
+      if (!abortSignal?.aborted) setError(err.message);
     } finally {
-      if (!signal?.aborted) setLoading(false);
+      if (!abortSignal?.aborted) setLoading(false);
     }
   };
 
   const loadAccessHistory = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const res = await fetch('/api/consents/access-history', {
         headers: { Authorization: `Bearer ${token}` },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (res.ok) {
         setAccessHistory(data.accessReport || []);
       } else throw new Error(data.message || 'Access history could not be loaded.');
     } catch (err) {
-      if (!signal?.aborted) setError(err.message);
+      if (!abortSignal?.aborted) setError(err.message);
     }
   };
 
   const loadMyRecords = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const patientId = patientUser?.id || patientUser?._id;
       if (!patientId) return;
       const res = await fetch(`/api/patients/${patientId}/records`, {
         headers: { Authorization: `Bearer ${token}` },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (res.ok) {
         setMyRecords(data.records || []);
       } else throw new Error(data.message || 'Records could not be loaded.');
     } catch (err) {
-      if (!signal?.aborted) setError(err.message);
+      if (!abortSignal?.aborted) setError(err.message);
     }
   };
 
   const loadMyReferrals = async (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     try {
       const res = await fetch('/api/referrals', {
         headers: { Authorization: `Bearer ${token}` },
-        signal,
+        signal: abortSignal,
       });
       const data = await res.json();
       if (res.ok) setMyReferrals(data.referrals || []);
       else throw new Error(data.message || 'Referral list could not be loaded.');
     } catch (err) {
-      if (!signal?.aborted) setError(err.message);
+      if (!abortSignal?.aborted) setError(err.message);
+    }
+  };
+
+  const viewRecordsForConsent = async (consent) => {
+    const consentId = consent.consentId;
+    if (viewingConsentRecords === consentId) {
+      setViewingConsentRecords(null);
+      setConsentRecords([]);
+      return;
+    }
+    setViewingConsentRecords(consentId);
+    setConsentRecordsLoading(true);
+    setConsentRecords([]);
+    try {
+      const patientId = patientUser?.id || patientUser?._id;
+      const res = await fetch(`/api/patients/${patientId}/records`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const allowedTypes = consent.recordTypes || [];
+        const filtered = (data.records || []).filter(r => allowedTypes.includes(r.type));
+        setConsentRecords(filtered);
+      } else {
+        setError(data.message || 'Failed to load records.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setConsentRecordsLoading(false);
     }
   };
 
@@ -431,7 +470,7 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
                   Explicit patient control. Doctors can only view records if you grant permission. You can narrow scope or revoke anytime.
                 </p>
               </div>
-              <button style={btnOutline} onClick={loadConsents}>↻ Refresh</button>
+              <button style={btnOutline} onClick={() => loadConsents()}>↻ Refresh</button>
             </div>
 
             {consents.length === 0 ? (
@@ -455,68 +494,117 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
                   </thead>
                   <tbody>
                     {consents.map((c) => (
-                      <tr key={c.consentId} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
-                        <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8' }}>{c.consentId}</td>
-                        <td style={{ padding: '12px' }}>
-                          <strong style={{ color: '#1E293B' }}>{c.requestingHospitalId?.name || 'Simulated Hospital'}</strong>
-                          <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
-                            {c.requestingHospitalId?.district}
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px', color: '#334155' }}>{c.purpose}</td>
-                        <td style={{ padding: '12px' }}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                            {c.recordTypes?.map((t) => (
-                              <span key={t} style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 600 }}>{t}</span>
-                            ))}
-                            {c.includeSensitiveRecords && (
-                              <span style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700 }}>Sensitive Included</span>
-                            )}
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px' }}>
-                          <span style={{
-                            borderRadius: 999,
-                            padding: '3px 10px',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            background: c.status === 'granted' ? '#DCFCE7' : c.status === 'requested' ? '#FEF3C7' : '#FEE2E2',
-                            color: c.status === 'granted' ? '#166534' : c.status === 'requested' ? '#92400E' : '#B91C1C',
-                            border: `1px solid ${c.status === 'granted' ? '#86EFAC' : c.status === 'requested' ? '#FDE68A' : '#FECACA'}`,
-                          }}>
-                            {c.status?.toUpperCase()}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px' }}>
-                          {c.status === 'requested' && (
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <button
-                                id={`grant-btn-${c.consentId}`}
-                                style={btnSuccess}
-                                onClick={() => openGrantModal(c)}
-                              >
-                                Grant...
-                              </button>
-                              <button
-                                id={`deny-btn-${c.consentId}`}
-                                style={btnDanger}
-                                onClick={() => handleDeny(c.consentId)}
-                              >
-                                Deny
-                              </button>
+                      <React.Fragment key={c.consentId}>
+                        <tr style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8' }}>{c.consentId}</td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{c.requestingHospitalId?.name || 'Simulated Hospital'}</strong>
+                            <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                              {c.requestingHospitalId?.district}
                             </div>
-                          )}
-                          {c.status === 'granted' && (
-                            <button
-                              id={`revoke-btn-${c.consentId}`}
-                              style={btnDanger}
-                              onClick={() => handleRevoke(c.consentId)}
-                            >
-                              Revoke Now
-                            </button>
-                          )}
-                        </td>
-                      </tr>
+                          </td>
+                          <td style={{ padding: '12px', color: '#334155' }}>{c.purpose}</td>
+                          <td style={{ padding: '12px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                              {c.recordTypes?.map((t) => (
+                                <span key={t} style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 600 }}>{t}</span>
+                              ))}
+                              {c.includeSensitiveRecords && (
+                                <span style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700 }}>Sensitive Included</span>
+                              )}
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '3px 10px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: c.status === 'granted' ? '#DCFCE7' : c.status === 'requested' ? '#FEF3C7' : '#FEE2E2',
+                              color: c.status === 'granted' ? '#166534' : c.status === 'requested' ? '#92400E' : '#B91C1C',
+                              border: `1px solid ${c.status === 'granted' ? '#86EFAC' : c.status === 'requested' ? '#FDE68A' : '#FECACA'}`,
+                            }}>
+                              {c.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            {c.status === 'requested' && (
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button
+                                  id={`grant-btn-${c.consentId}`}
+                                  style={btnSuccess}
+                                  onClick={() => openGrantModal(c)}
+                                >
+                                  Grant...
+                                </button>
+                                <button
+                                  id={`deny-btn-${c.consentId}`}
+                                  style={btnDanger}
+                                  onClick={() => handleDeny(c.consentId)}
+                                >
+                                  Deny
+                                </button>
+                              </div>
+                            )}
+                            {c.status === 'granted' && (
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button
+                                  id={`view-records-btn-${c.consentId}`}
+                                  style={btnOutline}
+                                  onClick={() => viewRecordsForConsent(c)}
+                                >
+                                  {viewingConsentRecords === c.consentId ? '▲ Hide' : '📁 Records'}
+                                </button>
+                                <button
+                                  id={`revoke-btn-${c.consentId}`}
+                                  style={btnDanger}
+                                  onClick={() => handleRevoke(c.consentId)}
+                                >
+                                  Revoke Now
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                        {viewingConsentRecords === c.consentId && (
+                          <tr key={`${c.consentId}-records`}>
+                            <td colSpan="6" style={{ padding: '0 12px 14px', background: '#F0F7FF' }}>
+                              <div style={{ background: '#FFFFFF', border: '1px solid #BFDBFE', borderRadius: 10, padding: 14, marginTop: 4 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                                  <div style={{ fontWeight: 700, color: '#1E3A8A', fontSize: '0.88rem' }}>
+                                    📁 Records shared under Consent <span style={{ fontFamily: 'monospace', color: '#1D4ED8' }}>{c.consentId}</span>
+                                  </div>
+                                  <span style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                                    Permitted Scope: <strong>{c.recordTypes?.join(', ') || 'All standard'}</strong>
+                                  </span>
+                                </div>
+                                {consentRecordsLoading ? (
+                                  <div style={{ color: '#64748B', fontSize: '0.85rem', padding: '10px 0' }}>Loading shared records…</div>
+                                ) : consentRecords.length === 0 ? (
+                                  <div style={{ color: '#64748B', fontSize: '0.85rem', padding: '10px 0', textAlign: 'center' }}>
+                                    No clinical documents currently match this consent's designated scope on file.
+                                  </div>
+                                ) : (
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+                                    {consentRecords.map((r) => (
+                                      <div key={r.recordId} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: 12 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                          <span style={{ background: '#DBEAFE', color: '#1D4ED8', padding: '2px 8px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700 }}>{r.type}</span>
+                                          <span style={{ fontSize: '0.75rem', color: '#64748B' }}>{new Date(r.recordDate).toLocaleDateString()}</span>
+                                        </div>
+                                        <div style={{ fontWeight: 700, color: '#1E3A8A', fontSize: '0.88rem', margin: '4px 0' }}>{r.title || r.type}</div>
+                                        <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                                          Facility: {r.sourceHospital?.name || r.provenance?.facilityName || 'Authorized Facility'}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
@@ -533,7 +621,7 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
                 <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>📁 My Clinical Records & Diagnostic Reports</h2>
                 <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>Your personal medical documents in protected storage.</p>
               </div>
-              <button style={btnOutline} onClick={loadMyRecords}>↻ Refresh</button>
+              <button style={btnOutline} onClick={() => loadMyRecords()}>↻ Refresh</button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
@@ -719,7 +807,7 @@ export default function PatientPortal({ token, patientUser, initialTab = 'consen
                 <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.15rem' }}>📜 Transparent Record Access Audit Log</h2>
                 <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>Immutable history of who requested, viewed, or interacted with your health data.</p>
               </div>
-              <button style={btnOutline} onClick={loadAccessHistory}>↻ Refresh</button>
+              <button style={btnOutline} onClick={() => loadAccessHistory()}>↻ Refresh</button>
             </div>
 
             <div style={{ overflowX: 'auto' }} role="region" aria-label="Record access history table" tabIndex="0">

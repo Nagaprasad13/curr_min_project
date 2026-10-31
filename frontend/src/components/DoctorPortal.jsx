@@ -139,6 +139,10 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     includeSensitive: false,
   });
 
+  // Sent Consent Requests state
+  const [sentConsents, setSentConsents] = useState([]);
+  const [sentConsentsLoading, setSentConsentsLoading] = useState(false);
+
   // Schemes State
   const [schemeMatches, setSchemeMatches] = useState(null);
   const [schemeInputs, setSchemeInputs] = useState({
@@ -213,6 +217,25 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     }
   }, [token]);
 
+  const loadSentConsents = useCallback(async () => {
+    setSentConsentsLoading(true);
+    try {
+      const res = await fetch('/api/consents', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSentConsents(data.consents || []);
+      } else {
+        setErrorMsg(data.message || 'Failed to load sent consent requests.');
+      }
+    } catch (e) {
+      setErrorMsg(e.message);
+    } finally {
+      setSentConsentsLoading(false);
+    }
+  }, [token]);
+
   useEffect(() => {
     const ctrl = new AbortController();
     loadPatients(ctrl.signal);
@@ -247,7 +270,8 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   useEffect(() => {
     if (activeTab === 'triage_queue') loadTriageQueue();
     if (activeTab === 'nurses') loadNurses();
-  }, [activeTab, loadTriageQueue, loadNurses]);
+    if (activeTab === 'sent_consents') loadSentConsents();
+  }, [activeTab, loadTriageQueue, loadNurses, loadSentConsents]);
 
   useEffect(() => {
     if (referralTimeLeft === null || referralTimeLeft <= 0) return;
@@ -785,6 +809,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
             { id: 'nurses', label: '👩‍⚕️ My In-Charge Nurses' },
             { id: 'records', label: '📑 Consented Records' },
             { id: 'schemes', label: '🛡️ Schemes' },
+            { id: 'sent_consents', label: `📋 Sent Requests (${sentConsents.length})` },
           ].map((tab) => (
             <button key={tab.id} style={tabStyle(tab.id)} onClick={() => setActiveTab(tab.id)}>
               {tab.label}
@@ -1831,6 +1856,112 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════════
+            TAB 7: SENT CONSENT REQUESTS
+        ═══════════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'sent_consents' && (
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0 }}>📋 My Sent Consent Requests</h2>
+                <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                  Track consent requests you have sent to patients. Patients must grant access before records can be viewed.
+                </p>
+              </div>
+              <button style={btnOutline} onClick={loadSentConsents} disabled={sentConsentsLoading}>
+                {sentConsentsLoading ? 'Loading…' : '↻ Refresh'}
+              </button>
+            </div>
+
+            {sentConsents.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: '#64748B' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>📭</div>
+                <div style={{ fontWeight: 700, color: '#1E3A8A' }}>No consent requests sent yet</div>
+                <div style={{ fontSize: '0.82rem', marginTop: 4 }}>Consent requests are automatically sent when you confirm a referral.</div>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }} role="region" aria-label="Sent consent requests table" tabIndex="0">
+                <table style={{ width: '100%', fontSize: '0.88rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                      <th style={{ padding: '10px 12px' }}>Consent ID</th>
+                      <th style={{ padding: '10px 12px' }}>Patient</th>
+                      <th style={{ padding: '10px 12px' }}>Purpose</th>
+                      <th style={{ padding: '10px 12px' }}>Requested Scope</th>
+                      <th style={{ padding: '10px 12px' }}>Status</th>
+                      <th style={{ padding: '10px 12px' }}>Requested On</th>
+                      <th style={{ padding: '10px 12px' }}>Expires</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sentConsents.map((c) => {
+                      const statusColors = {
+                        requested: { bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' },
+                        granted: { bg: '#DCFCE7', color: '#166534', border: '#86EFAC' },
+                        denied: { bg: '#FEE2E2', color: '#B91C1C', border: '#FECACA' },
+                        expired: { bg: '#F1F5F9', color: '#64748B', border: '#CBD5E1' },
+                        revoked: { bg: '#FEE2E2', color: '#B91C1C', border: '#FECACA' },
+                      };
+                      const sc = statusColors[c.status] || statusColors.expired;
+                      const isExpired = c.expiresAt && new Date(c.expiresAt) < new Date();
+                      const remainingHours = c.expiresAt
+                        ? Math.max(0, Math.round((new Date(c.expiresAt) - new Date()) / (1000 * 60 * 60)))
+                        : null;
+
+                      return (
+                        <tr key={c.consentId} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8', fontSize: '0.82rem' }}>
+                            {c.consentId}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{c.patientId?.name || 'Patient'}</strong>
+                            {c.patientId?.district && (
+                              <div style={{ fontSize: '0.78rem', color: '#64748B' }}>{c.patientId.district}</div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px', color: '#334155' }}>{c.purpose}</td>
+                          <td style={{ padding: '12px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                              {c.recordTypes?.map((t) => (
+                                <span key={t} style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', borderRadius: 999, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 600 }}>{t}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '3px 10px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: sc.bg,
+                              color: sc.color,
+                              border: `1px solid ${sc.border}`,
+                            }}>
+                              {c.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', fontSize: '0.82rem', color: '#64748B' }}>
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </td>
+                          <td style={{ padding: '12px', fontSize: '0.82rem' }}>
+                            {c.status === 'granted' && !isExpired ? (
+                              <span style={{ color: '#166534', fontWeight: 600 }}>{remainingHours}h remaining</span>
+                            ) : isExpired ? (
+                              <span style={{ color: '#B91C1C', fontWeight: 600 }}>Expired</span>
+                            ) : (
+                              <span style={{ color: '#64748B' }}>{remainingHours != null ? `${remainingHours}h` : '—'}</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

@@ -1,0 +1,18 @@
+{
+  "recordId": "aafe6028-cc5e-4dd8-9ff1-c5edf3eb8dc1",
+  "patientId": "6ace67b6327e419bb728af1f",
+  "patientName": "Anitha S.",
+  "sourceHospital": "Synthetic - Salem Government Mohan Kumaramangalam Medical College Hospital",
+  "sourceHospitalCode": "HOSP-TN-001",
+  "recordType": "diagnosis",
+  "title": "Clinical Diagnostic Workup - Mild Persistent Asthma",
+  "recordDate": "2026-09-01T17:25:48.223Z",
+  "sensitivityLevel": "normal",
+  "summary": "Spirometry confirmed reversible airflow obstruction (FEV1/FVC 72%, post-bronchodilator +14% improvement).",
+  "clinicalData": {
+    "icd10": "J45.30",
+    "condition": "Mild persistent asthma without complication",
+    "clinicalNotes": "Triggered by seasonal allergens and viral upper respiratory tract infections. Stepped up to low-dose ICS-formoterol maintenance."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Salem Government Mohan Kumaramangalam Medical College Hospital EMR telemetry. Research Prototype."
+}

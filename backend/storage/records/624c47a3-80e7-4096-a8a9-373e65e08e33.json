@@ -1,0 +1,19 @@
+{
+  "recordId": "624c47a3-80e7-4096-a8a9-373e65e08e33",
+  "patientId": "6acfdbda068a0d0ee7ad7342",
+  "patientName": "Nagaprasad",
+  "sourceHospital": "Synthetic - Salem Apex Heart & Critical Care Institute",
+  "sourceHospitalCode": "HOSP-TN-002",
+  "recordType": "allergy",
+  "title": "Documented Drug & Environmental Allergy Profile",
+  "recordDate": "2026-08-02T17:25:55.001Z",
+  "sensitivityLevel": "normal",
+  "summary": "Known severe allergy: Sulfa antibiotics (cutaneous rash, urticaria). Non-allergic to penicillins and NSAIDs.",
+  "clinicalData": {
+    "allergen": "Sulfonamide Antibiotics",
+    "reaction": "Maculopapular cutaneous rash and facial angioedema",
+    "severity": "Moderate to Severe",
+    "clinicalWarning": "Strict avoidance of cotrimoxazole, sulfasalazine, and related sulfa derivatives."
+  },
+  "provenanceStatement": "Authenticated by Synthetic - Salem Apex Heart & Critical Care Institute EMR telemetry. Research Prototype."
+}
