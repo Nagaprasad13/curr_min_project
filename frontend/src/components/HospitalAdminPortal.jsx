@@ -41,6 +41,12 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedNurseId, setSelectedNurseId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Referral & Transfer Desk state
+  const [transfers, setTransfers] = useState([]);
+  const [transfersLoading, setTransfersLoading] = useState(false);
+  const [transferFilter, setTransferFilter] = useState('all'); // 'all' | 'incoming' | 'outgoing'
+  const [transferActionMsg, setTransferActionMsg] = useState(null);
   const [pracForm, setPracForm] = useState({
     fullName: '',
     qualification: '',
@@ -62,6 +68,7 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
         loadLatestCapacity(controller.signal),
         loadPractitioners(controller.signal),
         loadNurses(controller.signal),
+        loadTransfers(controller.signal),
       ]).finally(() => {
         if (!controller.signal.aborted) setInitialContextLoading(false);
       });
@@ -106,6 +113,49 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
       }
     } catch (err) {
       if (!signal?.aborted) setNursesError(err.message);
+    }
+  };
+
+  const loadTransfers = async (signal) => {
+    try {
+      setTransfersLoading(true);
+      const res = await fetch('/api/referrals?limit=100', {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: signal instanceof AbortSignal ? signal : undefined,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTransfers(data.referrals || []);
+      } else {
+        setErrorMsg(data.message || 'Transfers could not be loaded.');
+      }
+    } catch (err) {
+      if (!signal?.aborted) setErrorMsg(err.message);
+    } finally {
+      if (!signal?.aborted) setTransfersLoading(false);
+    }
+  };
+
+  const handleTransferAction = async (referralId, newStatus) => {
+    try {
+      setTransferActionMsg(null);
+      const res = await fetch(`/api/referrals/${referralId}/transfer-status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newStatus }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTransferActionMsg(`✓ Transfer ${referralId} status updated to "${newStatus}".`);
+        loadTransfers();
+      } else {
+        setErrorMsg(data.message || 'Failed to update transfer status.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
     }
   };
 
@@ -473,6 +523,27 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
           onClick={() => setActiveTab('nurses')}
         >
           🩺 Nurse Roster ({nurses.length})
+        </button>
+        <button
+          type="button"
+          className={`btn ${activeTab === 'transfers' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          style={{
+            padding: '9px 18px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            background: activeTab === 'transfers' ? '#1D4ED8' : '#EFF6FF',
+            color: activeTab === 'transfers' ? '#FFFFFF' : '#1D4ED8',
+            boxShadow: activeTab === 'transfers' ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+          }}
+          onClick={() => {
+            setActiveTab('transfers');
+            loadTransfers();
+          }}
+        >
+          🚑 Referral & Transfer Desk ({transfers.length})
         </button>
       </div>
 
@@ -919,6 +990,237 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
                 </form>
             </Modal>
           )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          TAB 4: REFERRAL & TRANSFER COORDINATION DESK
+      ═══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'transfers' && (
+        <div className="card" style={{ padding: 24, borderRadius: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14 }}>
+            <div>
+              <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.2rem' }}>
+                🚑 Hospital Referral & Transfer Coordination Desk
+              </h2>
+              <p style={{ color: '#64748B', fontSize: '0.85rem', margin: '4px 0 0' }}>
+                Manage inter-facility patient routing. Authorize incoming patient admissions from regional hospitals, verify bed allocations, and track outgoing transfers.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => loadTransfers()}
+              disabled={transfersLoading}
+            >
+              {transfersLoading ? 'Refreshing…' : '↻ Refresh Transfers'}
+            </button>
+          </div>
+
+          {transferActionMsg && (
+            <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', color: '#166534', fontWeight: 600, marginBottom: 14 }}>
+              {transferActionMsg}
+            </div>
+          )}
+
+          {/* Transfer Filter Controls */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            {[
+              { id: 'all', label: `All Transfers (${transfers.length})` },
+              { id: 'incoming', label: `📥 Incoming to Us (${transfers.filter(t => t.direction === 'incoming').length})` },
+              { id: 'outgoing', label: `📤 Outgoing from Us (${transfers.filter(t => t.direction === 'outgoing').length})` },
+            ].map(f => (
+              <button
+                key={f.id}
+                type="button"
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  border: transferFilter === f.id ? 'none' : '1px solid #BFDBFE',
+                  background: transferFilter === f.id ? '#1D4ED8' : '#EFF6FF',
+                  color: transferFilter === f.id ? '#FFFFFF' : '#1D4ED8',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setTransferFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {(() => {
+            const displayed = transfers.filter(t => transferFilter === 'all' || t.direction === transferFilter);
+
+            if (displayed.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '40px 16px', color: '#64748B' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>📭</div>
+                  <div style={{ fontWeight: 700, color: '#1E3A8A' }}>No transfers matching filter</div>
+                  <div style={{ fontSize: '0.82rem', marginTop: 4 }}>
+                    New transfers appear here when clinicians review referrals or when patients are routed to this facility.
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div style={{ overflowX: 'auto' }} role="region" aria-label="Hospital transfers table" tabIndex="0">
+                <table style={{ width: '100%', fontSize: '0.88rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                      <th style={{ padding: '10px 12px' }}>Direction</th>
+                      <th style={{ padding: '10px 12px' }}>Transfer ID</th>
+                      <th style={{ padding: '10px 12px' }}>Patient</th>
+                      <th style={{ padding: '10px 12px' }}>Partner Facility</th>
+                      <th style={{ padding: '10px 12px' }}>Clinical Specialty & Urgency</th>
+                      <th style={{ padding: '10px 12px' }}>Transfer Status</th>
+                      <th style={{ padding: '10px 12px' }}>Records Consent</th>
+                      <th style={{ padding: '10px 12px' }}>Administrative Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayed.map((ref) => {
+                      const isIncoming = ref.direction === 'incoming';
+                      const statusColors = {
+                        draft: { bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' },
+                        reviewed: { bg: '#DBEAFE', color: '#1D4ED8', border: '#BFDBFE' },
+                        sent: { bg: '#E0E7FF', color: '#4338CA', border: '#C7D2FE' },
+                        accepted: { bg: '#DCFCE7', color: '#166534', border: '#86EFAC' },
+                        declined: { bg: '#FEE2E2', color: '#B91C1C', border: '#FECACA' },
+                        expired: { bg: '#F1F5F9', color: '#64748B', border: '#CBD5E1' },
+                      };
+                      const sc = statusColors[ref.status] || statusColors.draft;
+                      const partnerHosp = isIncoming ? ref.referringHospital : ref.selectedHospital;
+
+                      return (
+                        <tr key={ref.referralId} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              background: isIncoming ? '#DCFCE7' : '#EFF6FF',
+                              color: isIncoming ? '#166534' : '#1D4ED8',
+                              border: `1px solid ${isIncoming ? '#86EFAC' : '#BFDBFE'}`,
+                              borderRadius: 999,
+                              padding: '3px 10px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                            }}>
+                              {isIncoming ? '📥 INCOMING' : '📤 OUTGOING'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8' }}>
+                            {ref.referralId}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{ref.patientName || 'Patient'}</strong>
+                            {ref.patientSummary && (
+                              <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                                {ref.patientSummary.gender}, {ref.patientSummary.age}y ({ref.patientSummary.district})
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{partnerHosp?.name || 'Partner Facility'}</strong>
+                            <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                              {partnerHosp?.district} {partnerHosp?.tier && `· ${partnerHosp.tier}`}
+                            </div>
+                            {isIncoming && ref.referringDoctor?.name && (
+                              <div style={{ fontSize: '0.74rem', color: '#1D4ED8', marginTop: 2 }}>
+                                Doctor: {ref.referringDoctor.name}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <div style={{ fontWeight: 600, color: '#1E3A8A' }}>
+                              {ref.requirements?.requiredSpecialty || 'General'}
+                            </div>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              color: ref.requirements?.urgency === 'emergency' ? '#B91C1C' : '#1D4ED8',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                            }}>
+                              {ref.requirements?.urgency || 'routine'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '3px 10px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: sc.bg,
+                              color: sc.color,
+                              border: `1px solid ${sc.border}`,
+                            }}>
+                              {ref.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              background: ref.recordsConsentStatus === 'granted' ? '#DCFCE7' : ref.recordsConsentStatus === 'requested' ? '#FEF3C7' : '#F1F5F9',
+                              color: ref.recordsConsentStatus === 'granted' ? '#166534' : ref.recordsConsentStatus === 'requested' ? '#92400E' : '#64748B',
+                            }}>
+                              {ref.recordsConsentStatus}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            {isIncoming && (ref.status === 'reviewed' || ref.status === 'sent') ? (
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button
+                                  type="button"
+                                  style={{
+                                    background: '#16A34A',
+                                    color: '#FFFFFF',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    padding: '5px 10px',
+                                    fontWeight: 700,
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => handleTransferAction(ref.referralId, 'accepted')}
+                                >
+                                  ✓ Accept
+                                </button>
+                                <button
+                                  type="button"
+                                  style={{
+                                    background: '#FEE2E2',
+                                    color: '#B91C1C',
+                                    border: '1px solid #FECACA',
+                                    borderRadius: 6,
+                                    padding: '5px 10px',
+                                    fontWeight: 700,
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => handleTransferAction(ref.referralId, 'declined')}
+                                >
+                                  ✕ Decline
+                                </button>
+                              </div>
+                            ) : ref.status === 'accepted' ? (
+                              <span style={{ color: '#166534', fontWeight: 700, fontSize: '0.8rem' }}>✓ Bed Confirmed</span>
+                            ) : ref.status === 'declined' ? (
+                              <span style={{ color: '#B91C1C', fontWeight: 700, fontSize: '0.8rem' }}>✕ Transfer Declined</span>
+                            ) : (
+                              <span style={{ color: '#64748B', fontSize: '0.78rem' }}>In Transit / Draft</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

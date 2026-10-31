@@ -289,39 +289,81 @@ router.post(
 
 /**
  * GET /api/referrals
- * Lists only the signed-in patient's or doctor's referrals.
+ * Lists referrals scoped by authenticated role:
+ * - Patient: only their own referrals (sanitized, no internal scoring)
+ * - Doctor: referrals where they are the referring clinician
+ * - Hospital Admin: incoming transfers (to this hospital) and outgoing transfers (from this hospital)
  */
-router.get('/', authenticate, authorizeRoles('patient', 'doctor'), async (req, res) => {
+router.get('/', authenticate, authorizeRoles('patient', 'doctor', 'hospital_admin'), async (req, res) => {
   try {
     const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 25));
-    const query = req.user.role === 'patient'
-      ? { patientId: req.user._id }
-      : { referringDoctorId: req.user._id };
+    let query = {};
+
+    if (req.user.role === 'patient') {
+      query = { patientId: req.user._id };
+    } else if (req.user.role === 'doctor') {
+      query = { referringDoctorId: req.user._id };
+    } else if (req.user.role === 'hospital_admin') {
+      if (!req.user.hospitalId) {
+        return res.status(403).json({ error: 'Forbidden', message: 'No hospital assigned.' });
+      }
+      const direction = req.query.direction;
+      if (direction === 'incoming') {
+        query = { selectedHospitalId: req.user.hospitalId };
+      } else if (direction === 'outgoing') {
+        query = { referringHospitalId: req.user.hospitalId };
+      } else {
+        query = {
+          $or: [
+            { referringHospitalId: req.user.hospitalId },
+            { selectedHospitalId: req.user.hospitalId },
+          ],
+        };
+      }
+    }
+
     if (req.query.status) query.status = String(req.query.status).slice(0, 40);
 
     const [referrals, total] = await Promise.all([
       Referral.find(query)
-        .populate('selectedHospitalId', 'name district')
+        .populate('selectedHospitalId', 'name district code tier')
+        .populate('referringHospitalId', 'name district code tier')
+        .populate('referringDoctorId', 'name email')
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
       Referral.countDocuments(query),
     ]);
-    const safeReferrals = referrals.map((referral) => ({
-      referralId: referral.referralId,
-      status: referral.status,
-      recordsConsentStatus: referral.recordsConsentStatus || 'not_requested',
-      selectedHospital: referral.selectedHospitalId
-        ? { name: referral.selectedHospitalId.name, district: referral.selectedHospitalId.district }
-        : null,
-      createdAt: referral.createdAt,
-      ...(req.user.role === 'doctor' ? {
-        patientName: referral.patientName,
-        requirements: referral.requirements,
-      } : {}),
-    }));
+
+    const safeReferrals = referrals.map((referral) => {
+      const isIncoming = req.user.hospitalId && referral.selectedHospitalId &&
+        String(referral.selectedHospitalId._id || referral.selectedHospitalId) === String(req.user.hospitalId);
+
+      return {
+        referralId: referral.referralId,
+        status: referral.status,
+        recordsConsentStatus: referral.recordsConsentStatus || 'not_requested',
+        selectedHospital: referral.selectedHospitalId
+          ? { name: referral.selectedHospitalId.name, district: referral.selectedHospitalId.district, code: referral.selectedHospitalId.code, tier: referral.selectedHospitalId.tier }
+          : null,
+        referringHospital: referral.referringHospitalId
+          ? { name: referral.referringHospitalId.name, district: referral.referringHospitalId.district, code: referral.referringHospitalId.code, tier: referral.referringHospitalId.tier }
+          : null,
+        referringDoctor: referral.referringDoctorId
+          ? { name: referral.referringDoctorId.name, email: referral.referringDoctorId.email }
+          : null,
+        createdAt: referral.createdAt,
+        direction: isIncoming ? 'incoming' : 'outgoing',
+        ...(req.user.role !== 'patient' ? {
+          patientName: referral.patientName,
+          requirements: referral.requirements,
+          patientSummary: referral.patientSummary,
+        } : {}),
+      };
+    });
+
     return res.json({ referrals: safeReferrals, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     console.error('[GET REFERRALS ERROR]:', err);
@@ -642,6 +684,64 @@ router.post(
         referralId: referral.referralId,
         recordsConsentStatus: referral.recordsConsentStatus,
         consent,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Server Error', message: err.message });
+    }
+  }
+);
+
+/**
+ * PATCH /api/referrals/:id/transfer-status
+ * Hospital Admin accepts, declines, or dispatches an inter-hospital transfer.
+ * Scoped to target receiving hospital or source referring hospital.
+ */
+router.patch(
+  '/:id/transfer-status',
+  authenticate,
+  authorizeRoles('hospital_admin'),
+  async (req, res) => {
+    try {
+      const { newStatus, note } = req.body;
+      const allowed = ['accepted', 'declined', 'sent', 'cancelled'];
+      if (!allowed.includes(newStatus)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: `Invalid transfer status "${newStatus}". Must be one of: ${allowed.join(', ')}`,
+        });
+      }
+
+      const mongoose = require('mongoose');
+      const query = mongoose.Types.ObjectId.isValid(req.params.id)
+        ? { $or: [{ _id: req.params.id }, { referralId: req.params.id }] }
+        : { referralId: req.params.id };
+
+      const referral = await Referral.findOne(query)
+        .populate('selectedHospitalId', 'name district code tier')
+        .populate('referringHospitalId', 'name district code tier');
+
+      if (!referral) {
+        return res.status(404).json({ error: 'Not Found', message: 'Referral document not found.' });
+      }
+
+      const adminHospId = req.user.hospitalId ? req.user.hospitalId.toString() : '';
+      const isTarget = referral.selectedHospitalId && (referral.selectedHospitalId._id || referral.selectedHospitalId).toString() === adminHospId;
+      const isSource = referral.referringHospitalId && (referral.referringHospitalId._id || referral.referringHospitalId).toString() === adminHospId;
+
+      if (!isTarget && !isSource) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Access Denied: Your hospital is not a party to this transfer.',
+        });
+      }
+
+      referral.status = newStatus;
+      await referral.save();
+
+      return res.json({
+        message: `Referral ${referral.referralId} transfer status successfully updated to "${newStatus}".`,
+        referralId: referral.referralId,
+        status: referral.status,
       });
     } catch (err) {
       return res.status(500).json({ error: 'Server Error', message: err.message });

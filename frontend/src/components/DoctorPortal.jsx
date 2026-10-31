@@ -143,6 +143,10 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   const [sentConsents, setSentConsents] = useState([]);
   const [sentConsentsLoading, setSentConsentsLoading] = useState(false);
 
+  // Doctor Outgoing Referrals List state
+  const [referralsList, setReferralsList] = useState([]);
+  const [referralsListLoading, setReferralsListLoading] = useState(false);
+
   // Schemes State
   const [schemeMatches, setSchemeMatches] = useState(null);
   const [schemeInputs, setSchemeInputs] = useState({
@@ -236,6 +240,25 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     }
   }, [token]);
 
+  const loadReferralsList = useCallback(async () => {
+    setReferralsListLoading(true);
+    try {
+      const res = await fetch('/api/referrals?limit=100', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReferralsList(data.referrals || []);
+      } else {
+        setErrorMsg(data.message || 'Failed to load referrals list.');
+      }
+    } catch (e) {
+      setErrorMsg(e.message);
+    } finally {
+      setReferralsListLoading(false);
+    }
+  }, [token]);
+
   useEffect(() => {
     const ctrl = new AbortController();
     loadPatients(ctrl.signal);
@@ -271,7 +294,8 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     if (activeTab === 'triage_queue') loadTriageQueue();
     if (activeTab === 'nurses') loadNurses();
     if (activeTab === 'sent_consents') loadSentConsents();
-  }, [activeTab, loadTriageQueue, loadNurses, loadSentConsents]);
+    if (activeTab === 'my_referrals') loadReferralsList();
+  }, [activeTab, loadTriageQueue, loadNurses, loadSentConsents, loadReferralsList]);
 
   useEffect(() => {
     if (referralTimeLeft === null || referralTimeLeft <= 0) return;
@@ -805,6 +829,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
           {[
             { id: 'assessment', label: '🔍 Clinical Assessment' },
             { id: 'referrals', label: '🏥 Referral Recommendations' },
+            { id: 'my_referrals', label: `🚑 Outgoing Referrals (${referralsList.length})` },
             { id: 'triage_queue', label: '🩺 Nurse Triage Queue' },
             { id: 'nurses', label: '👩‍⚕️ My In-Charge Nurses' },
             { id: 'records', label: '📑 Consented Records' },
@@ -1956,6 +1981,117 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
                             ) : (
                               <span style={{ color: '#64748B' }}>{remainingHours != null ? `${remainingHours}h` : '—'}</span>
                             )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════════
+            TAB 8: MY OUTGOING REFERRALS
+        ═══════════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'my_referrals' && (
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0 }}>🚑 My Outgoing Hospital Referrals</h2>
+                <p style={{ color: '#64748B', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                  Referrals dispatched from your clinical assessments. Track target facility, review status, and patient consent.
+                </p>
+              </div>
+              <button style={btnOutline} onClick={loadReferralsList} disabled={referralsListLoading}>
+                {referralsListLoading ? 'Loading…' : '↻ Refresh'}
+              </button>
+            </div>
+
+            {referralsList.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: '#64748B' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>📭</div>
+                <div style={{ fontWeight: 700, color: '#1E3A8A' }}>No referrals created yet</div>
+                <div style={{ fontSize: '0.82rem', marginTop: 4 }}>Complete an assessment and confirm a hospital from Referral Recommendations to create one.</div>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }} role="region" aria-label="Outgoing referrals table" tabIndex="0">
+                <table style={{ width: '100%', fontSize: '0.88rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                      <th style={{ padding: '10px 12px' }}>Referral ID</th>
+                      <th style={{ padding: '10px 12px' }}>Patient</th>
+                      <th style={{ padding: '10px 12px' }}>Target Facility</th>
+                      <th style={{ padding: '10px 12px' }}>Clinical Specialty</th>
+                      <th style={{ padding: '10px 12px' }}>Transfer Status</th>
+                      <th style={{ padding: '10px 12px' }}>Records Consent</th>
+                      <th style={{ padding: '10px 12px' }}>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referralsList.map((ref) => {
+                      const statusBadges = {
+                        draft: { bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' },
+                        reviewed: { bg: '#DBEAFE', color: '#1D4ED8', border: '#BFDBFE' },
+                        sent: { bg: '#E0E7FF', color: '#4338CA', border: '#C7D2FE' },
+                        accepted: { bg: '#DCFCE7', color: '#166534', border: '#86EFAC' },
+                        declined: { bg: '#FEE2E2', color: '#B91C1C', border: '#FECACA' },
+                        expired: { bg: '#F1F5F9', color: '#64748B', border: '#CBD5E1' },
+                      };
+                      const sb = statusBadges[ref.status] || statusBadges.draft;
+
+                      return (
+                        <tr key={ref.referralId} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8', fontSize: '0.88rem' }}>
+                            {ref.referralId}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{ref.patientName || 'Patient'}</strong>
+                            {ref.patientSummary && (
+                              <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                                {ref.patientSummary.gender}, {ref.patientSummary.age}y ({ref.patientSummary.district})
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <strong style={{ color: '#1E293B' }}>{ref.selectedHospital?.name || 'Selected Facility'}</strong>
+                            <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                              {ref.selectedHospital?.district} {ref.selectedHospital?.tier && `· ${ref.selectedHospital.tier}`}
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px', color: '#334155' }}>
+                            <span style={{ background: '#EFF6FF', color: '#1D4ED8', padding: '2px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600 }}>
+                              {ref.requirements?.requiredSpecialty || 'General'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '3px 10px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: sb.bg,
+                              color: sb.color,
+                              border: `1px solid ${sb.border}`,
+                            }}>
+                              {ref.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              borderRadius: 999,
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              background: ref.recordsConsentStatus === 'granted' ? '#DCFCE7' : ref.recordsConsentStatus === 'requested' ? '#FEF3C7' : '#F1F5F9',
+                              color: ref.recordsConsentStatus === 'granted' ? '#166534' : ref.recordsConsentStatus === 'requested' ? '#92400E' : '#64748B',
+                            }}>
+                              {ref.recordsConsentStatus}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', fontSize: '0.82rem', color: '#64748B' }}>
+                            {new Date(ref.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
                       );
