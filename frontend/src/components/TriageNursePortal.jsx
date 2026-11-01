@@ -201,6 +201,7 @@ function OverviewTab({ records, patients, loading }) {
 /* ──────────────────────────────── INTAKE QUEUE ─────────────────────────── */
 function IntakeQueueTab({ records, loading, onRefresh }) {
   const pending = records.filter((r) => r.status === 'submitted');
+  const [selectedRecord, setSelectedRecord] = useState(null);
   return (
     <div className="tn-intake">
       <div className="tn-page-header">
@@ -217,12 +218,14 @@ function IntakeQueueTab({ records, loading, onRefresh }) {
           <thead>
             <tr>
               <th>Triage ID</th>
+              <th>Patient</th>
               <th>Chief Complaint</th>
               <th>BP / HR</th>
               <th>SpO₂</th>
               <th>Urgency</th>
               <th>Recorded</th>
               <th>Red Flags</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -231,6 +234,7 @@ function IntakeQueueTab({ records, loading, onRefresh }) {
               return (
                 <tr key={rec._id} className={hasFlag ? 'tn-row--redflag' : ''}>
                   <td className="tn-table-mono">{rec.triageId}</td>
+                  <td style={{ fontWeight: 600 }}>{rec.patientId?.name || '—'}</td>
                   <td>{rec.chiefComplaint?.category || '—'}</td>
                   <td className="tn-table-mono">
                     {rec.vitals?.systolicBp && rec.vitals?.diastolicBp
@@ -250,12 +254,23 @@ function IntakeQueueTab({ records, loading, onRefresh }) {
                       ? <span className="tn-redflag-dot">⚠ {rec.redFlags.length}</span>
                       : <span className="tn-table-muted">—</span>}
                   </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="tn-btn tn-btn--ghost"
+                      style={{ fontSize: '0.72rem', padding: '3px 8px', whiteSpace: 'nowrap' }}
+                      onClick={() => setSelectedRecord(rec)}
+                    >
+                      📋 View Report
+                    </button>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       )}
+      {selectedRecord && <TriageReportModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />}
     </div>
   );
 }
@@ -610,8 +625,222 @@ function NewTriageTab({ patients, token, nurseUser, onCreated }) {
   );
 }
 
+/* ──────────────────────────────── TRIAGE REPORT MODAL ─────────────────── */
+function TriageReportModal({ record, onClose }) {
+  if (!record) return null;
+  const v = record.vitals || {};
+  const p = record.patientId || {};
+  const nurse = record.recordedBy || {};
+  const confirmedBy = record.confirmedBy || {};
+  const urg = record.modelSuggestedUrgency || record.confirmedUrgency || 'routine';
+  const urgColors = { emergency: '#EF4444', urgent: '#F59E0B', routine: '#3B82F6' };
+  const urgColor = urgColors[urg] || '#3B82F6';
+
+  const sectionStyle = {
+    background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10,
+    padding: '14px 16px', marginBottom: 12,
+  };
+  const labelStyle = { fontSize: '0.72rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 };
+  const valueStyle = { fontSize: '0.88rem', color: '#1E293B', fontWeight: 600 };
+  const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detailed Triage Report"
+      onClick={onClose}
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 9999, padding: 16,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: '#FFFFFF', borderRadius: 16, maxWidth: 720, width: '100%',
+          maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          border: '1px solid #E2E8F0',
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          background: `linear-gradient(135deg, #1E3A8A, ${urgColor})`,
+          color: '#FFF', padding: '20px 24px', borderRadius: '16px 16px 0 0',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        }}>
+          <div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800 }}>{p.name || 'Patient'}</div>
+            <div style={{ fontSize: '0.85rem', color: '#BFDBFE', marginTop: 4 }}>
+              {p.age || '—'} yrs · {p.gender || '—'} · 📍 {p.district || '—'}
+            </div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: '#93C5FD', marginTop: 6 }}>
+              Triage ID: {record.triageId}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <span style={{
+              background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: 999,
+              fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase',
+            }}>
+              {urg}
+            </span>
+            <button
+              onClick={onClose}
+              aria-label="Close report"
+              style={{
+                display: 'block', marginTop: 8, background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, color: '#FFF',
+                cursor: 'pointer', padding: '4px 10px', fontSize: '0.78rem',
+              }}
+            >
+              ✕ Close
+            </button>
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 24px' }}>
+          {/* Chief Complaint & Arrival */}
+          <div style={sectionStyle}>
+            <div style={labelStyle}>Chief Complaint</div>
+            <div style={valueStyle}>{record.chiefComplaint?.category || 'General'}</div>
+            <div style={{ fontSize: '0.82rem', color: '#475569', marginTop: 4, fontStyle: 'italic' }}>
+              "{record.chiefComplaint?.text || 'No additional notes'}"
+            </div>
+            <div style={{ display: 'flex', gap: 20, marginTop: 10, fontSize: '0.82rem', color: '#64748B' }}>
+              <span>🚑 Arrival: <strong>{record.arrivalMode || 'Walk-in'}</strong></span>
+              <span>⏱ Duration: <strong>{record.symptomDuration || '—'}</strong></span>
+            </div>
+          </div>
+
+          {/* Physiological Vitals Grid */}
+          <div style={sectionStyle}>
+            <div style={labelStyle}>Physiological Vital Signs</div>
+            <div style={gridStyle}>
+              {VITAL_FIELDS.map((f) => {
+                const val = v[f.key];
+                if (val == null || val === '') return null;
+                const flagged = isRedFlag(f.key, val);
+                return (
+                  <div key={f.key} style={{
+                    background: flagged ? '#FEF2F2' : '#FFFFFF',
+                    border: `1px solid ${flagged ? '#FECACA' : '#E2E8F0'}`,
+                    borderRadius: 8, padding: '8px 10px',
+                  }}>
+                    <div style={{ fontSize: '0.7rem', color: flagged ? '#B91C1C' : '#64748B', fontWeight: 600 }}>
+                      {flagged && '⚠ '}{f.label}
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: flagged ? '#DC2626' : '#1E293B', fontFamily: 'monospace' }}>
+                      {val} <span style={{ fontSize: '0.72rem', fontWeight: 500, color: '#94A3B8' }}>{f.unit}</span>
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: '#94A3B8', marginTop: 2 }}>Normal: {f.normalRange}</div>
+                  </div>
+                );
+              })}
+              <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 10px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600 }}>Consciousness (AVPU)</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1E293B', textTransform: 'capitalize' }}>
+                  {v.consciousness || 'Alert'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Safety Scores & Red Flags */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div style={{
+              ...sectionStyle, marginBottom: 0,
+              background: (record.computedScores?.news2 ?? 0) >= 5 ? '#FEF2F2' : '#F0FDF4',
+              border: `1px solid ${(record.computedScores?.news2 ?? 0) >= 5 ? '#FECACA' : '#BBF7D0'}`,
+            }}>
+              <div style={labelStyle}>NEWS2 Score</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: (record.computedScores?.news2 ?? 0) >= 5 ? '#DC2626' : '#166534' }}>
+                {record.computedScores?.news2 ?? '—'}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: 2 }}>
+                {(record.computedScores?.news2 ?? 0) >= 7 ? 'Clinical Emergency' : (record.computedScores?.news2 ?? 0) >= 5 ? 'Urgent Response' : 'Low / Routine'}
+              </div>
+            </div>
+            <div style={{
+              ...sectionStyle, marginBottom: 0,
+              background: record.redFlags?.length > 0 ? '#FEF2F2' : '#F0FDF4',
+              border: `1px solid ${record.redFlags?.length > 0 ? '#FECACA' : '#BBF7D0'}`,
+            }}>
+              <div style={labelStyle}>Red Flags</div>
+              {record.redFlags?.length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                  {record.redFlags.map((f, i) => (
+                    <span key={i} style={{
+                      background: '#FEE2E2', color: '#B91C1C', fontSize: '0.72rem',
+                      fontWeight: 700, padding: '2px 8px', borderRadius: 999, border: '1px solid #FECACA',
+                    }}>
+                      🚨 {f}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#166534' }}>None ✓</div>
+              )}
+            </div>
+          </div>
+
+          {/* Clinical Urgency Assessment */}
+          <div style={sectionStyle}>
+            <div style={labelStyle}>Clinical Urgency Assessment</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 6 }}>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: '#64748B' }}>ML Model Suggestion</div>
+                <div style={{ marginTop: 2 }}><UrgencyBadge urgency={record.modelSuggestedUrgency} /></div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Doctor Confirmed</div>
+                <div style={{ marginTop: 2 }}>
+                  {record.confirmedUrgency
+                    ? <UrgencyBadge urgency={record.confirmedUrgency} />
+                    : <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontStyle: 'italic' }}>Awaiting review</span>}
+                </div>
+              </div>
+            </div>
+            {record.overrideReason && (
+              <div style={{ marginTop: 8, padding: '8px 12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, fontSize: '0.82rem', color: '#92400E' }}>
+                <strong>Override Justification:</strong> {record.overrideReason}
+              </div>
+            )}
+          </div>
+
+          {/* Nurse Notes */}
+          {record.notes && (
+            <div style={sectionStyle}>
+              <div style={labelStyle}>Nurse Clinical Notes</div>
+              <div style={{ fontSize: '0.85rem', color: '#334155' }}>{record.notes}</div>
+            </div>
+          )}
+
+          {/* Record Meta */}
+          <div style={{ ...sectionStyle, background: '#EFF6FF', border: '1px solid #BFDBFE' }}>
+            <div style={labelStyle}>Record Information</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.82rem', color: '#1E3A8A' }}>
+              <div>👩‍⚕️ Recorded by: <strong>{nurse.name || '—'}</strong></div>
+              <div>🏥 Status: <strong style={{ textTransform: 'uppercase' }}>{record.status}</strong></div>
+              <div>📅 Recorded: <strong>{record.recordedAt ? new Date(record.recordedAt).toLocaleString() : '—'}</strong></div>
+              <div>👨‍⚕️ Confirmed by: <strong>{confirmedBy.name || 'Pending'}</strong></div>
+            </div>
+          </div>
+
+          <p style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', margin: '12px 0 0' }}>
+            Decision support only. Synthetic data — not for real patient care. A clinician must review all records.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ──────────────────────────────── RECENT ─────────────────────────────── */
 function RecentTab({ records, loading }) {
+  const [selectedRecord, setSelectedRecord] = useState(null);
   return (
     <div className="tn-recent">
       <div className="tn-page-header">
@@ -626,17 +855,20 @@ function RecentTab({ records, loading }) {
           <thead>
             <tr>
               <th>Triage ID</th>
+              <th>Patient</th>
               <th>Category</th>
               <th>Vitals (BP/HR/SpO₂)</th>
               <th>Status</th>
               <th>Urgency</th>
               <th>Recorded</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {records.map((rec) => (
               <tr key={rec._id} className={rec.redFlags?.length > 0 ? 'tn-row--redflag' : ''}>
                 <td className="tn-table-mono">{rec.triageId}</td>
+                <td style={{ fontWeight: 600 }}>{rec.patientId?.name || '—'}</td>
                 <td>{rec.chiefComplaint?.category || '—'}</td>
                 <td className="tn-table-mono">
                   {rec.vitals
@@ -646,21 +878,48 @@ function RecentTab({ records, loading }) {
                 <td><span className={`tn-status-badge tn-status-badge--${rec.status}`}>{rec.status}</span></td>
                 <td><UrgencyBadge urgency={rec.modelSuggestedUrgency || rec.confirmedUrgency} /></td>
                 <td className="tn-table-muted">{formatAge(rec.recordedAt)}</td>
+                <td>
+                  <button
+                    type="button"
+                    className="tn-btn tn-btn--ghost"
+                    style={{ fontSize: '0.75rem', padding: '3px 8px', whiteSpace: 'nowrap' }}
+                    onClick={() => setSelectedRecord(rec)}
+                  >
+                    📋 View Report
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
+      {selectedRecord && <TriageReportModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />}
     </div>
   );
 }
 
 /* ──────────────────────────────── PATIENTS ─────────────────────────────── */
-function PatientsTab({ patients, loading }) {
+function PatientsTab({ patients, loading, records, onStartTriage }) {
+  const [selectedRecord, setSelectedRecord] = useState(null);
+
+  // Build a map: patientId → latest triage record
+  const patientLatestTriage = {};
+  if (records) {
+    for (const rec of records) {
+      const pid = rec.patientId?._id || rec.patientId;
+      if (pid && !patientLatestTriage[pid]) {
+        patientLatestTriage[pid] = rec;
+      }
+    }
+  }
+
   return (
     <div className="tn-patients">
       <div className="tn-page-header">
         <h1 className="tn-page-title">Patient Summaries</h1>
+        <span style={{ fontSize: '0.82rem', color: '#64748B' }}>
+          Showing {patients.length} registered patients · Click "📋 View Report" for latest triage details
+        </span>
       </div>
       {loading ? (
         <div className="tn-loading">Loading patients…</div>
@@ -671,21 +930,71 @@ function PatientsTab({ patients, loading }) {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Age / Gender</th>
               <th>District</th>
-              <th>Email</th>
+              <th>Triage Status</th>
+              <th>Latest Urgency</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {patients.map((p) => (
-              <tr key={p._id || p.id || p.patientId}>
-                <td>{p.name}</td>
-                <td className="tn-table-muted">{p.district || '—'}</td>
-                <td className="tn-table-muted">{p.email}</td>
-              </tr>
-            ))}
+            {patients.map((p) => {
+              const pid = p._id || p.id || p.patientId;
+              const latestRec = patientLatestTriage[pid];
+              const hasTriaged = Boolean(latestRec);
+              const urg = latestRec?.modelSuggestedUrgency || latestRec?.confirmedUrgency;
+              return (
+                <tr key={pid}>
+                  <td style={{ fontWeight: 600, color: '#1E293B' }}>{p.name}</td>
+                  <td className="tn-table-muted">{p.age || '—'} yrs · {p.gender || '—'}</td>
+                  <td className="tn-table-muted">{p.district || '—'}</td>
+                  <td>
+                    {hasTriaged ? (
+                      <span style={{
+                        background: latestRec.status === 'reviewed' ? '#DCFCE7' : latestRec.status === 'submitted' ? '#DBEAFE' : '#FEF3C7',
+                        color: latestRec.status === 'reviewed' ? '#166534' : latestRec.status === 'submitted' ? '#1D4ED8' : '#92400E',
+                        fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999,
+                        textTransform: 'uppercase',
+                      }}>
+                        {latestRec.status}
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.78rem', color: '#94A3B8', fontStyle: 'italic' }}>⚪ Not triaged</span>
+                    )}
+                  </td>
+                  <td>
+                    {urg ? <UrgencyBadge urgency={urg} /> : <span className="tn-table-muted">—</span>}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {hasTriaged ? (
+                        <button
+                          type="button"
+                          className="tn-btn tn-btn--ghost"
+                          style={{ fontSize: '0.72rem', padding: '3px 8px', whiteSpace: 'nowrap' }}
+                          onClick={() => setSelectedRecord(latestRec)}
+                        >
+                          📋 View Report
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="tn-btn tn-btn--primary"
+                          style={{ fontSize: '0.72rem', padding: '3px 10px', whiteSpace: 'nowrap' }}
+                          onClick={() => onStartTriage?.(pid)}
+                        >
+                          ➕ Triage Patient
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
+      {selectedRecord && <TriageReportModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />}
     </div>
   );
 }
@@ -878,7 +1187,14 @@ export default function TriageNursePortal({ token, nurseUser, initialTab = 'over
         <RecentTab records={records} loading={recordsLoading} />
       )}
       {activeTab === 'patients' && (
-        <PatientsTab patients={patients} loading={patientsLoading} />
+        <PatientsTab
+          patients={patients}
+          loading={patientsLoading}
+          records={records}
+          onStartTriage={(pid) => {
+            setActiveTab('new_triage');
+          }}
+        />
       )}
     </div>
   );

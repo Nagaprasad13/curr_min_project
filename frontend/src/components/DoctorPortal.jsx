@@ -106,6 +106,16 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   const [isOverride, setIsOverride] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
 
+  // In-House Admission Disposition State
+  const [inHouseAdmissions, setInHouseAdmissions] = useState({});
+  const [inHouseFormOpen, setInHouseFormOpen] = useState(false);
+  const [inHouseDisposition, setInHouseDisposition] = useState({
+    ward: 'General Medical Ward',
+    bedNumber: 'GW-04',
+    treatmentPlan: 'Continuous vitals monitoring Q4H. Initiate IV hydration and protocol medications. Re-evaluate in 4 hours.',
+    admissionNotes: '',
+  });
+
   // Referral State
   const [referralParams, setReferralParams] = useState({
     requiredSpecialty: '',
@@ -461,6 +471,53 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
     } finally {
       setAssessmentLoading(false);
     }
+  };
+
+  const handleOpenInHouseForm = () => {
+    const err = urgencyConfirmationError(isOverride, overrideReason);
+    if (err) {
+      setErrorMsg(err);
+      return;
+    }
+    setErrorMsg(null);
+    setInHouseFormOpen(true);
+  };
+
+  const handleConfirmInHouseAdmission = () => {
+    const selPat = patients.find((p) => p._id === selectedPatientId);
+    if (!inHouseDisposition.ward || !inHouseDisposition.bedNumber.trim()) {
+      setErrorMsg('Ward and Bed Number are required for in-house admission.');
+      return;
+    }
+    const admission = {
+      patientId: selectedPatientId,
+      patientName: selPat?.name || 'Patient',
+      hospitalName: hospital?.name || 'Local Facility',
+      tier: hospital?.tier || 'Secondary Care',
+      confirmedUrgency,
+      ward: inHouseDisposition.ward,
+      bedNumber: inHouseDisposition.bedNumber.trim(),
+      treatmentPlan: inHouseDisposition.treatmentPlan,
+      admissionNotes: inHouseDisposition.admissionNotes,
+      admittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      doctorName: doctorUser?.name || 'Attending Physician',
+    };
+    setInHouseAdmissions((prev) => ({
+      ...prev,
+      [selectedPatientId]: admission,
+    }));
+    setInHouseFormOpen(false);
+    setFeedbackMsg(`✓ Patient "${admission.patientName}" admitted to ${admission.ward} (${admission.bedNumber}). In-house treatment initiated.`);
+  };
+
+  const handleCancelInHouseAdmission = () => {
+    setInHouseFormOpen(false);
+  };
+
+  const handleEscalateToReferral = () => {
+    setReferralParams((p) => ({ ...p, urgency: confirmedUrgency }));
+    setFeedbackMsg(`Condition escalated for inter-hospital transfer. Proceeding to referral recommendations.`);
+    setActiveTab('referrals');
   };
 
   const handleConfirmUrgency = () => {
@@ -1108,9 +1165,199 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
                       </div>
                     )}
 
-                    <button id="confirm-urgency-btn" style={{ ...btnPrimary, width: '100%' }} onClick={handleConfirmUrgency}>
-                      ✓ Confirm Urgency & Proceed to Referral
-                    </button>
+                    {/* Clinical Disposition Decision (Dual Pathway: In-House Admission vs. External Referral) */}
+                    {(() => {
+                      const curInHouse = selectedPatientId ? inHouseAdmissions[selectedPatientId] : null;
+                      const reqSpecialty = assessmentResult.specialties?.[0] || 'General Medicine';
+                      const hospSpecialties = hospital?.specialties || [];
+                      const hasSpecialty = hospSpecialties.some((s) => s.toLowerCase() === reqSpecialty.toLowerCase());
+
+                      if (curInHouse) {
+                        return (
+                          <div style={{ marginTop: 16, background: '#ECFDF5', border: '2px solid #10B981', borderRadius: 12, padding: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontSize: '1.4rem' }}>🏥</span>
+                                <div>
+                                  <strong style={{ color: '#065F46', fontSize: '1rem' }}>Patient Admitted In-House</strong>
+                                  <div style={{ fontSize: '0.78rem', color: '#047857' }}>
+                                    Local facility capacity and specialty match. Managed locally without external transfer.
+                                  </div>
+                                </div>
+                              </div>
+                              <span style={{ background: '#10B981', color: '#FFF', fontSize: '0.72rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>
+                                IN-HOUSE ADMISSION
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8, marginTop: 12, fontSize: '0.8rem' }}>
+                              <div><span style={{ color: '#047857', fontWeight: 600 }}>Facility:</span> <strong>{curInHouse.hospitalName}</strong></div>
+                              <div><span style={{ color: '#047857', fontWeight: 600 }}>Ward:</span> <strong>{curInHouse.ward}</strong></div>
+                              <div><span style={{ color: '#047857', fontWeight: 600 }}>Bed:</span> <strong>{curInHouse.bedNumber}</strong></div>
+                              <div><span style={{ color: '#047857', fontWeight: 600 }}>Admitted:</span> <strong>{curInHouse.admittedAt}</strong></div>
+                            </div>
+
+                            {curInHouse.treatmentPlan && (
+                              <div style={{ marginTop: 10, padding: 10, background: '#FFFFFF', borderRadius: 8, border: '1px solid #A7F3D0', fontSize: '0.8rem', color: '#064E3B' }}>
+                                <strong style={{ color: '#047857' }}>Prescription & Clinical Orders:</strong>
+                                <p style={{ margin: '4px 0 0' }}>{curInHouse.treatmentPlan}</p>
+                              </div>
+                            )}
+
+                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, borderTop: '1px solid #A7F3D0', paddingTop: 10 }}>
+                              <span style={{ fontSize: '0.75rem', color: '#065F46' }}>
+                                Attending: <strong>{curInHouse.doctorName}</strong> · Urgency: <strong>{curInHouse.confirmedUrgency?.toUpperCase()}</strong>
+                              </span>
+                              <button
+                                type="button"
+                                style={{ ...btnOutline, borderColor: '#D97706', color: '#B45309', fontSize: '0.78rem', padding: '5px 12px' }}
+                                onClick={handleEscalateToReferral}
+                              >
+                                🚑 Condition Worsened? Escalate to Referral →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      if (inHouseFormOpen) {
+                        return (
+                          <div style={{ marginTop: 16, background: '#F0FDF4', border: '1.5px solid #86EFAC', borderRadius: 12, padding: 16 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                              <h4 style={{ margin: 0, color: '#166534', fontSize: '0.95rem' }}>🏥 In-House Admission & Treatment Order</h4>
+                              <span style={{ fontSize: '0.75rem', background: '#DCFCE7', color: '#166534', fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}>
+                                Local Care Path
+                              </span>
+                            </div>
+                            <p style={{ margin: '0 0 12px 0', fontSize: '0.78rem', color: '#4B5563' }}>
+                              Assign the patient to your hospital’s available ward and record initial treatment orders.
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                                  Target Ward / Care Unit *
+                                </label>
+                                <select
+                                  style={{ ...inputStyle, width: '100%' }}
+                                  value={inHouseDisposition.ward}
+                                  onChange={(e) => setInHouseDisposition((prev) => ({ ...prev, ward: e.target.value }))}
+                                >
+                                  <option value="General Medical Ward">General Medical Ward</option>
+                                  <option value="Observation Bay / Short Stay">Observation Bay / Short Stay</option>
+                                  <option value="High Dependency Unit (HDU)">High Dependency Unit (HDU)</option>
+                                  <option value="Local Intensive Care Unit (ICU)">Local Intensive Care Unit (ICU)</option>
+                                  <option value="Emergency Stabilization Ward">Emergency Stabilization Ward</option>
+                                  <option value="Pediatric Ward">Pediatric Ward</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                                  Bed / Bay Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  style={{ ...inputStyle, width: '100%' }}
+                                  placeholder="e.g. Bed-04, Bay-B"
+                                  value={inHouseDisposition.bedNumber}
+                                  onChange={(e) => setInHouseDisposition((prev) => ({ ...prev, bedNumber: e.target.value }))}
+                                />
+                              </div>
+                            </div>
+
+                            <div style={{ marginBottom: 10 }}>
+                              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                                Immediate Clinical Plan & Medication Orders
+                              </label>
+                              <textarea
+                                style={{ ...inputStyle, width: '100%', minHeight: 60 }}
+                                placeholder="e.g. Vitals monitoring Q4H, IV normal saline, bronchodilator nebulization..."
+                                value={inHouseDisposition.treatmentPlan}
+                                onChange={(e) => setInHouseDisposition((prev) => ({ ...prev, treatmentPlan: e.target.value }))}
+                              />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                style={{ ...btnOutline, borderColor: '#9CA3AF', color: '#4B5563', fontSize: '0.82rem', padding: '6px 14px' }}
+                                onClick={handleCancelInHouseAdmission}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                style={{ ...btnPrimary, background: '#059669', borderColor: '#059669', fontSize: '0.82rem', padding: '6px 16px' }}
+                                onClick={handleConfirmInHouseAdmission}
+                              >
+                                ✓ Confirm In-House Admission
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ marginTop: 14 }}>
+                          <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#64748B', fontWeight: 600 }}>Local Hospital Capability:</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#E2E8F0', color: '#334155', padding: '2px 8px', borderRadius: 6 }}>
+                                {hospital?.tier || 'Tier 2 (Secondary)'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: '#1E293B', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span>{hasSpecialty ? '✅' : 'ℹ️'}</span>
+                              <span>
+                                {hasSpecialty
+                                  ? `Required specialty (${reqSpecialty}) is available in-house at ${hospital?.name || 'this facility'}.`
+                                  : `Required specialty is ${reqSpecialty}. Review local bed/specialist availability before deciding.`}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                            <button
+                              type="button"
+                              id="admit-inhouse-btn"
+                              style={{
+                                ...btnPrimary,
+                                background: '#059669',
+                                borderColor: '#059669',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '12px 10px',
+                                textAlign: 'center',
+                              }}
+                              onClick={handleOpenInHouseForm}
+                            >
+                              <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>🏥 Admit & Treat In-House</span>
+                              <span style={{ fontSize: '0.72rem', opacity: 0.9, marginTop: 2 }}>Patient treated locally · No transfer</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              id="confirm-urgency-btn"
+                              style={{
+                                ...btnPrimary,
+                                background: '#2563EB',
+                                borderColor: '#2563EB',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '12px 10px',
+                                textAlign: 'center',
+                              }}
+                              onClick={handleConfirmUrgency}
+                            >
+                              <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>🚑 Refer / Transfer Outward</span>
+                              <span style={{ fontSize: '0.72rem', opacity: 0.9, marginTop: 2 }}>Requires higher tier or beds full</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
