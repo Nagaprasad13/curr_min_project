@@ -60,6 +60,7 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
   });
   const [inviteRole, setInviteRole] = useState('doctor');
   const [createdInvite, setCreatedInvite] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const hospitalId = adminUser?.hospitalId || null;
 
@@ -184,6 +185,22 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
       setErrorMsg(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyInviteCode = (code) => {
+    if (!code) return;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2500);
+      }).catch(() => {
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2500);
+      });
+    } else {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2500);
     }
   };
 
@@ -632,20 +649,232 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
         </button>
       </div>
 
-      <section className="card" aria-labelledby="staff-invite-title">
-        <h3 id="staff-invite-title">Invite staff to this hospital</h3>
-        <label htmlFor="staff-invite-role">Staff role</label>
-        <select id="staff-invite-role" value={inviteRole} onChange={(event) => setInviteRole(event.target.value)}>
-          <option value="doctor">Doctor</option>
-          <option value="hospital_admin">Hospital admin</option>
-        </select>
-        <button type="button" className="btn btn-outline btn-sm" onClick={handleCreateInvite} disabled={loading || !hospitalId}>
-          {loading ? 'Creating invite…' : 'Create invite code'}
-        </button>
+      <section
+        style={{
+          background: '#FFFFFF',
+          borderRadius: 16,
+          border: '1px solid #E2E8F0',
+          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)',
+          padding: '22px 26px',
+          marginBottom: 24,
+        }}
+        aria-labelledby="staff-invite-title"
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+                border: '1px solid #BFDBFE',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.35rem',
+              }}
+            >
+              🎟️
+            </div>
+            <div>
+              <h3 id="staff-invite-title" style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
+                Staff Onboarding & Invitation Desk
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '0.84rem', color: '#64748B' }}>
+                Generate single-use authorization codes to onboard verified doctors, nurses, and co-administrators to <strong>{hospital?.name || 'this facility'}</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '0.78rem', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569', padding: '4px 10px', borderRadius: 999, fontWeight: 600 }}>
+              Hospital Code: <strong>{hospital?.code || 'N/A'}</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* Action Controls Bar */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+            background: '#F8FAFC',
+            padding: '12px 16px',
+            borderRadius: 10,
+            border: '1px solid #E2E8F0',
+          }}
+        >
+          <label htmlFor="staff-invite-role" style={{ fontSize: '0.86rem', fontWeight: 700, color: '#334155' }}>
+            Staff Role:
+          </label>
+          <select
+            id="staff-invite-role"
+            value={inviteRole}
+            onChange={(event) => setInviteRole(event.target.value)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #CBD5E1',
+              background: '#FFFFFF',
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              color: '#1E293B',
+              minWidth: 230,
+            }}
+          >
+            <option value="doctor">🩺 Doctor / Medical Specialist</option>
+            <option value="triage_nurse">🩺 Emergency Triage Nurse</option>
+            <option value="hospital_admin">🏥 Co-Hospital Administrator</option>
+          </select>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleCreateInvite}
+            disabled={loading || !hospitalId}
+            style={{
+              padding: '8px 18px',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              borderRadius: 8,
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.2)',
+            }}
+          >
+            {loading ? '⏳ Generating…' : '⚡ Create Invite Code'}
+          </button>
+
+          {createdInvite && (
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => setCreatedInvite(null)}
+              style={{
+                padding: '7px 12px',
+                fontSize: '0.8rem',
+                color: '#64748B',
+                borderRadius: 8,
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Generated Invite Voucher Banner */}
         {createdInvite && (
-          <p role="status">
-            Code for this hospital: <code>{createdInvite.code}</code> · expires {new Date(createdInvite.expiresAt).toLocaleString()}
-          </p>
+          <div
+            role="status"
+            style={{
+              marginTop: 16,
+              background: 'linear-gradient(135deg, #F0FDF4 0%, #F8FAFC 100%)',
+              border: '1.5px solid #86EFAC',
+              borderRadius: 12,
+              padding: '18px 20px',
+              boxShadow: '0 2px 10px rgba(16, 185, 129, 0.08)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  style={{
+                    background: '#DCFCE7',
+                    color: '#15803D',
+                    border: '1px solid #BBF7D0',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    padding: '3px 9px',
+                    borderRadius: 999,
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  ✓ New Invite Generated
+                </span>
+                <span
+                  style={{
+                    background: createdInvite.role === 'doctor' ? '#E0E7FF' : createdInvite.role === 'triage_nurse' ? '#EFF6FF' : '#F3E8FF',
+                    color: createdInvite.role === 'doctor' ? '#4338CA' : createdInvite.role === 'triage_nurse' ? '#1D4ED8' : '#7E22CE',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    padding: '3px 9px',
+                    borderRadius: 999,
+                  }}
+                >
+                  Role: {createdInvite.role === 'doctor' ? 'Doctor' : createdInvite.role === 'triage_nurse' ? 'Triage Nurse' : 'Hospital Admin'}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>
+                Expires: <strong style={{ color: '#1E293B' }}>{new Date(createdInvite.expiresAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong>
+              </div>
+            </div>
+
+            {/* Voucher Box with Copy */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                flexWrap: 'wrap',
+                background: '#FFFFFF',
+                border: '1.5px dashed #10B981',
+                borderRadius: 10,
+                padding: '14px 18px',
+                marginBottom: 12,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>
+                  Hospital Authorization Code
+                </div>
+                <div
+                  style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 800,
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                    letterSpacing: '0.1em',
+                    color: '#0F172A',
+                    userSelect: 'all',
+                  }}
+                >
+                  {createdInvite.code}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleCopyInviteCode(createdInvite.code)}
+                style={{
+                  background: copiedCode ? '#16A34A' : '#1E293B',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '9px 16px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'all 0.15s ease',
+                  boxShadow: copiedCode ? '0 2px 8px rgba(22, 163, 74, 0.3)' : '0 2px 6px rgba(0,0,0,0.12)',
+                }}
+              >
+                {copiedCode ? <>✓ Copied to Clipboard!</> : <>📋 Copy Code</>}
+              </button>
+            </div>
+
+            {/* Instructions */}
+            <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
+              💡 <strong>Next step:</strong> Share this single-use code with the new hire. They will navigate to the CareBridge login page, click <strong>"Register"</strong>, check <strong>"Register with Staff Invite Code"</strong>, and enter this code to link their account to this hospital.
+            </div>
+          </div>
         )}
       </section>
 

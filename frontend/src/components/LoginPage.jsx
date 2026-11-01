@@ -355,24 +355,29 @@ export default function LoginPage({ onLoginSuccess, isDemoMode = false, onDemoLo
                   checked={isStaffRegister}
                   onChange={(e) => setIsStaffRegister(e.target.checked)}
                 />
-                <span>I am a Healthcare Doctor / Administrator with an Invite Code</span>
+                <span style={{ fontWeight: 600, color: '#1E3A8A' }}>
+                  I have a Staff / Nurse / Doctor Invite Code
+                </span>
               </label>
             </div>
 
             {isStaffRegister && (
-              <div className="form-group">
-                <label htmlFor="reg-invite">Invitation code</label>
+              <div className="form-group" style={{ background: '#EFF6FF', padding: 12, borderRadius: 8, border: '1px solid #BFDBFE' }}>
+                <label htmlFor="reg-invite" style={{ fontWeight: 700, color: '#1D4ED8' }}>
+                  Staff / Nurse Invitation Code:
+                </label>
                 <input
                   id="reg-invite"
                   type="text"
                   className="form-control"
                   required={isStaffRegister}
                   value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  placeholder="INV-DOC-XXXXXXXX"
+                  onChange={(e) => setInviteCode(e.target.value.trim().toUpperCase())}
+                  placeholder="e.g. INV-NUR-XXXXXXXX or INV-DOC-XXXXXXXX"
+                  style={{ fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.05em' }}
                 />
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                  Issued by a verified Hospital Admin or Platform Reviewer.
+                <div style={{ fontSize: '0.74rem', color: '#3B82F6', marginTop: 4 }}>
+                  ✓ Issued by your Hospital Administrator. This code will automatically link your account and role to the hospital.
                 </div>
               </div>
             )}
