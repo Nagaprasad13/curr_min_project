@@ -1,5 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
+const dns = require('node:dns');
 const mongoose = require('mongoose');
+
+if (process.env.MONGODB_DNS_SERVERS) {
+  dns.setServers(process.env.MONGODB_DNS_SERVERS.split(',').map(server => server.trim()));
+}
 
 let mongoMemoryServerInstance = null;
 
@@ -38,6 +44,9 @@ async function connectDB(uri = process.env.MONGODB_URI) {
     return mongoose.connection;
   } catch (err) {
     console.warn(`[CareBridge Database] MongoDB connection failed (${err.message}).`);
+    if (uri || process.env.MONGODB_URI) {
+      throw err;
+    }
     console.log(`[CareBridge Database] Initializing embedded in-memory MongoDB fallback server...`);
 
     try {
