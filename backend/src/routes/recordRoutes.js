@@ -4,6 +4,7 @@ const PatientRecord = require('../models/PatientRecord');
 const User = require('../models/User');
 const Referral = require('../models/Referral');
 const Consent = require('../models/Consent');
+const TriageRecord = require('../models/TriageRecord');
 const { authenticate, authorizeRoles } = require('../middleware/auth');
 const { createRateLimiter } = require('../middleware/rateLimiter');
 const {
@@ -38,7 +39,7 @@ router.get(
       }
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
       const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 25));
-      const [referralPatientIds, consentPatientIds] = await Promise.all([
+      const [referralPatientIds, consentPatientIds, triagePatientIds] = await Promise.all([
         Referral.distinct('patientId', {
           $or: [
             { referringDoctorId: req.user._id },
@@ -52,8 +53,12 @@ router.get(
             { requestingHospitalId: req.user.hospitalId },
           ],
         }),
+        TriageRecord.distinct('patientId', {
+          hospitalId: req.user.hospitalId,
+          patientId: { $ne: null },
+        }),
       ]);
-      const patientIds = [...new Set([...referralPatientIds, ...consentPatientIds].map(String))];
+      const patientIds = [...new Set([...referralPatientIds, ...consentPatientIds, ...triagePatientIds].map(String))];
       const search = String(req.query.search || '').trim().slice(0, 80);
       const searchFilter = search
         ? { $or: [{ name: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }, { district: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }] }

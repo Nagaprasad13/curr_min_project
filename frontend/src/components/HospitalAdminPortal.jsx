@@ -41,6 +41,10 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedNurseId, setSelectedNurseId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showNurseInviteModal, setShowNurseInviteModal] = useState(false);
+  const [nurseInviteCode, setNurseInviteCode] = useState(null);
+  const [nurseInviteLoading, setNurseInviteLoading] = useState(false);
+  const [nurseActionLoading, setNurseActionLoading] = useState(false);
 
   // Referral & Transfer Desk state
   const [transfers, setTransfers] = useState([]);
@@ -383,6 +387,87 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
       setErrorMsg(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyNurse = async (nurseId) => {
+    try {
+      setNurseActionLoading(true);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      const res = await fetch(`/api/hospitals/${hospitalId}/nurses/${nurseId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'verify' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMsg('✓ Triage Nurse verified and credentialed. This nurse is now active and available for doctors to supervise.');
+        loadNurses();
+      } else {
+        setErrorMsg(data.message || 'Failed to verify nurse.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setNurseActionLoading(false);
+    }
+  };
+
+  const handleDeactivateNurse = async (nurseId) => {
+    try {
+      setNurseActionLoading(true);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      const res = await fetch(`/api/hospitals/${hospitalId}/nurses/${nurseId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'deactivate' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMsg('✓ Triage Nurse deactivated.');
+        loadNurses();
+      } else {
+        setErrorMsg(data.message || 'Failed to deactivate nurse.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setNurseActionLoading(false);
+    }
+  };
+
+  const handleGenerateNurseInvite = async () => {
+    try {
+      setNurseInviteLoading(true);
+      setNurseInviteCode(null);
+      setErrorMsg(null);
+      const res = await fetch(`/api/hospitals/${hospitalId}/nurses/invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ durationDays: 7 }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNurseInviteCode(data.invite?.code);
+        setSuccessMsg(`✓ Nurse invite code generated: ${data.invite?.code}`);
+      } else {
+        setErrorMsg(data.message || 'Failed to generate nurse invite code.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setNurseInviteLoading(false);
     }
   };
 
@@ -988,6 +1073,217 @@ export default function HospitalAdminPortal({ token, adminUser, initialTab = 'te
                     </button>
                   </div>
                 </form>
+            </Modal>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          TAB: NURSE ROSTER & VERIFICATION DESK
+      ═══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'nurses' && (
+        <div className="card" style={{ padding: 24, borderRadius: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid #BFDBFE', paddingBottom: 14, flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: 0, fontSize: '1.2rem' }}>
+                🩺 Hospital Triage Nurse Roster & Verification Desk
+              </h2>
+              <p style={{ color: '#64748B', fontSize: '0.85rem', margin: '4px 0 0' }}>
+                Review nursing credentials and registration numbers. Only verified nurses appear in the doctor's roster for patient triage supervision.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => loadNurses()}
+                disabled={nursesLoading}
+              >
+                {nursesLoading ? 'Refreshing…' : '↻ Refresh Roster'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setShowNurseInviteModal(true);
+                  setNurseInviteCode(null);
+                }}
+              >
+                ➕ Invite Triage Nurse
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Roster Status Metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
+            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 16px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#1D4ED8', fontWeight: 700, textTransform: 'uppercase' }}>Total Registered</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1E3A8A', marginTop: 2 }}>{nurses.length}</div>
+            </div>
+            <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 10, padding: '12px 16px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 700, textTransform: 'uppercase' }}>Verified & Active</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#065F46', marginTop: 2 }}>
+                {nurses.filter(n => ['verified', 'active'].includes(n.status)).length}
+              </div>
+            </div>
+            <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#B45309', fontWeight: 700, textTransform: 'uppercase' }}>Pending Verification</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#92400E', marginTop: 2 }}>
+                {nurses.filter(n => !['verified', 'active'].includes(n.status)).length}
+              </div>
+            </div>
+          </div>
+
+          {nursesLoading && <Skeleton lines={4} />}
+
+          {!nursesLoading && nurses.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '50px 20px', color: '#64748B' }}>
+              <div style={{ fontSize: '3rem', marginBottom: 8 }}>🩺</div>
+              <div style={{ fontWeight: 800, color: '#1E3A8A', fontSize: '1.1rem' }}>No triage nurses registered yet</div>
+              <p style={{ margin: '6px 0 16px', fontSize: '0.85rem' }}>
+                Click "➕ Invite Triage Nurse" to generate an official staff invite code for nurses joining this facility.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setShowNurseInviteModal(true);
+                  setNurseInviteCode(null);
+                }}
+              >
+                ➕ Generate First Nurse Invite Code
+              </button>
+            </div>
+          )}
+
+          {!nursesLoading && nurses.length > 0 && (
+            <div style={{ overflowX: 'auto' }} role="region" aria-label="Nurse roster table" tabIndex="0">
+              <table style={{ width: '100%', fontSize: '0.88rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#EFF6FF', textAlign: 'left', color: '#1E3A8A' }}>
+                    <th style={{ padding: '10px 12px' }}>Nurse Name</th>
+                    <th style={{ padding: '10px 12px' }}>Qualification</th>
+                    <th style={{ padding: '10px 12px' }}>Council Reg. #</th>
+                    <th style={{ padding: '10px 12px' }}>Supervising Doctors</th>
+                    <th style={{ padding: '10px 12px' }}>Verification Status</th>
+                    <th style={{ padding: '10px 12px' }}>Administrative Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {nurses.map((nurse) => {
+                    const isVerified = ['verified', 'active'].includes(nurse.status);
+                    const docNames = (nurse.supervisingDoctorIds || []).map(d => d.name || d.email).filter(Boolean);
+
+                    return (
+                      <tr key={nurse._id} style={{ borderBottom: '1px solid #BFDBFE', background: '#FFFFFF' }}>
+                        <td style={{ padding: '12px' }}>
+                          <strong style={{ color: '#1E293B', display: 'block' }}>{nurse.name}</strong>
+                          <span style={{ fontSize: '0.78rem', color: '#64748B' }}>{nurse.email}</span>
+                        </td>
+                        <td style={{ padding: '12px', color: '#334155' }}>
+                          {nurse.qualification || 'Staff Nurse / RN'}
+                        </td>
+                        <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1D4ED8' }}>
+                          {nurse.registrationNumber || 'Pending Submission'}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {docNames.length > 0 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                              {docNames.map((dn, i) => (
+                                <span key={i} style={{ background: '#EFF6FF', color: '#1D4ED8', fontSize: '0.72rem', fontWeight: 600, padding: '2px 8px', borderRadius: 6, border: '1px solid #BFDBFE' }}>
+                                  👨‍⚕️ {dn}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span style={{ color: '#94A3B8', fontSize: '0.78rem', fontStyle: 'italic' }}>None assigned</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span style={{
+                            borderRadius: 999,
+                            padding: '3px 10px',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            background: isVerified ? '#DCFCE7' : '#FEF3C7',
+                            color: isVerified ? '#166534' : '#92400E',
+                            border: `1px solid ${isVerified ? '#86EFAC' : '#FDE68A'}`,
+                          }}>
+                            {isVerified ? 'VERIFIED' : (nurse.status || 'PENDING').toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {isVerified ? (
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              style={{ borderColor: '#F87171', color: '#DC2626', fontSize: '0.75rem', padding: '4px 10px' }}
+                              onClick={() => handleDeactivateNurse(nurse._id)}
+                              disabled={nurseActionLoading}
+                            >
+                              ✕ Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              style={{ background: '#16A34A', borderColor: '#16A34A', fontSize: '0.75rem', padding: '4px 12px' }}
+                              onClick={() => handleVerifyNurse(nurse._id)}
+                              disabled={nurseActionLoading}
+                            >
+                              ✓ Verify & Approve Nurse
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Nurse Invite Code Modal */}
+          {showNurseInviteModal && (
+            <Modal open title="Invite Triage Nurse" onClose={() => setShowNurseInviteModal(false)}>
+              <div style={{ padding: '10px 0' }}>
+                <p style={{ margin: '0 0 14px', fontSize: '0.88rem', color: '#334155' }}>
+                  Generate a secure registration code for a nurse joining <strong>{hospital?.name || 'this facility'}</strong>.
+                  Nurses use this invite code on the registration page to attach their profile to this hospital.
+                </p>
+
+                {nurseInviteCode ? (
+                  <div style={{ background: '#EFF6FF', border: '2px solid #3B82F6', borderRadius: 10, padding: 18, textAlign: 'center', marginBottom: 16 }}>
+                    <div style={{ fontSize: '0.8rem', color: '#1D4ED8', fontWeight: 700 }}>OFFICIAL NURSE INVITE CODE:</div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1E3A8A', fontFamily: 'monospace', letterSpacing: '0.08em', margin: '8px 0' }}>
+                      {nurseInviteCode}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                      Valid for 7 days · Single nurse registration
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ width: '100%', marginBottom: 14 }}
+                    onClick={handleGenerateNurseInvite}
+                    disabled={nurseInviteLoading}
+                  >
+                    {nurseInviteLoading ? 'Generating Invite Code…' : '⚡ Generate 7-Day Invite Code'}
+                  </button>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => setShowNurseInviteModal(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </Modal>
           )}
         </div>

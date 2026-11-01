@@ -301,11 +301,14 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   }, [initialTab]);
 
   useEffect(() => {
-    if (activeTab === 'triage_queue') loadTriageQueue();
+    if (activeTab === 'triage_queue') {
+      loadTriageQueue();
+      loadPatients();
+    }
     if (activeTab === 'nurses') loadNurses();
     if (activeTab === 'sent_consents') loadSentConsents();
     if (activeTab === 'my_referrals') loadReferralsList();
-  }, [activeTab, loadTriageQueue, loadNurses, loadSentConsents, loadReferralsList]);
+  }, [activeTab, loadTriageQueue, loadPatients, loadNurses, loadSentConsents, loadReferralsList]);
 
   useEffect(() => {
     if (referralTimeLeft === null || referralTimeLeft <= 0) return;
@@ -370,8 +373,19 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   const handleTreatPatientFromTriage = (record) => {
     if (!record) return;
     const p = record.patientId;
-    if (p && p._id) {
-      setSelectedPatientId(p._id);
+    const pId = typeof p === 'object' && p !== null ? p._id : p;
+    if (pId) {
+      const pIdStr = String(pId);
+      setPatients((prev) => {
+        if (!prev.some((existing) => String(existing._id) === pIdStr)) {
+          const newEntry = typeof p === 'object' && p !== null
+            ? { _id: pId, name: p.name || 'Patient', district: p.district || '' }
+            : { _id: pId, name: 'Patient', district: '' };
+          return [newEntry, ...prev];
+        }
+        return prev;
+      });
+      setSelectedPatientId(pIdStr);
     }
     const v = record.vitals || {};
     const redFlags = record.redFlags || [];
@@ -484,7 +498,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
   };
 
   const handleConfirmInHouseAdmission = () => {
-    const selPat = patients.find((p) => p._id === selectedPatientId);
+    const selPat = patients.find((p) => String(p._id) === String(selectedPatientId));
     if (!inHouseDisposition.ward || !inHouseDisposition.bedNumber.trim()) {
       setErrorMsg('Ward and Bed Number are required for in-house admission.');
       return;
@@ -533,7 +547,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
 
   // ── Referral Action ─────────────────────────────────────────────────────────
   const handleQueryReferrals = async () => {
-    const selPat = patients.find((p) => p._id === selectedPatientId);
+    const selPat = patients.find((p) => String(p._id) === String(selectedPatientId));
     if (!selPat || !referralParams.requiredSpecialty.trim()) {
       setErrorMsg('Select a patient and specialty.');
       return;
@@ -862,20 +876,20 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
             <select
               id="doctor-patient-select"
               style={{ ...inputStyle, maxWidth: 360 }}
-              value={selectedPatientId}
+              value={selectedPatientId ? String(selectedPatientId) : ''}
               onChange={(e) => setSelectedPatientId(e.target.value)}
               disabled={patientsLoading || patients.length === 0}
             >
               {patients.length === 0 && <option value="">{patientsLoading ? 'Loading patients…' : 'No patients available'}</option>}
               {patients.map((p) => (
-                <option key={p._id} value={p._id}>
+                <option key={String(p._id)} value={String(p._id)}>
                   {p.name}{p.district ? ` (${p.district})` : ''}
                 </option>
               ))}
             </select>
             {sourceNurseSubmission && (
               <span style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', fontSize: '0.78rem', padding: '4px 10px', borderRadius: 999, fontWeight: 600 }}>
-                📋 Triage Data: Nurse {sourceNurseSubmission.nurseName} ({sourceNurseSubmission.triageId})
+                📋 Triage Record #{sourceNurseSubmission.triageId} · Triage Nurse: {sourceNurseSubmission.nurseName}
               </span>
             )}
           </div>
@@ -1948,10 +1962,10 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
               <div style={cardStyle}>
                 <div style={{ marginBottom: 16 }}>
                   <h2 style={{ color: '#1E3A8A', fontWeight: 800, margin: '0 0 4px', fontSize: '1.1rem' }}>
-                    ➕ Available Hospital Nurses ({unassignedNurses.length})
+                    ➕ Available Verified Nurses ({unassignedNurses.length})
                   </h2>
                   <p style={{ color: '#64748B', fontSize: '0.82rem', margin: 0 }}>
-                    Triage nurses registered at {hospital?.name || 'your hospital'}:
+                    Hospital-verified triage nurses at {hospital?.name || 'your hospital'}:
                   </p>
                 </div>
 
@@ -1965,7 +1979,7 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
 
                 {!nursesLoading && availableNurses.length === 0 && (
                   <div style={{ textAlign: 'center', padding: '36px 16px', color: '#64748B' }}>
-                    No triage nurses found at this facility.
+                    No verified triage nurses found at this facility. Contact your Hospital Administrator to verify nurses in the Nurse Roster.
                   </div>
                 )}
 
@@ -1984,7 +1998,12 @@ export default function DoctorPortal({ token, doctorUser, initialTab = 'assessme
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '0.95rem' }}>{nurse.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontWeight: 700, color: '#1E293B', fontSize: '0.95rem' }}>{nurse.name}</span>
+                        <span style={{ background: '#DCFCE7', color: '#166534', fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: 6, border: '1px solid #86EFAC' }}>
+                          ✓ Verified by Admin
+                        </span>
+                      </div>
                       <div style={{ fontSize: '0.78rem', color: '#64748B', marginTop: 2 }}>
                         {nurse.qualification || 'Staff Nurse'} · {nurse.email}
                       </div>

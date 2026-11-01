@@ -77,7 +77,8 @@ export default function App() {
   const [theme, toggleTheme] = useDesignTheme();
   const [disclaimerExpanded, setDisclaimerExpanded] = useState(() => sessionStorage.getItem('carebridge-disclaimer-collapsed') !== 'true');
 
-  const isDemoMode = import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true';
+  // Production mode: Demo persona logins and synthetic debug banners are permanently disabled
+  const isDemoMode = false;
 
   useEffect(() => {
     const onPopState = () => setPathname(window.location.pathname);

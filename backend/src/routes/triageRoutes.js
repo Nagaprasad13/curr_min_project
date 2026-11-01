@@ -784,7 +784,8 @@ router.get(
 
 /**
  * GET /api/triage/doctor/available-nurses
- * Doctor fetches all nurses at their hospital to pick from.
+ * Doctor fetches all hospital-verified nurses at their hospital to pick from.
+ * Only returns nurses whose status has been verified/approved by hospital admin.
  */
 router.get(
   '/doctor/available-nurses',
@@ -795,6 +796,7 @@ router.get(
       const nurses = await User.find({
         role: 'triage_nurse',
         hospitalId: req.user.hospitalId,
+        status: { $in: ['active', 'verified'] },
       }).select('name email qualification registrationNumber status supervisingDoctorIds');
 
       return res.json({ nurses });
@@ -807,6 +809,7 @@ router.get(
 /**
  * POST /api/triage/doctor/add-nurse
  * Doctor adds a nurse to their supervised list.
+ * Only allowed for nurses who are verified by the hospital administrator.
  * Body: { nurseId }
  */
 router.post(
@@ -824,10 +827,14 @@ router.post(
         _id: nurseId,
         role: 'triage_nurse',
         hospitalId: req.user.hospitalId,
+        status: { $in: ['active', 'verified'] },
       });
 
       if (!nurse) {
-        return res.status(404).json({ error: 'Not Found', message: 'Nurse not found at your hospital.' });
+        return res.status(404).json({
+          error: 'Not Found',
+          message: 'Nurse not found or has not been verified by the hospital administrator yet.',
+        });
       }
 
       // Add this doctor to the nurse's supervisingDoctorIds if not already there
